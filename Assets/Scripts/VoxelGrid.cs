@@ -75,6 +75,7 @@ public class VoxelGrid : MonoBehaviour {
             }
         }
 
+        SetCrossings(stencil, xStart, xEnd, yStart, yEnd);
         Refresh();
     }
 
@@ -324,5 +325,66 @@ public class VoxelGrid : MonoBehaviour {
         int[] rowSwap = rowCacheMin;
         rowCacheMin = rowCacheMax;
         rowCacheMax = rowSwap;
+    }
+
+    private void SetCrossings(VoxelStencil stencil, int xStart, int xEnd, int yStart, int yEnd) {
+        bool crossHorizontalGap = false;
+        bool lastVerticalRow = false;
+        bool crossVerticalGap = false;
+
+        if (xStart > 0) {
+            xStart -= 1;
+        }
+        if (xEnd == resolution - 1) {
+            xEnd -= 1;
+            crossHorizontalGap = xNeighbor != null;
+        }
+        if (yStart > 0) {
+            yStart -= 1;
+        }
+        if (yEnd == resolution - 1) {
+            yEnd -= 1;
+            lastVerticalRow = true;
+            crossVerticalGap = yNeighbor != null;
+        }
+
+        Voxel a, b;
+        for (int y = yStart; y <= yEnd; y++) {
+            int i = y * resolution + xStart;
+            b = voxels[i];
+            for (int x = xStart; x <= xEnd; x++, i++) {
+                a = b;
+                b = voxels[i + 1];
+                stencil.SetHorizontalCrossing(a, b);
+                stencil.SetVirtualCrossing(a, voxels[i + resolution]);
+            }
+            stencil.SetVirtualCrossing(b, voxels[i + resolution]);
+            if (crossHorizontalGap) {
+                dummyX.BecomeXDummyOf(xNeighbor.voxels[y * resolution], gridSize);
+                stencil.SetHorizontalCrossing(b, dummyX);
+            }
+        }
+
+        if (lastVerticalRow) {
+            int i = voxels.Length - resolution + xStart;
+            b = voxels[i];
+            for (int x = xStart; x <= xEnd; x++, i++) {
+                a = b;
+                b = voxels[i + 1];
+                stencil.SetHorizontalCrossing(a, b);
+                if (crossVerticalGap) {
+                    dummyY.BecomeYDummyOf(yNeighbor.voxels[x], gridSize);
+                    stencil.SetVirtualCrossing(a, dummyY);
+                }
+            }
+            if (crossVerticalGap) {
+                dummyY.BecomeYDummyOf(yNeighbor.voxels[xEnd + 1], gridSize);
+                stencil.SetVirtualCrossing(b, dummyY);
+            }
+            if (crossHorizontalGap) {
+                dummyX.BecomeXDummyOf(xNeighbor.voxels[voxels.Length - resolution], gridSize);
+                stencil.SetHorizontalCrossing(b, dummyY);
+            }
+        }
     }
 }

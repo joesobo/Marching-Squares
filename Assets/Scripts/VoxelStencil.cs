@@ -46,4 +46,46 @@ public class VoxelStencil : MonoBehaviour {
             return centerY + radius;
         }
     }
+
+    public void SetHorizontalCrossing(Voxel xMin, Voxel xMax) {
+        if (xMin.state != xMax.state) {
+            FindHorizontalCrossing(xMin, xMax);
+        }
+    }
+
+    public void SetVirtualCrossing(Voxel yMin, Voxel yMax) {
+        if (yMin.state != yMax.state) {
+            FindVirtualCrossing(yMin, yMax);
+        }
+    }
+
+    protected virtual void FindHorizontalCrossing(Voxel xMin, Voxel xMax) {
+        if (xMin.position.y < YStart || xMin.position.y > YEnd) {
+            return;
+        }
+        if (xMin.state == fillType) {
+            if (xMin.position.x <= XEnd && xMax.position.x >= XEnd) {
+                xMin.xEdge = XEnd;
+            }
+        } else if (xMax.state == fillType) {
+            if (xMin.position.x <= XStart && xMin.position.x >= XStart) {
+                xMin.xEdge = XStart;
+            }
+        }
+    }
+
+    protected virtual void FindVirtualCrossing(Voxel yMin, Voxel yMax) {
+        if (yMin.position.x < XStart || yMin.position.x > XEnd) {
+            return;
+        }
+        if (yMin.state == fillType) {
+            if (yMin.position.y <= YEnd && yMax.position.y >= YEnd) {
+                yMin.yEdge = YEnd;
+            }
+        } else if (yMax.state == fillType) {
+            if (yMin.position.y <= YStart && yMin.position.y >= YStart) {
+                yMin.yEdge = YStart;
+            }
+        }
+    }
 }
