@@ -50,12 +50,16 @@ public class VoxelStencil : MonoBehaviour {
     public void SetHorizontalCrossing(Voxel xMin, Voxel xMax) {
         if (xMin.state != xMax.state) {
             FindHorizontalCrossing(xMin, xMax);
+        } else {
+            xMin.xEdge = float.MinValue;
         }
     }
 
-    public void SetVirtualCrossing(Voxel yMin, Voxel yMax) {
+    public void SetVerticalCrossing(Voxel yMin, Voxel yMax) {
         if (yMin.state != yMax.state) {
-            FindVirtualCrossing(yMin, yMax);
+            FindVerticalCrossing(yMin, yMax);
+        } else {
+            yMin.yEdge = float.MinValue;
         }
     }
 
@@ -65,26 +69,34 @@ public class VoxelStencil : MonoBehaviour {
         }
         if (xMin.state == fillType) {
             if (xMin.position.x <= XEnd && xMax.position.x >= XEnd) {
-                xMin.xEdge = XEnd;
+                if (xMin.xEdge == float.MinValue || xMin.xEdge < XEnd) {
+                    xMin.xEdge = XEnd;
+                }
             }
         } else if (xMax.state == fillType) {
-            if (xMin.position.x <= XStart && xMin.position.x >= XStart) {
-                xMin.xEdge = XStart;
+            if (xMin.position.x <= XStart && xMax.position.x >= XStart) {
+                if (xMin.xEdge == float.MinValue || xMin.xEdge > XStart) {
+                    xMin.xEdge = XStart;
+                }
             }
         }
     }
 
-    protected virtual void FindVirtualCrossing(Voxel yMin, Voxel yMax) {
+    protected virtual void FindVerticalCrossing(Voxel yMin, Voxel yMax) {
         if (yMin.position.x < XStart || yMin.position.x > XEnd) {
             return;
         }
         if (yMin.state == fillType) {
             if (yMin.position.y <= YEnd && yMax.position.y >= YEnd) {
-                yMin.yEdge = YEnd;
+                if (yMin.yEdge == float.MinValue || yMin.yEdge < YEnd) {
+                    yMin.yEdge = YEnd;
+                }
             }
         } else if (yMax.state == fillType) {
-            if (yMin.position.y <= YStart && yMin.position.y >= YStart) {
-                yMin.yEdge = YStart;
+            if (yMin.position.y <= YStart && yMax.position.y >= YStart) {
+                if (yMin.yEdge == float.MinValue || yMin.yEdge > YStart) {
+                    yMin.yEdge = YStart;
+                }
             }
         }
     }

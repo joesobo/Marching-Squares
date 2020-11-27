@@ -356,9 +356,9 @@ public class VoxelGrid : MonoBehaviour {
                 a = b;
                 b = voxels[i + 1];
                 stencil.SetHorizontalCrossing(a, b);
-                stencil.SetVirtualCrossing(a, voxels[i + resolution]);
+                stencil.SetVerticalCrossing(a, voxels[i + resolution]);
             }
-            stencil.SetVirtualCrossing(b, voxels[i + resolution]);
+            stencil.SetVerticalCrossing(b, voxels[i + resolution]);
             if (crossHorizontalGap) {
                 dummyX.BecomeXDummyOf(xNeighbor.voxels[y * resolution], gridSize);
                 stencil.SetHorizontalCrossing(b, dummyX);
@@ -374,16 +374,16 @@ public class VoxelGrid : MonoBehaviour {
                 stencil.SetHorizontalCrossing(a, b);
                 if (crossVerticalGap) {
                     dummyY.BecomeYDummyOf(yNeighbor.voxels[x], gridSize);
-                    stencil.SetVirtualCrossing(a, dummyY);
+                    stencil.SetVerticalCrossing(a, dummyY);
                 }
             }
             if (crossVerticalGap) {
                 dummyY.BecomeYDummyOf(yNeighbor.voxels[xEnd + 1], gridSize);
-                stencil.SetVirtualCrossing(b, dummyY);
+                stencil.SetVerticalCrossing(b, dummyY);
             }
             if (crossHorizontalGap) {
                 dummyX.BecomeXDummyOf(xNeighbor.voxels[voxels.Length - resolution], gridSize);
-                stencil.SetHorizontalCrossing(b, dummyY);
+                stencil.SetHorizontalCrossing(b, dummyX);
             }
         }
     }
