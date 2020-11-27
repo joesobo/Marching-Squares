@@ -190,9 +190,9 @@ public class VoxelGrid : MonoBehaviour {
         dummyT = dummyX;
         dummyX = dummySwap;
         int cacheIndex = (resolution - 1) * 2;
-		CacheNextEdgeAndCorner(cacheIndex, voxels[i + resolution], dummyX);
-		CacheNextMiddleEdge(dummyT, dummyX);
-		TriangulateCell(cacheIndex, voxels[i], dummyT, voxels[i + resolution], dummyX);
+        CacheNextEdgeAndCorner(cacheIndex, voxels[i + resolution], dummyX);
+        CacheNextMiddleEdge(dummyT, dummyX);
+        TriangulateCell(cacheIndex, voxels[i], dummyT, voxels[i + resolution], dummyX);
     }
 
     private void TriangulateCellRows() {
@@ -209,9 +209,9 @@ public class VoxelGrid : MonoBehaviour {
                     c = voxels[i + resolution],
                     d = voxels[i + resolution + 1];
                 int cacheIndex = x * 2;
-				CacheNextEdgeAndCorner(cacheIndex, c, d);
-				CacheNextMiddleEdge(b, d);
-				TriangulateCell(cacheIndex, a, b, c, d);
+                CacheNextEdgeAndCorner(cacheIndex, c, d);
+                CacheNextMiddleEdge(b, d);
+                TriangulateCell(cacheIndex, a, b, c, d);
             }
             if (xNeighbor != null) {
                 TriangulateGapCell(i);
@@ -233,46 +233,46 @@ public class VoxelGrid : MonoBehaviour {
             dummyT = dummyY;
             dummyY = dummySwap;
             int cacheIndex = x * 2;
-			CacheNextEdgeAndCorner(cacheIndex, dummyT, dummyY);
-			CacheNextMiddleEdge(voxels[x + offset + 1], dummyY);
-			TriangulateCell(cacheIndex, voxels[x + offset], voxels[x + offset + 1], dummyT, dummyY);
+            CacheNextEdgeAndCorner(cacheIndex, dummyT, dummyY);
+            CacheNextMiddleEdge(voxels[x + offset + 1], dummyY);
+            TriangulateCell(cacheIndex, voxels[x + offset], voxels[x + offset + 1], dummyT, dummyY);
         }
 
         if (xNeighbor != null) {
-			dummyT.BecomeXYDummyOf(xyNeighbor.voxels[0], gridSize);
-			int cacheIndex = cells * 2;
-			CacheNextEdgeAndCorner(cacheIndex, dummyY, dummyT);
-			CacheNextMiddleEdge(dummyX, dummyT);
-			TriangulateCell(cacheIndex, voxels[voxels.Length - 1], dummyX, dummyY, dummyT);
-		}
+            dummyT.BecomeXYDummyOf(xyNeighbor.voxels[0], gridSize);
+            int cacheIndex = cells * 2;
+            CacheNextEdgeAndCorner(cacheIndex, dummyY, dummyT);
+            CacheNextMiddleEdge(dummyX, dummyT);
+            TriangulateCell(cacheIndex, voxels[voxels.Length - 1], dummyX, dummyY, dummyT);
+        }
     }
 
-    private void AddTriangle (int a, int b, int c) {
-		triangles.Add(a);
-		triangles.Add(b);
-		triangles.Add(c);
-	}
+    private void AddTriangle(int a, int b, int c) {
+        triangles.Add(a);
+        triangles.Add(b);
+        triangles.Add(c);
+    }
 
-	private void AddQuad (int a, int b, int c, int d) {
-		triangles.Add(a);
-		triangles.Add(b);
-		triangles.Add(c);
-		triangles.Add(a);
-		triangles.Add(c);
-		triangles.Add(d);
-	}
+    private void AddQuad(int a, int b, int c, int d) {
+        triangles.Add(a);
+        triangles.Add(b);
+        triangles.Add(c);
+        triangles.Add(a);
+        triangles.Add(c);
+        triangles.Add(d);
+    }
 
-	private void AddPentagon (int a, int b, int c, int d, int e) {
-		triangles.Add(a);
-		triangles.Add(b);
-		triangles.Add(c);
-		triangles.Add(a);
-		triangles.Add(c);
-		triangles.Add(d);
-		triangles.Add(a);
-		triangles.Add(d);
-		triangles.Add(e);
-	}
+    private void AddPentagon(int a, int b, int c, int d, int e) {
+        triangles.Add(a);
+        triangles.Add(b);
+        triangles.Add(c);
+        triangles.Add(a);
+        triangles.Add(c);
+        triangles.Add(d);
+        triangles.Add(a);
+        triangles.Add(d);
+        triangles.Add(e);
+    }
 
     private void FillFirstRowCache() {
         CacheFirstCorner(voxels[0]);
@@ -296,7 +296,11 @@ public class VoxelGrid : MonoBehaviour {
     private void CacheNextEdgeAndCorner(int i, Voxel xMin, Voxel xMax) {
         if (xMin.state != xMax.state) {
             rowCacheMax[i + 1] = vertices.Count;
-            vertices.Add(xMin.xEdgePosition);
+            Vector3 p;
+            p.x = xMin.xEdge;
+            p.y = xMin.position.y;
+            p.z = 0f;
+            vertices.Add(p);
         }
         if (xMax.state) {
             rowCacheMax[i + 2] = vertices.Count;
@@ -308,7 +312,11 @@ public class VoxelGrid : MonoBehaviour {
         edgeCacheMin = edgeCacheMax;
         if (yMin.state != yMax.state) {
             edgeCacheMax = vertices.Count;
-            vertices.Add(yMin.yEdgePosition);
+            Vector3 p;
+            p.x = yMin.position.x;
+            p.y = yMin.yEdge;
+            p.z = 0f;
+            vertices.Add(p);
         }
     }
 
