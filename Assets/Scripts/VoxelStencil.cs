@@ -4,41 +4,44 @@ using UnityEngine;
 
 public class VoxelStencil : MonoBehaviour {
     protected bool fillType;
-    protected int centerX, centerY, radius;
+    protected float centerX, centerY, radius;
 
-    public virtual void Initialize(bool fillType, int radius) {
+    public virtual void Initialize(bool fillType, float radius) {
         this.fillType = fillType;
         this.radius = radius;
     }
 
-    public virtual bool Apply(int x, int y, bool voxel) {
-        return fillType;
+    public virtual void Apply(Voxel voxel) {
+        Vector2 p = voxel.position;
+        if (p.x >= XStart && p.x <= XEnd && p.y >= YStart && p.y <= YEnd) {
+            voxel.state = fillType;
+        }
     }
 
-    public virtual void SetCenter(int x, int y) {
+    public virtual void SetCenter(float x, float y) {
         centerX = x;
         centerY = y;
     }
 
-    public int XStart {
+    public float XStart {
         get {
             return centerX - radius;
         }
     }
 
-    public int XEnd {
+    public float XEnd {
         get {
             return centerX + radius;
         }
     }
 
-    public int YStart {
+    public float YStart {
         get {
             return centerY - radius;
         }
     }
 
-    public int YEnd {
+    public float YEnd {
         get {
             return centerY + radius;
         }

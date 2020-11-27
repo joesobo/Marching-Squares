@@ -3,20 +3,18 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class VoxelStencilCircle : VoxelStencil {
-    private int squareRadius;
+    private float squareRadius;
 
-    public override void Initialize(bool fillType, int radius) {
+    public override void Initialize(bool fillType, float radius) {
         base.Initialize(fillType, radius);
         squareRadius = radius * radius;
     }
 
-    public override bool Apply(int x, int y, bool voxel) {
-        x -= centerX;
-        y -= centerY;
-        if (x * x + y * y <= squareRadius) {
-            return fillType;
+    public override void Apply(Voxel voxel) {
+        float x = voxel.position.x - centerX;
+        float y = voxel.position.y - centerY;
+        if ( x * x + y * y <= squareRadius) {
+            voxel.state = fillType;
         }
-
-        return voxel;
     }
 }
