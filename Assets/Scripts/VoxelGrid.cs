@@ -101,21 +101,12 @@ public class VoxelGrid : MonoBehaviour {
             dummyX.BecomeXDummyOf(xNeighbor.voxels[0], gridSize);
         }
         TriangulateCellRows();
+        if (yNeighbor != null) {
+            TriangulateGapRow();
+        }
 
         mesh.vertices = vertices.ToArray();
         mesh.triangles = triangles.ToArray();
-    }
-
-    private void TriangulateCellRows() {
-        int cells = resolution - 1;
-        for (int i = 0, y = 0; y < cells; y++, i++) {
-            for (int x = 0; x < cells; x++, i++) {
-                TriangulateCell(voxels[i], voxels[i + 1], voxels[i + resolution], voxels[i + resolution + 1]);
-            }
-            if (xNeighbor != null) {
-                TriangulateGapCell(i);
-            }
-        }
     }
 
     private void TriangulateCell(Voxel a, Voxel b, Voxel c, Voxel d) {
@@ -192,6 +183,37 @@ public class VoxelGrid : MonoBehaviour {
         dummyT = dummyX;
         dummyX = dummySwap;
         TriangulateCell(voxels[i], dummyT, voxels[i + resolution], dummyX);
+    }
+
+    private void TriangulateCellRows() {
+        int cells = resolution - 1;
+        for (int i = 0, y = 0; y < cells; y++, i++) {
+            for (int x = 0; x < cells; x++, i++) {
+                TriangulateCell(voxels[i], voxels[i + 1], voxels[i + resolution], voxels[i + resolution + 1]);
+            }
+            if (xNeighbor != null) {
+                TriangulateGapCell(i);
+            }
+        }
+    }
+
+    private void TriangulateGapRow() {
+        dummyY.BecomeYDummyOf(yNeighbor.voxels[0], gridSize);
+        int cells = resolution - 1;
+        int offset = cells * resolution;
+
+        for (int x = 0; x < cells; x++) {
+            Voxel dummySwap = dummyT;
+            dummySwap.BecomeYDummyOf(yNeighbor.voxels[x + 1], gridSize);
+            dummyT = dummyY;
+            dummyY = dummySwap;
+            TriangulateCell(voxels[x + offset], voxels[x + offset + 1], dummyT, dummyY);
+        }
+
+        if (xNeighbor != null) {
+            dummyT.BecomeXYDummyOf(xyNeighbor.voxels[0], gridSize);
+            TriangulateCell(voxels[voxels.Length - 1], dummyX, dummyY, dummyT);
+        }
     }
 
     private void AddTriangle(Vector3 a, Vector3 b, Vector3 c) {

@@ -59,7 +59,7 @@ public class VoxelMap : MonoBehaviour {
         int centerX = (int)((point.x + halfSize) / voxelSize);
         int centerY = (int)((point.y + halfSize) / voxelSize);
 
-        int xStart = (centerX - radiusIndex) / voxelResolution;
+        int xStart = (centerX - radiusIndex - 1) / voxelResolution;
         if (xStart < 0) {
             xStart = 0;
         }
@@ -67,7 +67,7 @@ public class VoxelMap : MonoBehaviour {
         if (xEnd >= chunkResolution) {
             xEnd = chunkResolution - 1;
         }
-        int yStart = (centerY - radiusIndex) / voxelResolution;
+        int yStart = (centerY - radiusIndex - 1) / voxelResolution;
         if (yStart < 0) {
             yStart = 0;
         }
