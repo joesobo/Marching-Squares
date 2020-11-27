@@ -75,9 +75,6 @@ public class VoxelMap : MonoBehaviour {
     }
 
     private void EditVoxels(Vector2 center) {
-        // int centerX = (int)((point.x + halfSize) / voxelSize);
-        // int centerY = (int)((point.y + halfSize) / voxelSize);
-
         VoxelStencil activeStencil = stencils[stencilIndex];
         activeStencil.Initialize(fillTypeIndex == 0, (radiusIndex + 0.5f) * voxelSize);
         activeStencil.SetCenter(center.x, center.y);
@@ -99,16 +96,12 @@ public class VoxelMap : MonoBehaviour {
             yEnd = chunkResolution - 1;
         }
 
-        //int voxelYOffset = yEnd * voxelResolution;
         for (int y = yEnd; y >= yStart; y--) {
             int i = y * chunkResolution + xEnd;
-            //int voxelXOffset = xEnd * voxelResolution;
             for (int x = xEnd; x >= xStart; x--, i--) {
                 activeStencil.SetCenter(center.x - x * chunkSize, center.y - y * chunkSize);
                 chunks[i].Apply(activeStencil);
-                // voxelXOffset -= voxelResolution;
             }
-            // voxelYOffset -= voxelResolution;
         }
     }
 
