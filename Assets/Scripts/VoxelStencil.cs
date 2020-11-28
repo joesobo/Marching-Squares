@@ -71,12 +71,14 @@ public class VoxelStencil : MonoBehaviour {
             if (xMin.position.x <= XEnd && xMax.position.x >= XEnd) {
                 if (xMin.xEdge == float.MinValue || xMin.xEdge < XEnd) {
                     xMin.xEdge = XEnd;
+                    xMin.xNormal = new Vector2(fillType ? 1f : -1f, 0f);
                 }
             }
         } else if (xMax.state == fillType) {
             if (xMin.position.x <= XStart && xMax.position.x >= XStart) {
                 if (xMin.xEdge == float.MinValue || xMin.xEdge > XStart) {
                     xMin.xEdge = XStart;
+                    xMin.xNormal = new Vector2(fillType ? -1f : 1f, 0f);
                 }
             }
         }
@@ -90,12 +92,14 @@ public class VoxelStencil : MonoBehaviour {
             if (yMin.position.y <= YEnd && yMax.position.y >= YEnd) {
                 if (yMin.yEdge == float.MinValue || yMin.yEdge < YEnd) {
                     yMin.yEdge = YEnd;
+                    yMin.yNormal = new Vector2(0f, fillType ? 1f : -1f);
                 }
             }
         } else if (yMax.state == fillType) {
             if (yMin.position.y <= YStart && yMax.position.y >= YStart) {
                 if (yMin.yEdge == float.MinValue || yMin.yEdge > YStart) {
                     yMin.yEdge = YStart;
+                    yMin.yNormal = new Vector2(0f, fillType ? -1f : 1f);
                 }
             }
         }

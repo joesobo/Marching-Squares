@@ -8,6 +8,7 @@ public class Voxel {
     public bool state;
     public Vector2 position;
     public float xEdge, yEdge;
+    public Vector2 xNormal, yNormal;
 
     public Voxel() { }
 
@@ -25,6 +26,7 @@ public class Voxel {
         position.x += offset;
         xEdge = voxel.xEdge + offset;
         yEdge = voxel.yEdge;
+        yNormal = voxel.yNormal;
     }
 
     public void BecomeYDummyOf(Voxel voxel, float offset) {
@@ -33,6 +35,7 @@ public class Voxel {
         position.y += offset;
         xEdge = voxel.xEdge;
         yEdge = voxel.yEdge + offset;
+        xNormal = voxel.xNormal;
     }
 
     public void BecomeXYDummyOf(Voxel voxel, float offset) {
@@ -42,5 +45,17 @@ public class Voxel {
         position.x += offset;
         xEdge = voxel.xEdge + offset;
         yEdge = voxel.yEdge + offset;
+    }
+
+    public Vector2 XEdgePoint {
+        get {
+            return new Vector2(xEdge, position.y);
+        }
+    }
+
+    public Vector2 YEdgePoint {
+        get {
+            return new Vector2(position.x, yEdge);
+        }
     }
 }

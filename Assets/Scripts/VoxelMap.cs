@@ -4,6 +4,7 @@ public class VoxelMap : MonoBehaviour {
     public float size = 2f;
     public int voxelResolution = 8;
     public int chunkResolution = 2;
+    public float maxFeatureAngle = 135f;
 
     public VoxelGrid voxelGridPrefab;
 
@@ -107,7 +108,7 @@ public class VoxelMap : MonoBehaviour {
 
     private void CreateChunk(int i, int x, int y) {
         VoxelGrid chunk = Instantiate(voxelGridPrefab);
-        chunk.Initialize(voxelResolution, chunkSize);
+        chunk.Initialize(voxelResolution, chunkSize, maxFeatureAngle);
         chunk.transform.parent = transform;
         chunk.transform.localPosition = new Vector3(x * chunkSize - halfSize, y * chunkSize - halfSize);
         chunks[i] = chunk;
