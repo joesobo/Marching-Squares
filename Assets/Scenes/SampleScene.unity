@@ -407,11 +407,13 @@ MonoBehaviour:
   size: 2
   voxelResolution: 8
   chunkResolution: 2
+  maxFeatureAngle: 135
   voxelGridPrefab: {fileID: 3548131803593330355, guid: cd6752c4e78a93742b2902ed277cf67c,
     type: 3}
   stencilVisualizations:
   - {fileID: 98089121}
   - {fileID: 1552909629}
+  snapToGrid: 0
 --- !u!4 &1424422941
 Transform:
   m_ObjectHideFlags: 0
