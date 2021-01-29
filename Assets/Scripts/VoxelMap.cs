@@ -12,7 +12,7 @@ public class VoxelMap : MonoBehaviour {
     [Range(8,104)]
     public int voxelResolution = 8;
     public int chunkResolution = 2;
-    public VoxelChunk voxelGridPrefab;
+    public VoxelChunk voxelChunkPrefab;
     public bool useVoxelReferences;
     public ComputeShader shader;
 
@@ -132,7 +132,7 @@ public class VoxelMap : MonoBehaviour {
     }
 
     private void CreateChunk(int i, int x, int y) {
-        VoxelChunk chunk = Instantiate(voxelGridPrefab) as VoxelChunk;
+        VoxelChunk chunk = Instantiate(voxelChunkPrefab) as VoxelChunk;
         chunk.Initialize(useVoxelReferences, voxelResolution, chunkSize);
         chunk.transform.parent = transform;
         chunk.transform.localPosition = new Vector3(x * chunkSize - halfSize, y * chunkSize - halfSize);
