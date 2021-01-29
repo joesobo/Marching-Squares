@@ -1,13 +1,16 @@
-﻿Shader "Custom/2D Flat" {
-    Properties {
+Shader "Custom/2D Flat"
+{
+    Properties
+    {
         _Color ("Color", Color) = (1,1,1,1)
     }
-    SubShader {
+    SubShader
+    {
         Tags { "RenderType"="Opaque" }
         LOD 200
 
         CGPROGRAM
-        #pragma surface surf Standard fullforwardshadows vertex:vert
+        #pragma surface surf Lambert vertex:vert
 
         fixed4 _Color;
 
@@ -19,7 +22,7 @@
             v.normal = float3(0, 0, -1);
         }
 
-        void surf (Input IN, inout SurfaceOutputStandard o) {
+        void surf (Input IN, inout SurfaceOutput o) {
             o.Albedo = _Color.rgb;
         }
         ENDCG

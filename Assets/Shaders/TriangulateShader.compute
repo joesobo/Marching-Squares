@@ -1,0 +1,196 @@
+#pragma kernel CSMain
+
+struct Triangle {
+    float2 vertexA;
+    float2 vertexB;
+    float2 vertexC;
+};
+
+static int edges[16] = {
+    0x0,
+    0x3,
+    0x6,
+    0x5,
+    0x12,
+    0x15,
+    0x10,
+    0x9,
+    0x9,
+    0x10,
+    0x15,
+    0x12,
+    0x5,
+    0x6,
+    0x3,
+    0x0
+};
+
+static int triangulation[16][10] = {
+    {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+    {0, 1, 4, -1, -1, -1, -1, -1, -1, -1},
+    {1, 2, 5, -1, -1, -1, -1, -1, -1, -1},
+    {0, 2, 4, 4, 2, 5, -1, -1, -1, -1},
+    {2, 3, 6, -1, -1, -1, -1, -1, -1, -1},
+    {0, 1, 4, 2, 3, 6, -1, -1, -1, -1},
+    {1, 3, 5, 5, 6, 3, -1, -1, -1, -1},
+    {0, 4, 5, 0, 3, 5, 3, 5, 6, -1},
+    {0, 3, 7, -1, -1, -1, -1, -1, -1, -1},
+    {1, 3, 4, 4, 7, 3, -1, -1, -1, -1},
+    {0, 3, 7, 1, 2, 5, -1, -1, -1, -1},
+    {3, 7, 4, 3, 2, 4, 2, 5, 4, -1},
+    {0, 2, 7, 7, 6, 2, -1, -1, -1, -1},
+    {1, 2, 7, 1, 7, 4, 2, 7, 6, -1},
+    {0, 1, 6, 0, 6, 7, 1, 6, 5, -1},
+    {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1}
+};
+
+static int relativeOffsets[8][2] = {
+    {0, 0},
+    {0, 1},
+    {1, 0},
+    {1, 1},
+    {0, 0.5},
+    {0.5, 0},
+    {1, 0.5},
+    {0.5, 1}
+};
+
+RWStructuredBuffer<float3> _Vertices;
+AppendStructuredBuffer<Triangle> _Triangles;
+RWStructuredBuffer<int> _States;
+uint _VoxelResolution;
+uint _ChunkResolution;
+
+int2 GetUV (int3 id) {
+    return id.xy;
+}
+
+int indexFromCoord(int x, int y) {
+    return y * _VoxelResolution + x + y;
+}
+
+void addTriangle(float2 a, float2 b, float2 c) {
+    Triangle tri;
+    tri.vertexA = a;
+    tri.vertexB = b;
+    tri.vertexC = c; 
+    _Triangles.Append(tri);
+}
+
+void TriangulateCellRows(int2 uv) {
+    if (uv.x >= _VoxelResolution || uv.y >= _VoxelResolution) {
+      return;
+    }
+
+    float res = float(_VoxelResolution * _ChunkResolution);
+    float resLen = (1.0 / res);
+
+    int squareCornerStates[4] = {
+        _States[indexFromCoord(uv.x, uv.y)],
+        _States[indexFromCoord(uv.x + 1, uv.y)],
+        _States[indexFromCoord(uv.x + 1, uv.y + 1)],
+        _States[indexFromCoord(uv.x, uv.y + 1)],
+    };
+
+    // if (squareCornerStates[0] == -1 || squareCornerStates[1] == -1 || squareCornerStates[2] == -1 || squareCornerStates[3] == -1) {
+    //   return;
+    // }
+
+    int cellType = 0;
+    if (squareCornerStates[0] == 1) cellType |= 1; //A
+    if (squareCornerStates[1] == 1) cellType |= 2; //B
+    if (squareCornerStates[2] == 1) cellType |= 4; //C
+    if (squareCornerStates[3] == 1) cellType |= 8; //D
+
+    float2 A = float2(uv) / res;
+    float2 B = float2(uv.x + 1, uv.y) / res;
+    float2 C = float2(uv.x + 1, uv.y + 1) / res;
+    float2 D = float2(uv.x, uv.y + 1) / res;
+
+    float2 a = float2(A.x + resLen * 0.5, A.y);
+    float2 b = float2(A.x + resLen, A.y + resLen * 0.5);
+    float2 c = float2(A.x + resLen * 0.5, A.y + resLen);
+    float2 d = float2(A.x, A.y + resLen * 0.5);
+
+    float2 offset = float2(resLen * 0.5, resLen * 0.5);
+
+    Triangle tri;
+    
+    switch (cellType) {
+      case 1: 
+        addTriangle(a + offset, A + offset, d + offset);
+        break;
+      case 2:  
+        addTriangle(b + offset, B + offset, a + offset);
+        break;
+      case 3:  
+        addTriangle(B + offset, A + offset, d + offset);
+        addTriangle(d + offset, b + offset, B + offset);
+        break;
+      case 4: 
+        addTriangle(c + offset, C + offset, b + offset);
+        break;
+      case 5: 
+        addTriangle(a + offset, A + offset, d + offset);
+        addTriangle(c + offset, C + offset, b + offset);
+        break;
+      case 6:  
+        addTriangle(B + offset, c + offset, C + offset);
+        addTriangle(a + offset, c + offset, B + offset);
+        break;
+      case 7: 
+        addTriangle(d + offset, B + offset, A + offset);
+        addTriangle(d + offset, c + offset, B + offset);
+        addTriangle(c + offset, C + offset, B + offset);
+        break;
+      case 8:  
+        addTriangle(c + offset, d + offset, D + offset);
+        break;
+      case 9:  
+        addTriangle(D + offset, c + offset, A + offset);
+        addTriangle(c + offset, a + offset, A + offset);
+        break;
+      case 10: 
+        addTriangle(b + offset, B + offset, a + offset);
+        addTriangle(c + offset, d + offset, D + offset);
+        break;
+      case 11: 
+        addTriangle(A + offset, b + offset, B + offset);
+        addTriangle(A + offset, c + offset, b + offset);
+        addTriangle(A + offset, D + offset, c + offset);
+        break;
+      case 12: 
+        addTriangle(D + offset, C + offset, d + offset);
+        addTriangle(d + offset, C + offset, b + offset);
+        break;
+      case 13: 
+        addTriangle(A + offset, D + offset, a + offset);
+        addTriangle(a + offset, D + offset, b + offset);
+        addTriangle(b + offset, D + offset, C + offset);
+        break;
+      case 14: 
+        addTriangle(D + offset, C + offset, d + offset);
+        addTriangle(d + offset, C + offset, a + offset);
+        addTriangle(a + offset, C + offset, B + offset);
+        break;
+      case 15: 
+        addTriangle(A + offset, C + offset, B + offset);
+        addTriangle(A + offset, D + offset, C + offset);
+        break;
+    }
+
+    //Triangle tri;
+    // for(int i = 0; triangulation[cellType][i] != -1; i +=3) {
+    //     tri.vertexA = float2(uv.x, uv.y);
+    //     tri.vertexB = float2(uv.x + relativeOffsets[triangulation[cellType][i+1]][0], uv.y + relativeOffsets[triangulation[cellType][i+1]][1]);
+    //     tri.vertexC = float2(uv.x + relativeOffsets[triangulation[cellType][i+2]][0], uv.y + relativeOffsets[triangulation[cellType][i+2]][1]);
+    //     _Triangles.Append(tri);
+    // }
+}
+
+[numthreads(8,8,1)]
+void CSMain (int3 id : SV_DispatchThreadID)
+{
+    int2 uv = GetUV(id);
+    TriangulateCellRows(uv);
+}

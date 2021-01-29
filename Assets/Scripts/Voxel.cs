@@ -1,61 +1,55 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using System;
 
 [Serializable]
 public class Voxel {
-    public bool state;
-    public Vector2 position;
-    public float xEdge, yEdge;
-    public Vector2 xNormal, yNormal;
 
-    public Voxel() { }
+    public bool state;
+
+    public Vector2 position, xEdgePosition, yEdgePosition;
 
     public Voxel(int x, int y, float size) {
         position.x = (x + 0.5f) * size;
         position.y = (y + 0.5f) * size;
 
-        xEdge = float.MinValue;
-        yEdge = float.MinValue;
+        xEdgePosition = position;
+        xEdgePosition.x += size * 0.5f;
+        yEdgePosition = position;
+        yEdgePosition.y += size * 0.5f;
     }
+
+    public Voxel() { }
 
     public void BecomeXDummyOf(Voxel voxel, float offset) {
         state = voxel.state;
         position = voxel.position;
+        xEdgePosition = voxel.xEdgePosition;
+        yEdgePosition = voxel.yEdgePosition;
         position.x += offset;
-        xEdge = voxel.xEdge + offset;
-        yEdge = voxel.yEdge;
-        yNormal = voxel.yNormal;
+        xEdgePosition.x += offset;
+        yEdgePosition.x += offset;
     }
 
     public void BecomeYDummyOf(Voxel voxel, float offset) {
         state = voxel.state;
         position = voxel.position;
+        xEdgePosition = voxel.xEdgePosition;
+        yEdgePosition = voxel.yEdgePosition;
         position.y += offset;
-        xEdge = voxel.xEdge;
-        yEdge = voxel.yEdge + offset;
-        xNormal = voxel.xNormal;
+        xEdgePosition.y += offset;
+        yEdgePosition.y += offset;
     }
 
     public void BecomeXYDummyOf(Voxel voxel, float offset) {
         state = voxel.state;
         position = voxel.position;
-        position.y += offset;
+        xEdgePosition = voxel.xEdgePosition;
+        yEdgePosition = voxel.yEdgePosition;
         position.x += offset;
-        xEdge = voxel.xEdge + offset;
-        yEdge = voxel.yEdge + offset;
-    }
-
-    public Vector2 XEdgePoint {
-        get {
-            return new Vector2(xEdge, position.y);
-        }
-    }
-
-    public Vector2 YEdgePoint {
-        get {
-            return new Vector2(position.x, yEdge);
-        }
+        position.y += offset;
+        xEdgePosition.x += offset;
+        xEdgePosition.y += offset;
+        yEdgePosition.x += offset;
+        yEdgePosition.y += offset;
     }
 }
