@@ -92,100 +92,93 @@ void TriangulateCellRows(int2 uv) {
         _States[indexFromCoord(uv.x, uv.y + 1)],
     };
 
-    // if (squareCornerStates[0] == -1 || squareCornerStates[1] == -1 || squareCornerStates[2] == -1 || squareCornerStates[3] == -1) {
-    //   return;
-    // }
-
     int cellType = 0;
-    if (squareCornerStates[0] == 1) cellType |= 1; //A
-    if (squareCornerStates[1] == 1) cellType |= 2; //B
-    if (squareCornerStates[2] == 1) cellType |= 4; //C
-    if (squareCornerStates[3] == 1) cellType |= 8; //D
+    if (squareCornerStates[0] > 0) cellType |= 1; //A
+    if (squareCornerStates[1] > 0) cellType |= 2; //B
+    if (squareCornerStates[2] > 0) cellType |= 4; //C
+    if (squareCornerStates[3] > 0) cellType |= 8; //D
+
+    float2 offset = float2(resLen * 0.5, resLen * 0.5);
 
     float2 A = float2(uv) / res;
     float2 B = float2(uv.x + 1, uv.y) / res;
     float2 C = float2(uv.x + 1, uv.y + 1) / res;
     float2 D = float2(uv.x, uv.y + 1) / res;
 
-    float2 a = float2(A.x + resLen * 0.5, A.y);
-    float2 b = float2(A.x + resLen, A.y + resLen * 0.5);
-    float2 c = float2(A.x + resLen * 0.5, A.y + resLen);
-    float2 d = float2(A.x, A.y + resLen * 0.5);
+    float2 a = float2(A.x + resLen * 0.5, A.y) + offset;
+    float2 b = float2(A.x + resLen, A.y + resLen * 0.5) + offset;
+    float2 c = float2(A.x + resLen * 0.5, A.y + resLen) + offset;
+    float2 d = float2(A.x, A.y + resLen * 0.5) + offset;
 
-    float2 offset = float2(resLen * 0.5, resLen * 0.5);
+    A += offset;
+    B += offset;
+    C += offset;
+    D += offset;
 
     Triangle tri;
     
     switch (cellType) {
       case 1: 
-        addTriangle(a + offset, A + offset, d + offset);
+        addTriangle(a, A, d);
         break;
       case 2:  
-        addTriangle(b + offset, B + offset, a + offset);
+        addTriangle(b, B, a);
         break;
       case 3:  
-        addTriangle(B + offset, A + offset, d + offset);
-        addTriangle(d + offset, b + offset, B + offset);
+        addTriangle(B, A, d);
+        addTriangle(d, b, B);
         break;
       case 4: 
-        addTriangle(c + offset, C + offset, b + offset);
+        addTriangle(c, C, b);
         break;
       case 5: 
-        addTriangle(a + offset, A + offset, d + offset);
-        addTriangle(c + offset, C + offset, b + offset);
+        addTriangle(a, A, d);
+        addTriangle(c, C, b);
         break;
       case 6:  
-        addTriangle(B + offset, c + offset, C + offset);
-        addTriangle(a + offset, c + offset, B + offset);
+        addTriangle(B, c, C);
+        addTriangle(a, c, B);
         break;
       case 7: 
-        addTriangle(d + offset, B + offset, A + offset);
-        addTriangle(d + offset, c + offset, B + offset);
-        addTriangle(c + offset, C + offset, B + offset);
+        addTriangle(d, B, A);
+        addTriangle(d, c, B);
+        addTriangle(c, C, B);
         break;
       case 8:  
-        addTriangle(c + offset, d + offset, D + offset);
+        addTriangle(c, d, D);
         break;
       case 9:  
-        addTriangle(D + offset, c + offset, A + offset);
-        addTriangle(c + offset, a + offset, A + offset);
+        addTriangle(D, c, A);
+        addTriangle(c, a, A);
         break;
       case 10: 
-        addTriangle(b + offset, B + offset, a + offset);
-        addTriangle(c + offset, d + offset, D + offset);
+        addTriangle(b, B, a);
+        addTriangle(c, d, D);
         break;
       case 11: 
-        addTriangle(A + offset, b + offset, B + offset);
-        addTriangle(A + offset, c + offset, b + offset);
-        addTriangle(A + offset, D + offset, c + offset);
+        addTriangle(A, b, B);
+        addTriangle(A, c, b);
+        addTriangle(A, D, c);
         break;
       case 12: 
-        addTriangle(D + offset, C + offset, d + offset);
-        addTriangle(d + offset, C + offset, b + offset);
+        addTriangle(D, C, d);
+        addTriangle(d, C, b);
         break;
       case 13: 
-        addTriangle(A + offset, D + offset, a + offset);
-        addTriangle(a + offset, D + offset, b + offset);
-        addTriangle(b + offset, D + offset, C + offset);
+        addTriangle(A, D, a);
+        addTriangle(a, D, b);
+        addTriangle(b, D, C);
         break;
       case 14: 
-        addTriangle(D + offset, C + offset, d + offset);
-        addTriangle(d + offset, C + offset, a + offset);
-        addTriangle(a + offset, C + offset, B + offset);
+        addTriangle(D, C, d);
+        addTriangle(d, C, a);
+        addTriangle(a, C, B);
         break;
       case 15: 
-        addTriangle(A + offset, C + offset, B + offset);
-        addTriangle(A + offset, D + offset, C + offset);
+        addTriangle(A, C, B);
+        addTriangle(A, D, C);
         break;
     }
-
-    //Triangle tri;
-    // for(int i = 0; triangulation[cellType][i] != -1; i +=3) {
-    //     tri.vertexA = float2(uv.x, uv.y);
-    //     tri.vertexB = float2(uv.x + relativeOffsets[triangulation[cellType][i+1]][0], uv.y + relativeOffsets[triangulation[cellType][i+1]][1]);
-    //     tri.vertexC = float2(uv.x + relativeOffsets[triangulation[cellType][i+2]][0], uv.y + relativeOffsets[triangulation[cellType][i+2]][1]);
-    //     _Triangles.Append(tri);
-    // }
 }
 
 [numthreads(8,8,1)]

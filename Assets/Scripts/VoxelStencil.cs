@@ -2,9 +2,7 @@
 
 public class VoxelStencil {
 
-	protected bool fillType;
-
-	protected int centerX, centerY, radius;
+	protected int fillType, centerX, centerY, radius;
 
 	public int XStart {
 		get {
@@ -30,7 +28,7 @@ public class VoxelStencil {
 		}
 	}
 
-	public virtual void Initialize (bool fillType, int radius) {
+	public virtual void Initialize (int fillType, int radius) {
 		this.fillType = fillType;
 		this.radius = radius;
 	}
@@ -40,7 +38,7 @@ public class VoxelStencil {
 		centerY = y;
 	}
 
-	public virtual bool Apply (int x, int y, bool voxel) {
+	public virtual int Apply (int x, int y, int voxel) {
 		return fillType;
 	}
 }

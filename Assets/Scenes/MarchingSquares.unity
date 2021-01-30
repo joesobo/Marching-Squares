@@ -138,7 +138,7 @@ GameObject:
   - component: {fileID: 701687079}
   - component: {fileID: 701687078}
   m_Layer: 0
-  m_Name: Plane
+  m_Name: Map Display
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -364,10 +364,8 @@ MonoBehaviour:
   useVoxelReferences: 0
   shader: {fileID: 7200000, guid: 82bebc4886c0ef2479b2a7ebe8b6f899, type: 3}
   scaleNoise: 1
-  useRandomSeed: 0
+  useRandomSeed: 1
   seed: 0
-  textures: []
-  materials: []
 --- !u!4 &911654351
 Transform:
   m_ObjectHideFlags: 0

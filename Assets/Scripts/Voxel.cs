@@ -4,7 +4,7 @@ using System;
 [Serializable]
 public class Voxel {
 
-    public bool state;
+    public int state;
 
     public Vector2 position, xEdgePosition, yEdgePosition;
 
