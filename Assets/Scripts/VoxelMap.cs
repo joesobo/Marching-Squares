@@ -7,8 +7,6 @@ public class VoxelMap : MonoBehaviour {
     private static string[] radiusNames = { "0", "1", "2", "3", "4", "5" };
     private static string[] stencilNames = { "Square", "Circle" };
 
-    [Range(1, 4)]
-    public int chunkSize = 2;
     [Range(8, 104)]
     public int voxelResolution = 8;
     public int chunkResolution = 2;
@@ -58,8 +56,8 @@ public class VoxelMap : MonoBehaviour {
     private void Generate() {
         noiseMap = new float[voxelResolution * chunkResolution, voxelResolution * chunkResolution];
 
-        halfSize = chunkSize * 0.5f * chunkResolution;
-        voxelSize = (float)chunkSize / (float)voxelResolution;
+        halfSize = 0.5f * chunkResolution;
+        voxelSize = 1f / voxelResolution;
         statePositions = new int[(voxelResolution + 1) * (voxelResolution + 1)];
         chunks = new VoxelChunk[chunkResolution * chunkResolution];
 
@@ -93,7 +91,7 @@ public class VoxelMap : MonoBehaviour {
 
         }
         box = gameObject.AddComponent<BoxCollider>();
-        box.size = new Vector3(chunkSize * chunkResolution, chunkSize * chunkResolution);
+        box.size = new Vector3(chunkResolution, chunkResolution);
     }
 
     private void GenerateTerrain() {
@@ -105,9 +103,9 @@ public class VoxelMap : MonoBehaviour {
 
     private void CreateChunk(int i, int x, int y) {
         VoxelChunk chunk = Instantiate(voxelChunkPrefab) as VoxelChunk;
-        chunk.Initialize(useVoxelReferences, voxelResolution, chunkSize);
+        chunk.Initialize(useVoxelReferences, voxelResolution);
         chunk.transform.parent = transform;
-        chunk.transform.localPosition = new Vector3(x * chunkSize - halfSize, y * chunkSize - halfSize);
+        chunk.transform.localPosition = new Vector3(x - halfSize, y - halfSize);
         chunks[i] = chunk;
         if (x > 0) {
             chunks[i - 1].xNeighbor = chunk;
@@ -222,8 +220,8 @@ public class VoxelMap : MonoBehaviour {
                 triangles[i * 3 + j] = i * 3 + j;
 
                 var vertex = tris[i][j];
-                vertex.x = vertex.x * chunkResolution * chunkSize;
-                vertex.y = vertex.y * chunkResolution * chunkSize;
+                vertex.x = vertex.x * chunkResolution;
+                vertex.y = vertex.y * chunkResolution;
 
                 vertices[i * 3 + j] = vertex;
             }

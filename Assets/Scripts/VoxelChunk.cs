@@ -18,12 +18,12 @@ public class VoxelChunk : MonoBehaviour {
     private Vector3[] vertices;
     private int[] triangles;
 
-    public void Initialize(bool useVoxelPoints, int resolution, float size) {
+    public void Initialize(bool useVoxelPoints, int resolution) {
         this.useVoxelPoints = useVoxelPoints;
         this.resolution = resolution;
 
-        gridSize = size;
-        voxelSize = size / resolution;
+        gridSize = 1f;
+        voxelSize = 1f / resolution;
         voxels = new Voxel[resolution * resolution];
 
         for (int i = 0, y = 0; y < resolution; y++) {
@@ -31,7 +31,7 @@ public class VoxelChunk : MonoBehaviour {
                 CreateVoxelPoint(i, x, y);
             }
         }
-        
+
         GetComponent<MeshFilter>().mesh = mesh = new Mesh();
         mesh.name = "VoxelChunk Mesh";
 
