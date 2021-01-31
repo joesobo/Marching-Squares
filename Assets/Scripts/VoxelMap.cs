@@ -166,7 +166,7 @@ public class VoxelMap : MonoBehaviour {
         int numPoints = (voxelResolution + 1) * (voxelResolution + 1);
         int numVoxelsPerResolution = voxelResolution - 1;
         int numVoxels = numVoxelsPerResolution * numVoxelsPerResolution;
-        int maxTriangleCount = numVoxels * 4;
+        int maxTriangleCount = numVoxels * 12;
 
         ReleaseBuffers();
         verticeBuffer = new ComputeBuffer(numPoints, sizeof(float) * 3);
@@ -305,14 +305,17 @@ public class VoxelMap : MonoBehaviour {
             //1 triangle
             if (cellType == 1 || cellType == 2 || cellType == 4 || cellType == 8) {
                 loops = 1;
-            } else if (cellType == 3 || cellType == 5 || cellType == 6 || cellType == 9 || cellType == 10 || cellType == 12 || cellType == 15) {
+            } else if (cellType == 5 || cellType == 10) {
                 loops = 2;
-            } else if (cellType == 7 || cellType == 11 || cellType == 13 || cellType == 14) {
-                loops = 3;
+            } else if (cellType == 3 || cellType == 6 || cellType == 9 || cellType == 12) {
+                loops = 4;
+            } else if (cellType == 7 || cellType == 15 || cellType == 11 || cellType == 13 || cellType == 14) {
+                loops = 8;
             }
 
             for (int j = 0; j < loops; j++) {
                 ColorTriangle(colors, UnityEngine.Random.ColorHSV(), index);
+                // ColorTriangle(colors, Color.white, index);
                 index += 3;
             }
         }
@@ -360,7 +363,7 @@ public class VoxelMap : MonoBehaviour {
 
         foreach (Voxel voxel in chunk.voxels) {
             //OFF
-            // voxel.state = 0;
+            voxel.state = 0;
 
             //ON
             // voxel.state = 1;

@@ -6,55 +6,6 @@ struct Triangle {
     float2 vertexC;
 };
 
-static int edges[16] = {
-    0x0,
-    0x3,
-    0x6,
-    0x5,
-    0x12,
-    0x15,
-    0x10,
-    0x9,
-    0x9,
-    0x10,
-    0x15,
-    0x12,
-    0x5,
-    0x6,
-    0x3,
-    0x0
-};
-
-static int triangulation[16][10] = {
-    {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
-    {0, 1, 4, -1, -1, -1, -1, -1, -1, -1},
-    {1, 2, 5, -1, -1, -1, -1, -1, -1, -1},
-    {0, 2, 4, 4, 2, 5, -1, -1, -1, -1},
-    {2, 3, 6, -1, -1, -1, -1, -1, -1, -1},
-    {0, 1, 4, 2, 3, 6, -1, -1, -1, -1},
-    {1, 3, 5, 5, 6, 3, -1, -1, -1, -1},
-    {0, 4, 5, 0, 3, 5, 3, 5, 6, -1},
-    {0, 3, 7, -1, -1, -1, -1, -1, -1, -1},
-    {1, 3, 4, 4, 7, 3, -1, -1, -1, -1},
-    {0, 3, 7, 1, 2, 5, -1, -1, -1, -1},
-    {3, 7, 4, 3, 2, 4, 2, 5, 4, -1},
-    {0, 2, 7, 7, 6, 2, -1, -1, -1, -1},
-    {1, 2, 7, 1, 7, 4, 2, 7, 6, -1},
-    {0, 1, 6, 0, 6, 7, 1, 6, 5, -1},
-    {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1}
-};
-
-static int relativeOffsets[8][2] = {
-    {0, 0},
-    {0, 1},
-    {1, 0},
-    {1, 1},
-    {0, 0.5},
-    {0.5, 0},
-    {1, 0.5},
-    {0.5, 1}
-};
-
 RWStructuredBuffer<float3> _Vertices;
 AppendStructuredBuffer<Triangle> _Triangles;
 RWStructuredBuffer<int> _States;
@@ -110,6 +61,13 @@ void TriangulateCellRows(int2 uv) {
     float2 c = float2(A.x + resLen * 0.5, A.y + resLen) + offset;
     float2 d = float2(A.x, A.y + resLen * 0.5) + offset;
 
+    float2 center = float2(A.x + resLen * 0.5, A.y + resLen * 0.5) + offset;
+
+    float2 innerA = float2(A.x + resLen * 0.25, A.y + resLen * 0.25) + offset;
+    float2 innerB = float2(A.x + resLen * 0.75, A.y + resLen * 0.25) + offset;
+    float2 innerC = float2(A.x + resLen * 0.75, A.y + resLen * 0.75) + offset;
+    float2 innerD = float2(A.x + resLen * 0.25, A.y + resLen * 0.75) + offset;
+
     A += offset;
     B += offset;
     C += offset;
@@ -124,9 +82,11 @@ void TriangulateCellRows(int2 uv) {
       case 2:  
         addTriangle(b, B, a);
         break;
-      case 3:  
-        addTriangle(B, A, d);
-        addTriangle(d, b, B);
+      case 3:
+        addTriangle(A, d, center);
+        addTriangle(A, center, a);
+        addTriangle(a, center, B);
+        addTriangle(center, b, B);
         break;
       case 4: 
         addTriangle(c, C, b);
@@ -135,48 +95,83 @@ void TriangulateCellRows(int2 uv) {
         addTriangle(a, A, d);
         addTriangle(c, C, b);
         break;
-      case 6:  
-        addTriangle(B, c, C);
-        addTriangle(a, c, B);
+      case 6:
+        addTriangle(B, a, center);
+        addTriangle(center, b, B);
+        addTriangle(b, center, c);
+        addTriangle(c, C, b);
         break;
       case 7: 
-        addTriangle(d, B, A);
-        addTriangle(d, c, B);
-        addTriangle(c, C, B);
+        addTriangle(A, d, a);
+        addTriangle(d, center, a);
+        addTriangle(d, innerD, center);
+        addTriangle(B, a, center);
+        addTriangle(B, center, b);
+        addTriangle(b, center, c);
+        addTriangle(b, c, C);
+        addTriangle(center, innerD, c);
         break;
       case 8:  
         addTriangle(c, d, D);
         break;
-      case 9:  
-        addTriangle(D, c, A);
-        addTriangle(c, a, A);
+      case 9:
+        addTriangle(A, center, a);
+        addTriangle(center, A, d);
+        addTriangle(center, d, c);
+        addTriangle(d, D, c);
         break;
       case 10: 
         addTriangle(b, B, a);
         addTriangle(c, d, D);
         break;
-      case 11: 
-        addTriangle(A, b, B);
-        addTriangle(A, c, b);
-        addTriangle(A, D, c);
+      case 11:
+        addTriangle(a, A, d);
+        addTriangle(a, d, center);
+        addTriangle(B, a, center);
+        addTriangle(B, center, b);
+        addTriangle(b, center, innerC);
+        addTriangle(center, d, D);
+        addTriangle(center, D, c);
+        addTriangle(center, c, innerC);
         break;
       case 12: 
-        addTriangle(D, C, d);
-        addTriangle(d, C, b);
+        addTriangle(b, center, C);
+        addTriangle(C, center, c);
+        addTriangle(c, center, d);
+        addTriangle(d, D, c);
         break;
       case 13: 
-        addTriangle(A, D, a);
-        addTriangle(a, D, b);
-        addTriangle(b, D, C);
+        addTriangle(a, A, d);
+        addTriangle(a, d, center);
+        addTriangle(a, center, innerB);
+        addTriangle(innerB, center, b);
+        addTriangle(b, center, c);
+        addTriangle(b, c, C);
+        addTriangle(center, d, D);
+        addTriangle(center, D, c);
         break;
       case 14: 
-        addTriangle(D, C, d);
-        addTriangle(d, C, a);
-        addTriangle(a, C, B);
+        // addTriangle(D, C, d);
+        // addTriangle(d, C, a);
+        // addTriangle(a, C, B);
+        addTriangle(innerA, center, a);
+        addTriangle(B, a, center);
+        addTriangle(B, center, b);
+        addTriangle(b, center, c);
+        addTriangle(b, c, C);
+        addTriangle(center, d, D);
+        addTriangle(center, D, c);
+        addTriangle(center, innerA, d);
         break;
       case 15: 
-        addTriangle(A, C, B);
-        addTriangle(A, D, C);
+        addTriangle(A, center, a);
+        addTriangle(A, d, center);
+        addTriangle(a, b, B);
+        addTriangle(a, center, b);
+        addTriangle(center, C, b);
+        addTriangle(center, c, C);
+        addTriangle(d, c, center);
+        addTriangle(d, D, c);
         break;
     }
 }
