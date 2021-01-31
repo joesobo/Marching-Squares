@@ -3,11 +3,11 @@
 public class VoxelMap : MonoBehaviour {
     const int threadSize = 8;
 
-    private static string[] fillTypeNames = { "Empty", "White", "Red" };
+    private static string[] fillTypeNames = { "Empty", "White", "Red", "Blue", "Green" };
     private static string[] radiusNames = { "0", "1", "2", "3", "4", "5" };
     private static string[] stencilNames = { "Square", "Circle" };
 
-    [Range(8, 104)]
+    [Range(8, 56)]
     public int voxelResolution = 8;
     public int chunkResolution = 2;
     public VoxelChunk voxelChunkPrefab;
@@ -21,6 +21,7 @@ public class VoxelMap : MonoBehaviour {
 
     ComputeBuffer verticeBuffer;
     ComputeBuffer triangleBuffer;
+    ComputeBuffer colorBuffer;
     ComputeBuffer triCountBuffer;
     ComputeBuffer stateBuffer;
 
@@ -171,6 +172,7 @@ public class VoxelMap : MonoBehaviour {
         ReleaseBuffers();
         verticeBuffer = new ComputeBuffer(numPoints, sizeof(float) * 3);
         triangleBuffer = new ComputeBuffer(maxTriangleCount, sizeof(float) * 2 * 3, ComputeBufferType.Append);
+        colorBuffer = new ComputeBuffer(maxTriangleCount, sizeof(float) * 3, ComputeBufferType.Append);
         triCountBuffer = new ComputeBuffer(1, sizeof(int), ComputeBufferType.Raw);
         stateBuffer = new ComputeBuffer(numPoints, sizeof(int));
     }
@@ -179,6 +181,7 @@ public class VoxelMap : MonoBehaviour {
         if (triangleBuffer != null) {
             verticeBuffer.Release();
             triangleBuffer.Release();
+            colorBuffer.Release();
             triCountBuffer.Release();
             stateBuffer.Release();
         }
@@ -193,8 +196,10 @@ public class VoxelMap : MonoBehaviour {
         int numThreadsPerResolution = Mathf.CeilToInt(voxelResolution / threadSize);
 
         triangleBuffer.SetCounterValue(0);
+        colorBuffer.SetCounterValue(0);
         shader.SetBuffer(0, "_Vertices", verticeBuffer);
         shader.SetBuffer(0, "_Triangles", triangleBuffer);
+        shader.SetBuffer(0, "_Colors", colorBuffer);
         shader.SetBuffer(0, "_States", stateBuffer);
         shader.SetInt("_VoxelResolution", voxelResolution);
         shader.SetInt("_ChunkResolution", chunkResolution);
@@ -227,98 +232,21 @@ public class VoxelMap : MonoBehaviour {
             }
         }
 
-        Color[] colors = new Color[vertices.Length];
-        SetupChunkColors(chunk, colors);
+        TriangleColor[] triangleColors = new TriangleColor[numTris];
+        colorBuffer.GetData(triangleColors, 0, 0, numTris);
+
+        Color[] colors = new Color[numTris * 3];
+        for (int i = 0, index = 0; i < numTris; i++) {
+            for (int j = 0; j < 3; j++) {
+                colors[index] = new Color(triangleColors[i][0], triangleColors[i][1], triangleColors[i][2]);
+                index++;
+            }
+        }
 
         mesh.vertices = vertices;
         mesh.triangles = triangles;
         mesh.colors = colors;
         mesh.RecalculateNormals();
-    }
-
-    private void SetupChunkColors(VoxelChunk chunk, Color[] colors) {
-        for (int i = 0, index = 0; i < chunk.voxels.Length; i++) {
-            int a = chunk.voxels[i].state;
-            int b = i + 1 < chunk.voxels.Length ? chunk.voxels[i + 1].state : 0;
-            int c = (i + voxelResolution + 1) < chunk.voxels.Length ? chunk.voxels[i + voxelResolution + 1].state : 0;
-            int d = i + voxelResolution < chunk.voxels.Length ? chunk.voxels[i + voxelResolution].state : 0;
-
-            //xNeighbor
-            if (i == (voxelResolution - 1) || (i > (voxelResolution - 1) && (i - (voxelResolution - 1)) % voxelResolution == 0)) {
-                if (chunk.xNeighbor) {
-                    b = chunk.xNeighbor.voxels[(i - (voxelResolution - 1) % voxelResolution)].state;
-                    if ((i - (voxelResolution - 1) % voxelResolution) + voxelResolution < chunk.xNeighbor.voxels.Length) {
-                        c = chunk.xNeighbor.voxels[(i - (voxelResolution - 1) % voxelResolution) + voxelResolution].state;
-                    } else {
-                        c = 0;
-                    }
-                } else {
-                    b = 0;
-                    c = 0;
-                }
-            }
-
-            //yNeighbor
-            if (i > (voxelResolution * voxelResolution) - voxelResolution - 1) {
-                if (chunk.yNeighbor) {
-                    d = chunk.yNeighbor.voxels[(i - ((voxelResolution * voxelResolution) - voxelResolution))].state;
-                    if ((i - ((voxelResolution * voxelResolution) - voxelResolution) + 1) < chunk.yNeighbor.voxels.Length) {
-                        c = chunk.yNeighbor.voxels[(i - ((voxelResolution * voxelResolution) - voxelResolution) + 1)].state;
-                    } else {
-                        c = 0;
-                    }
-                } else {
-                    c = 0;
-                    d = 0;
-                }
-            }
-
-            //xyNeighbor
-            if (i == voxelResolution * voxelResolution - 1) {
-                if (chunk.xyNeighbor) {
-                    c = chunk.xyNeighbor.voxels[0].state;
-
-                    if (chunk.xNeighbor) {
-                        b = chunk.xNeighbor.voxels[(voxelResolution * voxelResolution) - voxelResolution].state;
-                    } else {
-                        b = 0;
-                    }
-
-                    if (chunk.yNeighbor) {
-                        d = chunk.yNeighbor.voxels[voxelResolution - 1].state;
-                    } else {
-                        d = 0;
-                    }
-                } else {
-                    c = 0;
-                }
-            }
-
-            int cellType = 0;
-            if (a > 0) cellType |= 1;
-            if (b > 0) cellType |= 2;
-            if (c > 0) cellType |= 4;
-            if (d > 0) cellType |= 8;
-
-            int loops = 0;
-
-            //1 triangle
-            if (cellType == 1 || cellType == 2 || cellType == 4 || cellType == 8) {
-                loops = 1;
-            } else if (cellType == 5 || cellType == 10) {
-                loops = 2;
-            } else if (cellType == 3 || cellType == 6 || cellType == 9 || cellType == 12) {
-                loops = 4;
-            } else if (cellType == 7 || cellType == 15 || cellType == 11 || cellType == 13 || cellType == 14) {
-                loops = 8;
-            }
-
-            for (int j = 0; j < loops; j++) {
-                ColorTriangle(colors, UnityEngine.Random.ColorHSV(), index);
-                // ColorTriangle(colors, Color.white, index);
-                index += 3;
-            }
-        }
     }
 
     private void ColorTriangle(Color[] colors, Color color, int index) {
@@ -372,14 +300,14 @@ public class VoxelMap : MonoBehaviour {
             // voxel.state = UnityEngine.Random.Range(0, 2);
 
             //PERLIN
-            int x = Mathf.RoundToInt(voxel.position.x * (voxelResolution - 1) + centeredChunkX * voxelResolution);
-            int y = Mathf.RoundToInt(voxel.position.y * (voxelResolution - 1) + centeredChunkY * voxelResolution);
+            // int x = Mathf.RoundToInt(voxel.position.x * (voxelResolution - 1) + centeredChunkX * voxelResolution);
+            // int y = Mathf.RoundToInt(voxel.position.y * (voxelResolution - 1) + centeredChunkY * voxelResolution);
 
-            float scaledX = x / scaleNoise / voxelResolution;
-            float scaledY = y / scaleNoise / voxelResolution;
+            // float scaledX = x / scaleNoise / voxelResolution;
+            // float scaledY = y / scaleNoise / voxelResolution;
 
-            noiseMap[(int)x, (int)y] = Mathf.PerlinNoise(scaledX + seed, scaledY + seed);
-            voxel.state = Mathf.PerlinNoise(scaledX + seed, scaledY + seed) > 0.5f ? 0 : 1;
+            // noiseMap[(int)x, (int)y] = Mathf.PerlinNoise(scaledX + seed, scaledY + seed);
+            // voxel.state = Mathf.PerlinNoise(scaledX + seed, scaledY + seed) > 0.5f ? 0 : 1;
         }
     }
 
@@ -413,6 +341,26 @@ public class VoxelMap : MonoBehaviour {
         }
     }
 
+    struct TriangleColor {
+#pragma warning disable 649 // disable unassigned variable warning
+        public float red;
+        public float green;
+        public float blue;
+
+        public float this[int i] {
+            get {
+                switch (i) {
+                    case 0:
+                        return red;
+                    case 1:
+                        return green;
+                    default:
+                        return blue;
+                }
+            }
+        }
+    }
+
     private void OnGUI() {
         GUILayout.BeginArea(new Rect(4f, 4f, 150f, 1000f));
         GUILayout.Label("Fill Type");
@@ -422,7 +370,7 @@ public class VoxelMap : MonoBehaviour {
         GUILayout.Label("Stencil");
         stencilIndex = GUILayout.SelectionGrid(stencilIndex, stencilNames, 2);
         GUILayout.Label("Regenerate");
-        if (GUI.Button(new Rect(0, 175, 150f, 20f), "Generate")) {
+        if (GUI.Button(new Rect(0, 225, 150f, 20f), "Generate")) {
             foreach (Transform child in this.transform) {
                 Destroy(child.gameObject);
             }
