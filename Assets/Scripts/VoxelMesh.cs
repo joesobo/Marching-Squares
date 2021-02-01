@@ -4,7 +4,7 @@ public class VoxelMesh : MonoBehaviour {
     const int threadSize = 8;
 
     private int voxelResolution, chunkResolution;
-    
+
     private int[] statePositions;
 
     public ComputeShader shader;
@@ -25,7 +25,7 @@ public class VoxelMesh : MonoBehaviour {
         CreateBuffers();
 
         foreach (VoxelChunk chunk in chunks) {
-            TriangulateChunk(chunk);
+            TriangulateChunkMesh(chunk);
         }
     }
 
@@ -51,11 +51,23 @@ public class VoxelMesh : MonoBehaviour {
         }
     }
 
-    public void TriangulateChunk(VoxelChunk chunk) {
+    public void TriangulateChunkMesh(VoxelChunk chunk) {
         Mesh mesh = chunk.mesh;
 
         mesh.Clear();
+        Vector3[] vertices;
+        int[] triangles;
+        Color32[] colors;
 
+        ShaderTriangulate(chunk, out vertices, out triangles, out colors);
+
+        mesh.vertices = vertices;
+        mesh.triangles = triangles;
+        mesh.colors32 = colors;
+        mesh.RecalculateNormals();
+    }
+
+    private void ShaderTriangulate(VoxelChunk chunk, out Vector3[] vertices, out int[] triangles, out Color32[] colors) {
         int numThreadsPerResolution = Mathf.CeilToInt(voxelResolution / threadSize);
 
         triangleBuffer.SetCounterValue(0);
@@ -78,10 +90,13 @@ public class VoxelMesh : MonoBehaviour {
         Triangle[] tris = new Triangle[numTris];
         triangleBuffer.GetData(tris, 0, 0, numTris);
 
-        Vector3[] vertices = new Vector3[numTris * 3];
-        int[] triangles = new int[numTris * 3];
-        Color32[] colors = new Color32[numTris * 3];
+        vertices = new Vector3[numTris * 3];
+        triangles = new int[numTris * 3];
+        colors = new Color32[numTris * 3];
+        GetShaderData(numTris, tris, vertices, triangles, colors);
+    }
 
+    private void GetShaderData(int numTris, Triangle[] tris, Vector3[] vertices, int[] triangles, Color32[] colors) {
         for (int i = 0; i < numTris; i++) {
             for (int j = 0; j < 3; j++) {
                 colors[i * 3 + j] = new Color32((byte)(tris[i].red * 255), (byte)(tris[i].green * 255), (byte)(tris[i].blue * 255), 255);
@@ -95,11 +110,6 @@ public class VoxelMesh : MonoBehaviour {
                 vertices[i * 3 + j] = vertex;
             }
         }
-
-        mesh.vertices = vertices;
-        mesh.triangles = triangles;
-        mesh.colors32 = colors;
-        mesh.RecalculateNormals();
     }
 
     private void SetupStates(VoxelChunk chunk) {

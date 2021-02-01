@@ -83,7 +83,7 @@ public class VoxelEditor : MonoBehaviour {
                 activeStencil.SetCenter(centerX - voxelXOffset, centerY - voxelYOffset);
                 chunks[i].Apply(activeStencil);
 
-                voxelMesh.TriangulateChunk(chunks[i]);
+                voxelMesh.TriangulateChunkMesh(chunks[i]);
 
                 voxelXOffset -= voxelResolution;
             }
