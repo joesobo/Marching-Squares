@@ -363,7 +363,7 @@ MonoBehaviour:
   useVoxelReferences: 1
   shader: {fileID: 7200000, guid: 82bebc4886c0ef2479b2a7ebe8b6f899, type: 3}
   scaleNoise: 1
-  useRandomSeed: 1
+  useRandomSeed: 0
   seed: 0
 --- !u!4 &911654351
 Transform:

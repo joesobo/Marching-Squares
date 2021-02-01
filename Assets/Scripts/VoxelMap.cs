@@ -21,7 +21,7 @@ public class VoxelMap : MonoBehaviour {
 
     ComputeBuffer verticeBuffer;
     ComputeBuffer triangleBuffer;
-    ComputeBuffer colorBuffer;
+    //ComputeBuffer colorBuffer;
     ComputeBuffer triCountBuffer;
     ComputeBuffer stateBuffer;
 
@@ -171,8 +171,7 @@ public class VoxelMap : MonoBehaviour {
 
         ReleaseBuffers();
         verticeBuffer = new ComputeBuffer(numPoints, sizeof(float) * 3);
-        triangleBuffer = new ComputeBuffer(maxTriangleCount, sizeof(float) * 2 * 3, ComputeBufferType.Append);
-        colorBuffer = new ComputeBuffer(maxTriangleCount, sizeof(float) * 3, ComputeBufferType.Append);
+        triangleBuffer = new ComputeBuffer(maxTriangleCount, sizeof(float) * 3 * 3, ComputeBufferType.Append);
         triCountBuffer = new ComputeBuffer(1, sizeof(int), ComputeBufferType.Raw);
         stateBuffer = new ComputeBuffer(numPoints, sizeof(int));
     }
@@ -181,7 +180,6 @@ public class VoxelMap : MonoBehaviour {
         if (triangleBuffer != null) {
             verticeBuffer.Release();
             triangleBuffer.Release();
-            colorBuffer.Release();
             triCountBuffer.Release();
             stateBuffer.Release();
         }
@@ -196,10 +194,8 @@ public class VoxelMap : MonoBehaviour {
         int numThreadsPerResolution = Mathf.CeilToInt(voxelResolution / threadSize);
 
         triangleBuffer.SetCounterValue(0);
-        colorBuffer.SetCounterValue(0);
         shader.SetBuffer(0, "_Vertices", verticeBuffer);
         shader.SetBuffer(0, "_Triangles", triangleBuffer);
-        shader.SetBuffer(0, "_Colors", colorBuffer);
         shader.SetBuffer(0, "_States", stateBuffer);
         shader.SetInt("_VoxelResolution", voxelResolution);
         shader.SetInt("_ChunkResolution", chunkResolution);
@@ -217,11 +213,14 @@ public class VoxelMap : MonoBehaviour {
         Triangle[] tris = new Triangle[numTris];
         triangleBuffer.GetData(tris, 0, 0, numTris);
 
-        var vertices = new Vector3[numTris * 3];
-        var triangles = new int[numTris * 3];
+        Vector3[] vertices = new Vector3[numTris * 3];
+        int[] triangles = new int[numTris * 3];
+        Color32[] colors = new Color32[numTris * 3];
 
         for (int i = 0; i < numTris; i++) {
             for (int j = 0; j < 3; j++) {
+                colors[i * 3 + j] = new Color32((byte)(tris[i].red * 255), (byte)(tris[i].green * 255), (byte)(tris[i].blue * 255), 255);
+
                 triangles[i * 3 + j] = i * 3 + j;
 
                 var vertex = tris[i][j];
@@ -232,20 +231,9 @@ public class VoxelMap : MonoBehaviour {
             }
         }
 
-        TriangleColor[] triangleColors = new TriangleColor[numTris];
-        colorBuffer.GetData(triangleColors, 0, 0, numTris);
-
-        Color[] colors = new Color[numTris * 3];
-        for (int i = 0, index = 0; i < numTris; i++) {
-            for (int j = 0; j < 3; j++) {
-                colors[index] = new Color(triangleColors[i][0], triangleColors[i][1], triangleColors[i][2]);
-                index++;
-            }
-        }
-
         mesh.vertices = vertices;
         mesh.triangles = triangles;
-        mesh.colors = colors;
+        mesh.colors32 = colors;
         mesh.RecalculateNormals();
     }
 
@@ -300,14 +288,14 @@ public class VoxelMap : MonoBehaviour {
             // voxel.state = UnityEngine.Random.Range(0, 2);
 
             //PERLIN
-            // int x = Mathf.RoundToInt(voxel.position.x * (voxelResolution - 1) + centeredChunkX * voxelResolution);
-            // int y = Mathf.RoundToInt(voxel.position.y * (voxelResolution - 1) + centeredChunkY * voxelResolution);
+            int x = Mathf.RoundToInt(voxel.position.x * (voxelResolution - 1) + centeredChunkX * voxelResolution);
+            int y = Mathf.RoundToInt(voxel.position.y * (voxelResolution - 1) + centeredChunkY * voxelResolution);
 
-            // float scaledX = x / scaleNoise / voxelResolution;
-            // float scaledY = y / scaleNoise / voxelResolution;
+            float scaledX = x / scaleNoise / voxelResolution;
+            float scaledY = y / scaleNoise / voxelResolution;
 
-            // noiseMap[(int)x, (int)y] = Mathf.PerlinNoise(scaledX + seed, scaledY + seed);
-            // voxel.state = Mathf.PerlinNoise(scaledX + seed, scaledY + seed) > 0.5f ? 0 : 1;
+            noiseMap[(int)x, (int)y] = Mathf.PerlinNoise(scaledX + seed, scaledY + seed);
+            voxel.state = Mathf.PerlinNoise(scaledX + seed, scaledY + seed) > 0.5f ? 0 : Mathf.RoundToInt(Random.Range(1, 5));
         }
     }
 
@@ -326,6 +314,9 @@ public class VoxelMap : MonoBehaviour {
         public Vector2 a;
         public Vector2 b;
         public Vector2 c;
+        public float red;
+        public float green;
+        public float blue;
 
         public Vector2 this[int i] {
             get {
@@ -341,25 +332,12 @@ public class VoxelMap : MonoBehaviour {
         }
     }
 
-    struct TriangleColor {
-#pragma warning disable 649 // disable unassigned variable warning
-        public float red;
-        public float green;
-        public float blue;
-
-        public float this[int i] {
-            get {
-                switch (i) {
-                    case 0:
-                        return red;
-                    case 1:
-                        return green;
-                    default:
-                        return blue;
-                }
-            }
-        }
-    }
+//     struct TriangleColor {
+// #pragma warning disable 649 // disable unassigned variable warning
+//         public float red;
+//         public float green;
+//         public float blue;
+//     }
 
     private void OnGUI() {
         GUILayout.BeginArea(new Rect(4f, 4f, 150f, 1000f));

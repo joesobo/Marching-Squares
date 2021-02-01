@@ -4,6 +4,9 @@ struct Triangle {
   float2 vertexA;
   float2 vertexB;
   float2 vertexC;
+  float red;
+  float green;
+  float blue;
 };
 
 struct Color {
@@ -14,7 +17,6 @@ struct Color {
 
 RWStructuredBuffer<float3> _Vertices;
 AppendStructuredBuffer<Triangle> _Triangles;
-AppendStructuredBuffer<Color> _Colors;
 RWStructuredBuffer<int> _States;
 uint _VoxelResolution;
 uint _ChunkResolution;
@@ -27,15 +29,18 @@ int indexFromCoord(int x, int y) {
   return y * _VoxelResolution + x + y;
 }
 
-void addTriangle(float2 a, float2 b, float2 c) {
+void addTriangle(float2 a, float2 b, float2 c, Color col) {
   Triangle tri;
   tri.vertexA = a;
   tri.vertexB = b;
   tri.vertexC = c; 
+  tri.red = col.red;
+  tri.green = col.green;
+  tri.blue = col.blue;
   _Triangles.Append(tri);
 }
 
-void addColorByState(float state) {
+Color colorByState(float state) {
   Color col;
  
   if (state == 1) {
@@ -59,15 +64,7 @@ void addColorByState(float state) {
     col.blue = 0;
   }
    
-  _Colors.Append(col);
-}
-
-void addColor() {
-  Color col;
-  col.red = 1;
-  col.green = 1;
-  col.blue = 1; 
-  _Colors.Append(col);
+  return col;
 }
 
 void TriangulateCellRows(int2 uv) {
@@ -79,10 +76,10 @@ void TriangulateCellRows(int2 uv) {
   float resLen = (1.0 / res);
 
   int squareCornerStates[4] = {
-      _States[indexFromCoord(uv.x, uv.y)],
-      _States[indexFromCoord(uv.x + 1, uv.y)],
-      _States[indexFromCoord(uv.x + 1, uv.y + 1)],
-      _States[indexFromCoord(uv.x, uv.y + 1)],
+    _States[indexFromCoord(uv.x, uv.y)],
+    _States[indexFromCoord(uv.x + 1, uv.y)],
+    _States[indexFromCoord(uv.x + 1, uv.y + 1)],
+    _States[indexFromCoord(uv.x, uv.y + 1)],
   };
 
   int cellType = 0;
@@ -91,6 +88,11 @@ void TriangulateCellRows(int2 uv) {
   float bState = squareCornerStates[1];
   float cState = squareCornerStates[2];
   float dState = squareCornerStates[3];
+
+  Color aColor = colorByState(aState);
+  Color bColor = colorByState(bState);
+  Color cColor = colorByState(cState);
+  Color dColor = colorByState(dState);
 
   if (aState > 0) cellType |= 1; //A
   if (bState > 0) cellType |= 2; //B
@@ -125,162 +127,98 @@ void TriangulateCellRows(int2 uv) {
   
   switch (cellType) {
     case 1: 
-      addTriangle(a, A, d);
-      addColorByState(aState);
+      addTriangle(a, A, d, aColor);
       break;
     case 2:  
-      addTriangle(b, B, a);
-      addColorByState(bState);
+      addTriangle(b, B, a, bColor);
       break;
     case 3:
-      addTriangle(A, d, center);
-      addColorByState(aState);
-      addTriangle(A, center, a);
-      addColorByState(aState);
-      addTriangle(a, center, B);
-      addColorByState(bState);
-      addTriangle(center, b, B);
-      addColorByState(bState);
+      addTriangle(A, d, center, aColor);
+      addTriangle(A, center, a, aColor);
+      addTriangle(a, center, B, bColor);
+      addTriangle(center, b, B, bColor);
       break;
     case 4: 
-      addTriangle(c, C, b);
-      addColorByState(cState);
+      addTriangle(c, C, b, cColor);
       break;
     case 5: 
-      addTriangle(a, A, d);
-      addColorByState(aState);
-      addTriangle(c, C, b);
-      addColorByState(cState);
+      addTriangle(a, A, d, aColor);
+      addTriangle(c, C, b, cColor);
       break;
     case 6:
-      addTriangle(B, a, center);
-      addColorByState(bState);
-      addTriangle(center, b, B);
-      addColorByState(bState);
-      addTriangle(b, center, c);
-      addColorByState(cState);
-      addTriangle(c, C, b);
-      addColorByState(cState);
+      addTriangle(B, a, center, bColor);
+      addTriangle(center, b, B, bColor);
+      addTriangle(b, center, c, cColor);
+      addTriangle(c, C, b, cColor);
       break;
     case 7: 
-      addTriangle(A, d, a);
-      addColorByState(aState);
-      addTriangle(d, center, a);
-      addColorByState(aState);
-      addTriangle(d, innerD, center);
-      addColorByState(aState);
-      addTriangle(B, a, center);
-      addColorByState(bState);
-      addTriangle(B, center, b);
-      addColorByState(bState);
-      addTriangle(b, center, c);
-      addColorByState(cState);
-      addTriangle(b, c, C);
-      addColorByState(cState);
-      addTriangle(center, innerD, c);
-      addColorByState(cState);
+      addTriangle(A, d, a, aColor);
+      addTriangle(d, center, a, aColor);
+      addTriangle(d, innerD, center, aColor);
+      addTriangle(B, a, center, bColor);
+      addTriangle(B, center, b, bColor);
+      addTriangle(b, center, c, cColor);
+      addTriangle(b, c, C, cColor);
+      addTriangle(center, innerD, c, cColor);
       break;
     case 8:  
-      addTriangle(c, d, D);
-      addColorByState(dState);
+      addTriangle(c, d, D, dColor);
       break;
     case 9:
-      addTriangle(A, center, a);
-      addColorByState(aState);
-      addTriangle(center, A, d);
-      addColorByState(aState);
-      addTriangle(center, d, c);
-      addColorByState(dState);
-      addTriangle(d, D, c);
-      addColorByState(dState);
+      addTriangle(A, center, a, aColor);
+      addTriangle(center, A, d, aColor);
+      addTriangle(center, d, c, dColor);
+      addTriangle(d, D, c, dColor);
       break;
     case 10: 
-      addTriangle(b, B, a);
-      addColorByState(bState);
-      addTriangle(c, d, D);
-      addColorByState(dState);
+      addTriangle(b, B, a, bColor);
+      addTriangle(c, d, D, dColor);
       break;
     case 11:
-      addTriangle(a, A, d);
-      addColorByState(aState);
-      addTriangle(a, d, center);
-      addColorByState(aState);
-      addTriangle(B, a, center);
-      addColorByState(bState);
-      addTriangle(B, center, b);
-      addColorByState(bState);
-      addTriangle(b, center, innerC);
-      addColorByState(bState);
-      addTriangle(center, d, D);
-      addColorByState(dState);
-      addTriangle(center, D, c);
-      addColorByState(dState);
-      addTriangle(center, c, innerC);
-      addColorByState(dState);
+      addTriangle(a, A, d, aColor);
+      addTriangle(a, d, center, aColor);
+      addTriangle(B, a, center, bColor);
+      addTriangle(B, center, b, bColor);
+      addTriangle(b, center, innerC, bColor);
+      addTriangle(center, d, D, dColor);
+      addTriangle(center, D, c, dColor);
+      addTriangle(center, c, innerC, dColor);
       break;
     case 12: 
-      addTriangle(b, center, C);
-      addColorByState(cState);
-      addTriangle(C, center, c);
-      addColorByState(cState);
-      addTriangle(c, center, d);
-      addColorByState(dState);
-      addTriangle(d, D, c);
-      addColorByState(dState);
+      addTriangle(b, center, C, cColor);
+      addTriangle(C, center, c, cColor);
+      addTriangle(c, center, d, dColor);
+      addTriangle(d, D, c, dColor);
       break;
     case 13: 
-      addTriangle(a, A, d);
-      addColorByState(aState);
-      addTriangle(a, d, center);
-      addColorByState(aState);
-      addTriangle(a, center, innerB);
-      addColorByState(aState);
-      addTriangle(innerB, center, b);
-      addColorByState(cState);
-      addTriangle(b, center, c);
-      addColorByState(cState);
-      addTriangle(b, c, C);
-      addColorByState(cState);
-      addTriangle(center, d, D);
-      addColorByState(dState);
-      addTriangle(center, D, c);
-      addColorByState(dState);
+      addTriangle(a, A, d, aColor);
+      addTriangle(a, d, center, aColor);
+      addTriangle(a, center, innerB, aColor);
+      addTriangle(innerB, center, b, cColor);
+      addTriangle(b, center, c, cColor);
+      addTriangle(b, c, C, cColor);
+      addTriangle(center, d, D, dColor);
+      addTriangle(center, D, c, dColor);
       break;
     case 14: 
-      addTriangle(innerA, center, a);
-      addColorByState(bState);
-      addTriangle(B, a, center);
-      addColorByState(bState);
-      addTriangle(B, center, b);
-      addColorByState(bState);
-      addTriangle(b, center, c);
-      addColorByState(cState);
-      addTriangle(b, c, C);
-      addColorByState(cState);
-      addTriangle(center, d, D);
-      addColorByState(dState);
-      addTriangle(center, D, c);
-      addColorByState(dState);
-      addTriangle(center, innerA, d);
-      addColorByState(dState);
+      addTriangle(innerA, center, a, bColor);
+      addTriangle(B, a, center, bColor);
+      addTriangle(B, center, b, bColor);
+      addTriangle(b, center, c, cColor);
+      addTriangle(b, c, C, cColor);
+      addTriangle(center, d, D, dColor);
+      addTriangle(center, D, c, dColor);
+      addTriangle(center, innerA, d, dColor);
       break;
     case 15: 
-      addTriangle(A, center, a);
-      addColorByState(aState);
-      addTriangle(A, d, center);
-      addColorByState(aState);
-      addTriangle(a, b, B);
-      addColorByState(bState);
-      addTriangle(a, center, b);
-      addColorByState(bState);
-      addTriangle(center, C, b);
-      addColorByState(cState);
-      addTriangle(center, c, C);
-      addColorByState(cState);
-      addTriangle(d, c, center);
-      addColorByState(dState);
-      addTriangle(d, D, c);
-      addColorByState(dState);
+      addTriangle(A, center, a, aColor);
+      addTriangle(A, d, center, aColor);
+      addTriangle(a, b, B, bColor);
+      addTriangle(a, center, b, bColor);
+      addTriangle(center, C, b, cColor);
+      addTriangle(center, c, C, cColor);
+      addTriangle(d, c, center, dColor);
+      addTriangle(d, D, c, dColor);
       break;
   }
 }
