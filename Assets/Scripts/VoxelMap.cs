@@ -23,14 +23,14 @@ public partial class VoxelMap : MonoBehaviour {
         GenerateTerrain();
     }
 
-    private void GenerateTerrain() {
+    public void GenerateTerrain() {
         halfSize = 0.5f * chunkResolution;
         voxelSize = 1f / voxelResolution;
         chunks = new VoxelChunk[chunkResolution * chunkResolution];
 
         terrainNoise.Startup(voxelResolution, chunkResolution);
         voxelMesh.Startup(voxelResolution, chunkResolution);
-        voxelEditor.Startup(voxelResolution, chunkResolution, chunks);
+        voxelEditor.Startup(voxelResolution, chunkResolution, chunks, this);
 
         Cleanup();
 
@@ -41,9 +41,14 @@ public partial class VoxelMap : MonoBehaviour {
         voxelMesh.TriangulateChunks(chunks);
     }
 
-    private void Cleanup() {
-        foreach (Transform child in this.transform) {
-            GameObject.DestroyImmediate(child.gameObject);
+    public void Cleanup() {
+        GameObject[] objsToDestroy = new GameObject[transform.childCount];
+        int idx = 0;
+        foreach (Transform child in transform) {
+            objsToDestroy[idx++] = child.gameObject;
+        }
+        for (int i = 0; i < objsToDestroy.Length; i++) {
+            DestroyImmediate(objsToDestroy[i]);
         }
     }
 
@@ -73,20 +78,6 @@ public partial class VoxelMap : MonoBehaviour {
     }
 
     private void OnDestroy() {
-        foreach (Transform child in transform) {
-            GameObject.DestroyImmediate(child.gameObject);
-        }
-    }
-
-    private void OnGUI() {
-        GUILayout.BeginArea(new Rect(4f, 4f, 150f, 1000f));
-        GUILayout.Label("Regenerate");
-        if (GUI.Button(new Rect(0, 225, 150f, 20f), "Generate")) {
-            foreach (Transform child in this.transform) {
-                Destroy(child.gameObject);
-            }
-            GenerateTerrain();
-        }
-        GUILayout.EndArea();
+        Cleanup();
     }
 }

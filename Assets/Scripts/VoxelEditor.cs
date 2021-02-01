@@ -14,16 +14,18 @@ public class VoxelEditor : MonoBehaviour {
 
     private VoxelMesh voxelMesh;
     private VoxelChunk[] chunks;
+    private VoxelMap voxelMap;
 
     private VoxelStencil[] stencils = {
         new VoxelStencil(),
         new VoxelStencilCircle()
     };
 
-    public void Startup(int voxelResolution, int chunkResolution, VoxelChunk[] chunks) {
+    public void Startup(int voxelResolution, int chunkResolution, VoxelChunk[] chunks, VoxelMap voxelMap) {
         this.voxelResolution = voxelResolution;
         this.chunkResolution = chunkResolution;
         this.chunks = chunks;
+        this.voxelMap = voxelMap;
         halfSize = 0.5f * chunkResolution;
         voxelSize = 1f / voxelResolution;
 
@@ -99,6 +101,10 @@ public class VoxelEditor : MonoBehaviour {
         radiusIndex = GUILayout.SelectionGrid(radiusIndex, radiusNames, 6);
         GUILayout.Label("Stencil");
         stencilIndex = GUILayout.SelectionGrid(stencilIndex, stencilNames, 2);
+        GUILayout.Label("Regenerate");
+        if (GUI.Button(new Rect(0, 225, 150f, 20f), "Generate")) {
+            voxelMap.GenerateTerrain();
+        }
         GUILayout.EndArea();
     }
 }
