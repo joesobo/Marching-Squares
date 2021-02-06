@@ -18,7 +18,6 @@ public class VoxelChunk : MonoBehaviour {
     public Vector3[] vertices;
     public int[] triangles;
     public Color32[] colors;
-    //potentially move into chunk
     public HashSet<int> checkedVertices;
     public List<List<int>> outlines;
     public Dictionary<Vector2, List<Triangle>> triangleDictionary;
