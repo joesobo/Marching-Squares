@@ -163,7 +163,7 @@ public class VoxelMesh : MonoBehaviour {
 
 
 
-
+    // Refactor to its own file
     private void Generate2DCollider(VoxelChunk chunk) {
         EdgeCollider2D[] currentColliders = chunk.gameObject.GetComponents<EdgeCollider2D>();
         for (int i = 0; i < currentColliders.Length; i++) {
