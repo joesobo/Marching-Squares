@@ -15,8 +15,13 @@ public class VoxelChunk : MonoBehaviour {
     private float voxelSize, gridSize;
     private List<Material> voxelMaterials = new List<Material>();
     public Mesh mesh;
-    private Vector3[] vertices;
-    private int[] triangles;
+    public Vector3[] vertices;
+    public int[] triangles;
+    public Color32[] colors;
+    //potentially move into chunk
+    public HashSet<int> checkedVertices;
+    public List<List<int>> outlines;
+    public Dictionary<Vector2, List<Triangle>> triangleDictionary;
 
     public void Initialize(bool useVoxelPoints, int resolution) {
         this.useVoxelPoints = useVoxelPoints;
@@ -34,6 +39,8 @@ public class VoxelChunk : MonoBehaviour {
 
         GetComponent<MeshFilter>().mesh = mesh = new Mesh();
         mesh.name = "VoxelChunk Mesh";
+
+        ResetValues();
 
         Refresh();
     }
@@ -86,5 +93,12 @@ public class VoxelChunk : MonoBehaviour {
             }
         }
         Refresh();
+    }
+
+    public void ResetValues() {
+        mesh.Clear();
+        checkedVertices = new HashSet<int>();
+        outlines = new List<List<int>>();
+        triangleDictionary = new Dictionary<Vector2, List<Triangle>>();
     }
 }

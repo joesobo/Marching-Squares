@@ -137,13 +137,14 @@ GameObject:
   - component: {fileID: 547865866}
   - component: {fileID: 547865865}
   - component: {fileID: 547865864}
+  - component: {fileID: 547865869}
   m_Layer: 0
-  m_Name: Quad
+  m_Name: Player
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!50 &547865864
 Rigidbody2D:
   serializedVersion: 4
@@ -248,12 +249,27 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 547865863}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.248, y: 3.49, z: 0}
+  m_LocalPosition: {x: 0, y: 1.5, z: 0}
   m_LocalScale: {x: 0.1, y: 0.1, z: 0.1}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &547865869
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 547865863}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6a985fdc56ced664c8465f0d42743ed4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  velocity: {x: 0, y: 0}
+  speed: 5
+  walkAcceleration: 1
 --- !u!1 &666039676
 GameObject:
   m_ObjectHideFlags: 0
@@ -534,10 +550,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   voxelResolution: 8
-  chunkResolution: 8
+  chunkResolution: 1
   voxelChunkPrefab: {fileID: 7782940093856803487, guid: 3865adb193875b742ba5dd4d18ee8c72,
     type: 3}
-  useVoxelReferences: 0
+  useVoxelReferences: 1
   shader: {fileID: 7200000, guid: 82bebc4886c0ef2479b2a7ebe8b6f899, type: 3}
 --- !u!4 &911654351
 Transform:

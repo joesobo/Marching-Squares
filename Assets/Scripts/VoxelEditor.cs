@@ -89,8 +89,6 @@ public class VoxelEditor : MonoBehaviour {
             }
             voxelYOffset -= voxelResolution;
         }
-
-        voxelMesh.TriangulateChunks(chunks);
     }
 
     private void OnGUI() {

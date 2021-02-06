@@ -1,6 +1,6 @@
 using UnityEngine;
 
-struct Triangle {
+public struct Triangle {
 #pragma warning disable 649 // disable unassigned variable warning
         public Vector2 a;
         public Vector2 b;

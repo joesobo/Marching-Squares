@@ -96,9 +96,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   resolution: 0
   useVoxelPoints: 1
-  voxelPointPrefab: {fileID: 8390095622439126479, guid: b583654fb55a71c40ac0228bb8dbd6fd, type: 3}
+  voxelPointPrefab: {fileID: 8390095622439126479, guid: b583654fb55a71c40ac0228bb8dbd6fd,
+    type: 3}
   xNeighbor: {fileID: 0}
   yNeighbor: {fileID: 0}
   xyNeighbor: {fileID: 0}
   voxels: []
   mesh: {fileID: 0}
+  vertices: []
+  triangles: 
+  colors: []
