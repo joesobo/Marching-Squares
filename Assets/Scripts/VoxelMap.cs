@@ -14,11 +14,14 @@ public partial class VoxelMap : MonoBehaviour {
 
     private VoxelChunk[] chunks;
     private float voxelSize, halfSize;
+    private Camera mainCam;
 
     private void Awake() {
         terrainNoise = FindObjectOfType<TerrainNoise>();
         voxelMesh = FindObjectOfType<VoxelMesh>();
         voxelEditor = FindObjectOfType<VoxelEditor>();
+
+        mainCam = Camera.main;
 
         GenerateTerrain();
     }
@@ -27,6 +30,8 @@ public partial class VoxelMap : MonoBehaviour {
         halfSize = 0.5f * chunkResolution;
         voxelSize = 1f / voxelResolution;
         chunks = new VoxelChunk[chunkResolution * chunkResolution];
+
+        mainCam.orthographicSize = halfSize;
 
         terrainNoise.Startup(voxelResolution, chunkResolution);
         voxelMesh.Startup(voxelResolution, chunkResolution);
