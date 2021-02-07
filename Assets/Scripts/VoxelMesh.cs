@@ -63,7 +63,7 @@ public class VoxelMesh : MonoBehaviour {
 
         ShaderTriangulate(chunk, out chunk.vertices, out chunk.triangles, out chunk.colors);
 
-        chunkCollider.Generate2DCollider(chunk);
+        chunkCollider.Generate2DCollider(chunk, chunkResolution);
 
         mesh.vertices = chunk.vertices;
         mesh.triangles = chunk.triangles;

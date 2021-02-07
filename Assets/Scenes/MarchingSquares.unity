@@ -550,7 +550,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   voxelResolution: 8
-  chunkResolution: 1
+  chunkResolution: 8
   voxelChunkPrefab: {fileID: 7782940093856803487, guid: 3865adb193875b742ba5dd4d18ee8c72,
     type: 3}
   useVoxelReferences: 0

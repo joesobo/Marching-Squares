@@ -4,7 +4,11 @@ using UnityEngine;
 
 public class ChunkCollider : MonoBehaviour
 {
-    public void Generate2DCollider(VoxelChunk chunk) {
+    private float chunkResolution;
+
+    public void Generate2DCollider(VoxelChunk chunk, int chunkResolution) {
+        this.chunkResolution = (float)chunkResolution;
+
         EdgeCollider2D[] currentColliders = chunk.gameObject.GetComponents<EdgeCollider2D>();
         for (int i = 0; i < currentColliders.Length; i++) {
             Destroy(currentColliders[i]);
@@ -57,10 +61,10 @@ public class ChunkCollider : MonoBehaviour
 
         foreach (Triangle triangle in trianglesContainingVertex) {
             for (int i = 0; i < 3; i++) {
-                Vector2 chunkVertice = new Vector2(chunk.vertices[vertexIndex].x, chunk.vertices[vertexIndex].y);
+                Vector2 chunkVertice = new Vector2(chunk.vertices[vertexIndex].x / chunkResolution, chunk.vertices[vertexIndex].y / chunkResolution);
 
                 if (chunkVertice == triangle[i]) {
-                    int nextVertexIndex = System.Array.IndexOf(chunk.vertices, triangle[(i + 1) % 3]);
+                    int nextVertexIndex = System.Array.IndexOf(chunk.vertices, triangle[(i + 1) % 3] * chunkResolution);
                     if (!chunk.checkedVertices.Contains(nextVertexIndex) && IsOutlineEdge(vertexIndex, nextVertexIndex, chunk)) {
                         return nextVertexIndex;
                     }
@@ -77,7 +81,10 @@ public class ChunkCollider : MonoBehaviour
 
         for (int i = 0; i < trianglesContainingVertexA.Count; i++) {
             Vector2 chunkVertice = new Vector2(chunk.vertices[vertexB].x, chunk.vertices[vertexB].y);
-            if (trianglesContainingVertexA[i].a == chunkVertice || trianglesContainingVertexA[i].b == chunkVertice || trianglesContainingVertexA[i].c == chunkVertice) {
+            if (trianglesContainingVertexA[i].a * chunkResolution == chunkVertice || 
+                trianglesContainingVertexA[i].b * chunkResolution == chunkVertice || 
+                trianglesContainingVertexA[i].c * chunkResolution == chunkVertice
+            ) {
                 sharedTriangleCount++;
                 if (sharedTriangleCount > 1) {
                     break;
