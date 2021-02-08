@@ -555,6 +555,7 @@ MonoBehaviour:
     type: 3}
   useVoxelReferences: 0
   shader: {fileID: 7200000, guid: 82bebc4886c0ef2479b2a7ebe8b6f899, type: 3}
+  useColliders: 0
 --- !u!4 &911654351
 Transform:
   m_ObjectHideFlags: 0

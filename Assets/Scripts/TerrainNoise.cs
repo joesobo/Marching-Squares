@@ -80,8 +80,14 @@ public class TerrainNoise : MonoBehaviour {
         float scaledY = y / scaleNoise / voxelResolution;
 
         float noiseVal = Mathf.PerlinNoise(scaledX + seed, scaledY + seed);
+        float maxHeight = Mathf.PerlinNoise(scaledX + seed, 0) * (chunkResolution * voxelResolution);
 
-        noiseMap[(int)x, (int)y] = noiseVal;
-        voxel.state = noiseVal > 0.5f ? 0 : Mathf.RoundToInt(noiseVal * Mathf.RoundToInt(Random.Range(2, 12)));
+        if (y > maxHeight) {
+            noiseMap[(int)x, (int)y] = 0;
+            voxel.state = 0;
+        } else {
+            noiseMap[(int)x, (int)y] = noiseVal;
+            voxel.state = noiseVal > 0.5f ? 0 : Mathf.RoundToInt(noiseVal * Mathf.RoundToInt(Random.Range(2, 12)));
+        }
     }
 }

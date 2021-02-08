@@ -3,6 +3,7 @@
 public partial class VoxelMap : MonoBehaviour {
     [Range(8, 56)]
     public int voxelResolution = 8;
+    [Range(1, 16)]
     public int chunkResolution = 2;
     public VoxelChunk voxelChunkPrefab;
     public bool useVoxelReferences = false;
