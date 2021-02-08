@@ -7,6 +7,7 @@ public partial class VoxelMap : MonoBehaviour {
     public VoxelChunk voxelChunkPrefab;
     public bool useVoxelReferences = false;
     public ComputeShader shader;
+    public bool useColliders = false;
 
     private TerrainNoise terrainNoise;
     private VoxelMesh voxelMesh;
@@ -34,7 +35,7 @@ public partial class VoxelMap : MonoBehaviour {
         mainCam.orthographicSize = halfSize;
 
         terrainNoise.Startup(voxelResolution, chunkResolution);
-        voxelMesh.Startup(voxelResolution, chunkResolution);
+        voxelMesh.Startup(voxelResolution, chunkResolution, useColliders);
         voxelEditor.Startup(voxelResolution, chunkResolution, chunks, this);
 
         Cleanup();

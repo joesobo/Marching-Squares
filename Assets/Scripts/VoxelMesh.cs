@@ -6,6 +6,7 @@ public class VoxelMesh : MonoBehaviour {
     const int threadSize = 8;
 
     private int voxelResolution, chunkResolution;
+    private bool useColliders;
 
     private int[] statePositions;
 
@@ -18,9 +19,10 @@ public class VoxelMesh : MonoBehaviour {
     ComputeBuffer triCountBuffer;
     ComputeBuffer stateBuffer;
 
-    public void Startup(int voxelResolution, int chunkResolution) {
+    public void Startup(int voxelResolution, int chunkResolution, bool useColliders) {
         this.voxelResolution = voxelResolution;
         this.chunkResolution = chunkResolution;
+        this.useColliders = useColliders;
 
         statePositions = new int[(voxelResolution + 1) * (voxelResolution + 1)];
 
@@ -63,7 +65,9 @@ public class VoxelMesh : MonoBehaviour {
 
         ShaderTriangulate(chunk, out chunk.vertices, out chunk.triangles, out chunk.colors);
 
-        chunkCollider.Generate2DCollider(chunk, chunkResolution);
+        if (useColliders) {
+            chunkCollider.Generate2DCollider(chunk, chunkResolution);
+        }
 
         mesh.vertices = chunk.vertices;
         mesh.triangles = chunk.triangles;
