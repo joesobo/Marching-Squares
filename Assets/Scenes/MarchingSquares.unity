@@ -159,8 +159,8 @@ Rigidbody2D:
   m_UseAutoMass: 0
   m_Mass: 1
   m_LinearDrag: 0
-  m_AngularDrag: 0.05
-  m_GravityScale: 0
+  m_AngularDrag: 0
+  m_GravityScale: 30
   m_Material: {fileID: 0}
   m_Interpolate: 1
   m_SleepingMode: 1
@@ -270,6 +270,11 @@ MonoBehaviour:
   velocity: {x: 0, y: 0, z: 0}
   speed: 10
   walkAcceleration: 1
+  jumpforce: 35000
+  isGroundedRayLength: 0.1
+  layerMaskForGrounded:
+    serializedVersion: 2
+    m_Bits: 8
 --- !u!1 &666039676
 GameObject:
   m_ObjectHideFlags: 0
@@ -299,14 +304,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5bf713b57817c754b8b0302424a29995, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  scaleNoise: 2
+  scaleHeightNoise: 2
+  scaleTerrainNoise: 1
   seed: 0
   useRandomSeed: 1
   terrainType: 4
-  height1: 1
-  height2: 2
-  height3: 3
-  height4: 4
+  height1: 0.05
+  height2: 0.2
+  height3: 0.3
+  height4: 0.5
 --- !u!4 &666039678
 Transform:
   m_ObjectHideFlags: 0

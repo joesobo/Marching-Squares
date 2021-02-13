@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class VoxelEditor : MonoBehaviour {
-    private static string[] fillTypeNames = { "Empty", "White", "Red", "Blue", "Green" };
+    private static string[] fillTypeNames = { "Empty", "Stone", "Dirt", "Rock", "Grass" };
     private static string[] radiusNames = { "0", "1", "2", "3", "4", "5" };
     private static string[] stencilNames = { "Square", "Circle" };
 

@@ -98,7 +98,7 @@ public class TerrainNoise : MonoBehaviour {
                 voxel.state = 3;
             } else if (y < height2 * chunkResolution * voxelResolution) {
                 //random 3/1
-                voxel.state = noiseVal > 0.5f ? 3 : 1;
+                voxel.state = noiseVal > 0.65f ? 3 : 1;
             } else if (y < height3 * chunkResolution * voxelResolution) {
                 //random 2/1/0
                 voxel.state = noiseVal > 0.66f ? 2 : noiseVal > 0.33f ? 1 : 0;
@@ -108,6 +108,9 @@ public class TerrainNoise : MonoBehaviour {
 
             if (InRange(y, Mathf.RoundToInt(maxHeight), 3)) {
                 voxel.state = 4;
+            }
+            else if (InRange(y, Mathf.RoundToInt(maxHeight), 8)) {
+                voxel.state = noiseVal > 0.2f ? 2 : 1;
             }
         }
     }

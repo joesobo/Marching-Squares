@@ -72,6 +72,7 @@ public partial class VoxelMap : MonoBehaviour {
         chunk.Initialize(useVoxelReferences, voxelResolution);
         chunk.transform.parent = transform;
         chunk.transform.localPosition = new Vector3(x - halfSize, y - halfSize);
+        chunk.gameObject.layer = 3;
         chunks[i] = chunk;
         if (x > 0) {
             chunks[i - 1].xNeighbor = chunk;
