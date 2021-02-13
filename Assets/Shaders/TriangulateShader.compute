@@ -138,7 +138,7 @@ void TriangulateCellRows(int2 uv) {
 
   Triangle tri;
   
-  if (isMultiMaterial(aState, bState, cState, dState)) {
+  // if (isMultiMaterial(aState, bState, cState, dState)) {
     switch (cellType) {
       case 1: 
         addTriangle(a, A, d, aColor);
@@ -235,70 +235,70 @@ void TriangulateCellRows(int2 uv) {
         addTriangle(d, D, c, dColor);
         break;
     }
-  } else {
-    switch (cellType) {
-      case 1: 
-        addTriangle(a, A, d, aColor);
-        break;
-      case 2:  
-        addTriangle(b, B, a, bColor);
-        break;
-      case 3:  
-        addTriangle(B, A, d, aColor);
-        addTriangle(d, b, B, bColor);
-        break;
-      case 4: 
-        addTriangle(c, C, b, cColor);
-        break;
-      case 5: 
-        addTriangle(a, A, d, aColor);
-        addTriangle(c, C, b, cColor);
-        break;
-      case 6:  
-        addTriangle(B, c, C, cColor);
-        addTriangle(a, c, B, bColor);
-        break;
-      case 7: 
-        addTriangle(d, B, A, aColor);
-        addTriangle(d, c, B, bColor);
-        addTriangle(c, C, B, cColor);
-        break;
-      case 8:  
-        addTriangle(c, d, D, dColor);
-        break;
-      case 9:  
-        addTriangle(D, c, A, dColor);
-        addTriangle(c, a, A, aColor);
-        break;
-      case 10: 
-        addTriangle(b, B, a, bColor);
-        addTriangle(c, d, D, dColor);
-        break;
-      case 11: 
-        addTriangle(A, b, B, bColor);
-        addTriangle(A, c, b, aColor);
-        addTriangle(A, D, c, dColor);
-        break;
-      case 12: 
-        addTriangle(D, C, d, dColor);
-        addTriangle(d, C, b, cColor);
-        break;
-      case 13: 
-        addTriangle(A, D, a, aColor);
-        addTriangle(a, D, b, dColor);
-        addTriangle(b, D, C, cColor);
-        break;
-      case 14: 
-        addTriangle(D, C, d, dColor);
-        addTriangle(d, C, a, cColor);
-        addTriangle(a, C, B, bColor);
-        break;
-      case 15: 
-        addTriangle(A, C, B, bColor);
-        addTriangle(A, D, C, dColor);
-        break;
-    }
-  }
+  // } else {
+  //   switch (cellType) {
+  //     case 1: 
+  //       addTriangle(a, A, d, aColor);
+  //       break;
+  //     case 2:  
+  //       addTriangle(b, B, a, bColor);
+  //       break;
+  //     case 3:  
+  //       addTriangle(B, A, d, aColor);
+  //       addTriangle(d, b, B, bColor);
+  //       break;
+  //     case 4: 
+  //       addTriangle(c, C, b, cColor);
+  //       break;
+  //     case 5: 
+  //       addTriangle(a, A, d, aColor);
+  //       addTriangle(c, C, b, cColor);
+  //       break;
+  //     case 6:  
+  //       addTriangle(B, c, C, cColor);
+  //       addTriangle(a, c, B, bColor);
+  //       break;
+  //     case 7: 
+  //       addTriangle(d, B, A, aColor);
+  //       addTriangle(d, c, B, bColor);
+  //       addTriangle(c, C, B, cColor);
+  //       break;
+  //     case 8:  
+  //       addTriangle(c, d, D, dColor);
+  //       break;
+  //     case 9:  
+  //       addTriangle(D, c, A, dColor);
+  //       addTriangle(c, a, A, aColor);
+  //       break;
+  //     case 10: 
+  //       addTriangle(b, B, a, bColor);
+  //       addTriangle(c, d, D, dColor);
+  //       break;
+  //     case 11: 
+  //       addTriangle(A, b, B, bColor);
+  //       addTriangle(A, c, b, aColor);
+  //       addTriangle(A, D, c, dColor);
+  //       break;
+  //     case 12: 
+  //       addTriangle(D, C, d, dColor);
+  //       addTriangle(d, C, b, cColor);
+  //       break;
+  //     case 13: 
+  //       addTriangle(A, D, a, aColor);
+  //       addTriangle(a, D, b, dColor);
+  //       addTriangle(b, D, C, cColor);
+  //       break;
+  //     case 14: 
+  //       addTriangle(D, C, d, dColor);
+  //       addTriangle(d, C, a, cColor);
+  //       addTriangle(a, C, B, bColor);
+  //       break;
+  //     case 15: 
+  //       addTriangle(A, C, B, bColor);
+  //       addTriangle(A, D, C, dColor);
+  //       break;
+  //   }
+  // }
 }
 
 [numthreads(8,8,1)]
