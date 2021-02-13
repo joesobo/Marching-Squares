@@ -3,7 +3,7 @@ using UnityEngine;
 using System.Collections;
 
 public class VoxelMesh : MonoBehaviour {
-    const int threadSize = 8;
+    const int ThreadSize = 8;
 
     private int voxelResolution, chunkResolution;
     private bool useColliders;
@@ -76,7 +76,7 @@ public class VoxelMesh : MonoBehaviour {
     }
 
     private void ShaderTriangulate(VoxelChunk chunk, out Vector3[] vertices, out int[] triangles, out Color32[] colors) {
-        int numThreadsPerResolution = Mathf.CeilToInt(voxelResolution / threadSize);
+        int numThreadsPerResolution = Mathf.CeilToInt(voxelResolution / ThreadSize);
 
         triangleBuffer.SetCounterValue(0);
         shader.SetBuffer(0, "_Vertices", verticeBuffer);
