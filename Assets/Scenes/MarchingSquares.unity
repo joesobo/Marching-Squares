@@ -303,6 +303,10 @@ MonoBehaviour:
   seed: 0
   useRandomSeed: 1
   terrainType: 4
+  height1: 1
+  height2: 2
+  height3: 3
+  height4: 4
 --- !u!4 &666039678
 Transform:
   m_ObjectHideFlags: 0

@@ -4,7 +4,9 @@ using UnityEngine;
 
 public class TerrainNoise : MonoBehaviour {
     [Range(0.3f, 100)]
-    public float scaleNoise;
+    public float scaleHeightNoise;
+    [Range(0.3f, 100)]
+    public float scaleTerrainNoise;
     public float seed = 0;
     public bool useRandomSeed;
     public TerrainType terrainType = TerrainType.Perlin;
@@ -14,6 +16,8 @@ public class TerrainNoise : MonoBehaviour {
 
     private int voxelResolution, chunkResolution;
     private float halfSize;
+
+    public float height1, height2, height3, height4 = 0;
 
     public enum TerrainType {
         Off,
@@ -76,18 +80,43 @@ public class TerrainNoise : MonoBehaviour {
         int x = Mathf.RoundToInt(voxel.position.x * (voxelResolution - 1) + centeredChunkX * voxelResolution);
         int y = Mathf.RoundToInt(voxel.position.y * (voxelResolution - 1) + centeredChunkY * voxelResolution);
 
-        float scaledX = x / scaleNoise / voxelResolution;
-        float scaledY = y / scaleNoise / voxelResolution;
+        float scaledX = x / scaleTerrainNoise / voxelResolution;
+        float scaledY = y / scaleTerrainNoise / voxelResolution;
+
+        float scaledXHeight = x / scaleHeightNoise / voxelResolution;
 
         float noiseVal = Mathf.PerlinNoise(scaledX + seed, scaledY + seed);
-        float maxHeight = Mathf.PerlinNoise(scaledX + seed, 0) * (chunkResolution * voxelResolution);
+        float maxHeight = Mathf.PerlinNoise(scaledXHeight + seed, 0) * (chunkResolution * voxelResolution);
 
         if (y > maxHeight) {
             noiseMap[(int)x, (int)y] = 0;
             voxel.state = 0;
         } else {
             noiseMap[(int)x, (int)y] = noiseVal;
-            voxel.state = noiseVal > 0.5f ? 0 : Mathf.RoundToInt(noiseVal * Mathf.RoundToInt(Random.Range(2, 12)));
+
+            if (y < height1 * chunkResolution * voxelResolution) {
+                voxel.state = 3;
+            } else if (y < height2 * chunkResolution * voxelResolution) {
+                //random 3/1
+                voxel.state = noiseVal > 0.5f ? 3 : 1;
+            } else if (y < height3 * chunkResolution * voxelResolution) {
+                //random 2/1/0
+                voxel.state = noiseVal > 0.66f ? 2 : noiseVal > 0.33f ? 1 : 0;
+            } else {
+                voxel.state = noiseVal > 0.5f ? 2 : 1;
+            }
+
+            if (InRange(y, Mathf.RoundToInt(maxHeight), 3)) {
+                voxel.state = 4;
+            }
         }
+    }
+
+    private bool InRange(float input, float value, float range) {
+        if (input + range > value && input - range < value) {
+            return true;
+        }
+
+        return false;
     }
 }
