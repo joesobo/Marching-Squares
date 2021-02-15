@@ -15,6 +15,7 @@ public class VoxelChunk : MonoBehaviour {
     private float voxelSize, gridSize;
     private List<Material> voxelMaterials = new List<Material>();
     public Mesh mesh;
+    public Material material;
     public Vector3[] vertices;
     public int[] triangles;
     public Color32[] colors;
@@ -37,6 +38,8 @@ public class VoxelChunk : MonoBehaviour {
         }
 
         GetComponent<MeshFilter>().mesh = mesh = new Mesh();
+        material.SetVector("Resolution", Vector2.one * resolution);
+        GetComponent<MeshRenderer>().material = material;
         mesh.name = "VoxelChunk Mesh";
 
         ResetValues();

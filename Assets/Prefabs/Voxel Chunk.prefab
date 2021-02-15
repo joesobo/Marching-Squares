@@ -103,6 +103,7 @@ MonoBehaviour:
   xyNeighbor: {fileID: 0}
   voxels: []
   mesh: {fileID: 0}
+  material: {fileID: 2100000, guid: 2a2113f63f5d93c4b8c01ae899385ab1, type: 2}
   vertices: []
   triangles: 
   colors: []

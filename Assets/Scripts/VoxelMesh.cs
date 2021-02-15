@@ -14,7 +14,7 @@ public class VoxelMesh : MonoBehaviour {
 
     private ChunkCollider chunkCollider;
 
-    public int tileAmount = 10;
+    private int tileAmount = 10;
 
     ComputeBuffer verticeBuffer;
     ComputeBuffer triangleBuffer;
@@ -25,6 +25,8 @@ public class VoxelMesh : MonoBehaviour {
         this.voxelResolution = voxelResolution;
         this.chunkResolution = chunkResolution;
         this.useColliders = useColliders;
+
+        tileAmount = (voxelResolution * chunkResolution) / 2;
 
         statePositions = new int[(voxelResolution + 1) * (voxelResolution + 1)];
 
