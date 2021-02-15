@@ -95,10 +95,11 @@ public class TerrainNoise : MonoBehaviour {
             noiseMap[(int)x, (int)y] = noiseVal;
 
             if (y < height1 * chunkResolution * voxelResolution) {
-                voxel.state = 3;
+                //random 3/0
+                voxel.state = noiseVal > 0.33f ? 3 : 0;
             } else if (y < height2 * chunkResolution * voxelResolution) {
-                //random 3/1
-                voxel.state = noiseVal > 0.65f ? 3 : 1;
+                //random 3/1/0
+                voxel.state = noiseVal > 0.65f ? 3 : noiseVal > 0.33f ? 1 : 0;
             } else if (y < height3 * chunkResolution * voxelResolution) {
                 //random 2/1/0
                 voxel.state = noiseVal > 0.66f ? 2 : noiseVal > 0.33f ? 1 : 0;
