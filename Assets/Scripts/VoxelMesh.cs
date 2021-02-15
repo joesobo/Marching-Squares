@@ -73,6 +73,16 @@ public class VoxelMesh : MonoBehaviour {
             chunkCollider.Generate2DCollider(chunk, chunkResolution);
         }
 
+        Vector2[] uvs = GetUVs(chunk);
+
+        mesh.vertices = chunk.vertices;
+        mesh.triangles = chunk.triangles;
+        mesh.uv = uvs;
+        mesh.colors32 = chunk.colors;
+        mesh.RecalculateNormals();
+    }
+
+    private Vector2[] GetUVs(VoxelChunk chunk) {
         Vector2[] uvs = new Vector2[chunk.vertices.Length];
         for (int i = 0; i < chunk.vertices.Length; i++) {
             float percentX = Mathf.InverseLerp(0, chunkResolution * voxelResolution, chunk.vertices[i].x) * tileAmount;
@@ -80,11 +90,7 @@ public class VoxelMesh : MonoBehaviour {
             uvs[i] = new Vector2(percentX, percentY);
         }
 
-        mesh.vertices = chunk.vertices;
-        mesh.triangles = chunk.triangles;
-        mesh.uv = uvs;
-        mesh.colors32 = chunk.colors;
-        mesh.RecalculateNormals();
+        return uvs;
     }
 
     private void ShaderTriangulate(VoxelChunk chunk, out Vector3[] vertices, out int[] triangles, out Color32[] colors) {
