@@ -33,8 +33,9 @@ public partial class VoxelMap : MonoBehaviour {
         voxelSize = 1f / voxelResolution;
         chunks = new VoxelChunk[chunkResolution * chunkResolution];
 
-        mainCam.orthographicSize = halfSize;
+        mainCam.orthographicSize = voxelResolution;
 
+        transform.parent.localScale = Vector3.one;
         terrainNoise.Startup(voxelResolution, chunkResolution);
         voxelMesh.Startup(voxelResolution, chunkResolution, useColliders);
         voxelEditor.Startup(voxelResolution, chunkResolution, chunks, this);
@@ -46,6 +47,8 @@ public partial class VoxelMap : MonoBehaviour {
         terrainNoise.GenerateNoise(chunks);
 
         voxelMesh.TriangulateChunks(chunks);
+
+        transform.parent.localScale = Vector3.one * voxelResolution;
     }
 
     public void Cleanup() {
