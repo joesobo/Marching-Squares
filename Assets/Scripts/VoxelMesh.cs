@@ -14,6 +14,8 @@ public class VoxelMesh : MonoBehaviour {
 
     private ChunkCollider chunkCollider;
 
+    public int tileAmount = 10;
+
     ComputeBuffer verticeBuffer;
     ComputeBuffer triangleBuffer;
     ComputeBuffer triCountBuffer;
@@ -69,8 +71,16 @@ public class VoxelMesh : MonoBehaviour {
             chunkCollider.Generate2DCollider(chunk, chunkResolution);
         }
 
+        Vector2[] uvs = new Vector2[chunk.vertices.Length];
+        for (int i = 0; i < chunk.vertices.Length; i++) {
+            float percentX = Mathf.InverseLerp(0, chunkResolution * voxelResolution, chunk.vertices[i].x) * tileAmount;
+            float percentY = Mathf.InverseLerp(0, chunkResolution * voxelResolution, chunk.vertices[i].y) * tileAmount;
+            uvs[i] = new Vector2(percentX, percentY);
+        }
+
         mesh.vertices = chunk.vertices;
         mesh.triangles = chunk.triangles;
+        mesh.uv = uvs;
         mesh.colors32 = chunk.colors;
         mesh.RecalculateNormals();
     }

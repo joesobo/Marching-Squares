@@ -144,7 +144,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!50 &547865864
 Rigidbody2D:
   serializedVersion: 4
@@ -270,8 +270,8 @@ MonoBehaviour:
   velocity: {x: 0, y: 0, z: 0}
   speed: 10
   walkAcceleration: 1
-  jumpforce: 35000
-  isGroundedRayLength: 0.1
+  jumpforce: 3500
+  isGroundedRayLength: 0.15
   layerMaskForGrounded:
     serializedVersion: 2
     m_Bits: 8
@@ -565,7 +565,7 @@ MonoBehaviour:
     type: 3}
   useVoxelReferences: 0
   shader: {fileID: 7200000, guid: 82bebc4886c0ef2479b2a7ebe8b6f899, type: 3}
-  useColliders: 1
+  useColliders: 0
 --- !u!4 &911654351
 Transform:
   m_ObjectHideFlags: 0
@@ -617,7 +617,7 @@ Camera:
   m_Enabled: 1
   serializedVersion: 2
   m_ClearFlags: 2
-  m_BackGroundColor: {r: 0.3018868, g: 0.3018868, b: 0.3018868, a: 0}
+  m_BackGroundColor: {r: 0.15686275, g: 0.15686275, b: 0.15686275, a: 0}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
   m_FOVAxisMode: 0
@@ -890,6 +890,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   shader: {fileID: 7200000, guid: 82bebc4886c0ef2479b2a7ebe8b6f899, type: 3}
+  tileAmount: 10
 --- !u!4 &1917315890
 Transform:
   m_ObjectHideFlags: 0
