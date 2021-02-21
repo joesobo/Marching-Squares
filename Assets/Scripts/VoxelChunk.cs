@@ -8,7 +8,7 @@ public class VoxelChunk : MonoBehaviour {
     public bool useVoxelPoints;
     public bool shouldUpdateMesh = false;
     public GameObject voxelPointPrefab;
-    // [HideInInspector]
+    [HideInInspector]
     public VoxelChunk xNeighbor, yNeighbor, xyNeighbor;
     private ComputeShader shader;
 
@@ -102,5 +102,13 @@ public class VoxelChunk : MonoBehaviour {
         checkedVertices = new HashSet<int>();
         outlines = new List<List<int>>();
         triangleDictionary = new Dictionary<Vector2, List<Triangle>>();
+    }
+
+    public void SetNewChunk(int x, int y) {
+        xNeighbor = null;
+        yNeighbor = null;
+        xyNeighbor = null;
+        transform.position = new Vector3(x, y);
+        shouldUpdateMesh = true;
     }
 }

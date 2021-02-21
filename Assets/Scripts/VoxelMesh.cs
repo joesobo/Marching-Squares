@@ -51,8 +51,6 @@ public class VoxelMesh : MonoBehaviour {
     public void TriangulateChunks(List<VoxelChunk> chunks) {
         CreateBuffers();
 
-        List<VoxelChunk> updateNeighborChunks = new List<VoxelChunk>();
-
         Vector2 p = player.position / voxelResolution;
         Vector2Int playerCoord = new Vector2Int(Mathf.RoundToInt(p.x), Mathf.RoundToInt(p.y));
 
@@ -73,7 +71,7 @@ public class VoxelMesh : MonoBehaviour {
             }
         }
 
-        // Create new chunks in range and setup neighbors
+        // Create new chunks in range
         for (int y = -chunkResolution / 2, i = 0; y < chunkResolution / 2; y++) {
             for (int x = -chunkResolution / 2; x < chunkResolution / 2; x++, i++) {
                 Vector2Int coord = new Vector2Int(x, y) + playerCoord;
@@ -89,30 +87,18 @@ public class VoxelMesh : MonoBehaviour {
                 if (sqrDst <= sqrViewDist) {
                     if (recycleableChunks.Count > 0) {
                         VoxelChunk recycleChunk = recycleableChunks.Dequeue();
-                        recycleChunk.xNeighbor = null;
-                        recycleChunk.yNeighbor = null;
-                        recycleChunk.xyNeighbor = null;
-                        recycleChunk.transform.position = new Vector3(coord.x, coord.y);
+                        recycleChunk.SetNewChunk(coord.x, coord.y);
                         existingChunks.Add(coord, recycleChunk);
-                        updateNeighborChunks.Add(recycleChunk);
-                        // SetupChunkNeighbors(coord, recycleChunk);
-                        recycleChunk.shouldUpdateMesh = true;
                         chunks.Add(recycleChunk);
                         terrainNoise.GenerateNoise(recycleChunk);
-                    } else {
-                        // VoxelChunk newChunk = CreateChunk(i, x, y, chunks);
-                        // existingChunks.Add(coord, newChunk);
-                        // SetupChunkNeighbors(x, y, newChunk);
-                        // newChunk.shouldUpdate = true;
-                        // chunks.Add(newChunk);
-                        // terrainNoise.GenerateNoise(newChunk);
                     }
                 }
             }
         }
 
+        // update chunk neighbors for new chunks
         foreach (VoxelChunk chunk in chunks) {
-            if (chunk.shouldUpdateMesh == true) {
+            if (chunk.shouldUpdateMesh) {
                 Vector2Int coord = new Vector2Int(Mathf.RoundToInt(chunk.transform.position.x), Mathf.RoundToInt(chunk.transform.position.y));
                 SetupChunkNeighbors(coord, chunk);
             }
@@ -120,7 +106,7 @@ public class VoxelMesh : MonoBehaviour {
 
         // recreate all chunk meshes
         foreach (VoxelChunk chunk in chunks) {
-            if (chunk.shouldUpdateMesh == true) {
+            if (chunk.shouldUpdateMesh) {
                 TriangulateChunkMesh(chunk);
                 chunk.shouldUpdateMesh = false;
             }
@@ -144,15 +130,16 @@ public class VoxelMesh : MonoBehaviour {
         Vector2Int Bxcoord = new Vector2Int(coord.x + 1, coord.y);
         Vector2Int Bycoord = new Vector2Int(coord.x, coord.y + 1);
         Vector2Int Bxycoord = new Vector2Int(coord.x + 1, coord.y + 1);
+        VoxelChunk tempChunk;
 
         if (existingChunks.ContainsKey(coord)) {
             if (existingChunks.ContainsKey(Axcoord)) {
-                VoxelChunk tempChunk = existingChunks[Axcoord];
+                tempChunk = existingChunks[Axcoord];
                 tempChunk.shouldUpdateMesh = true;
                 tempChunk.xNeighbor = chunk;
             }
             if (existingChunks.ContainsKey(Aycoord)) {
-                VoxelChunk tempChunk = existingChunks[Aycoord];
+                tempChunk = existingChunks[Aycoord];
                 tempChunk.shouldUpdateMesh = true;
                 tempChunk.yNeighbor = chunk;
 
@@ -164,11 +151,11 @@ public class VoxelMesh : MonoBehaviour {
             }
 
             if (existingChunks.ContainsKey(Bxcoord)) {
-                VoxelChunk tempChunk = existingChunks[Bxcoord];
+                tempChunk = existingChunks[Bxcoord];
                 chunk.xNeighbor = tempChunk;
             }
             if (existingChunks.ContainsKey(Bycoord)) {
-                VoxelChunk tempChunk = existingChunks[Bycoord];
+                tempChunk = existingChunks[Bycoord];
                 chunk.yNeighbor = tempChunk;
 
                 if (existingChunks.ContainsKey(Bxycoord)) {
