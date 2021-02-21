@@ -6,8 +6,9 @@ using System;
 public class VoxelChunk : MonoBehaviour {
     public int resolution;
     public bool useVoxelPoints;
+    public bool shouldUpdateMesh = false;
     public GameObject voxelPointPrefab;
-    [HideInInspector]
+    // [HideInInspector]
     public VoxelChunk xNeighbor, yNeighbor, xyNeighbor;
     private ComputeShader shader;
 

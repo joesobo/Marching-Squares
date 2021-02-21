@@ -20,7 +20,7 @@ public partial class VoxelMap : MonoBehaviour {
         voxelMesh = FindObjectOfType<VoxelMesh>();
         voxelEditor = FindObjectOfType<VoxelEditor>();
 
-        var oldChunks = FindObjectsOfType<VoxelChunk>();
+        VoxelChunk[] oldChunks = FindObjectsOfType<VoxelChunk>();
         for (int i = oldChunks.Length - 1; i >= 0; i--) {
             Destroy(oldChunks[i].gameObject);
         }
