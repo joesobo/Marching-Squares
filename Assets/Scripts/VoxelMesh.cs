@@ -1,44 +1,124 @@
 using System.Collections.Generic;
 using UnityEngine;
-using System.Collections;
 
 public class VoxelMesh : MonoBehaviour {
-    const int ThreadSize = 8;
+    const int THREADS = 8;
+
+    public ComputeShader shader;
+    public float viewDistance = 3;
+
+    public VoxelChunk voxelChunkPrefab;
+    public bool useVoxelReferences = false;
 
     private int voxelResolution, chunkResolution;
     private bool useColliders;
-
+    private int textureTileAmount;
     private int[] statePositions;
 
-    public ComputeShader shader;
-
     private ChunkCollider chunkCollider;
-
-    private int tileAmount = 10;
+    private Transform player;
 
     ComputeBuffer verticeBuffer;
     ComputeBuffer triangleBuffer;
     ComputeBuffer triCountBuffer;
     ComputeBuffer stateBuffer;
 
+    private Queue<VoxelChunk> recycleableChunks;
+    private Dictionary<Vector2Int, VoxelChunk> existingChunks;
+
+    private TerrainNoise terrainNoise;
+
     public void Startup(int voxelResolution, int chunkResolution, bool useColliders) {
         this.voxelResolution = voxelResolution;
         this.chunkResolution = chunkResolution;
         this.useColliders = useColliders;
 
-        tileAmount = (voxelResolution * chunkResolution) / 2;
+        textureTileAmount = (voxelResolution * chunkResolution) / 2;
 
         statePositions = new int[(voxelResolution + 1) * (voxelResolution + 1)];
 
         chunkCollider = FindObjectOfType<ChunkCollider>();
+        player = FindObjectOfType<PlayerController>().transform;
+
+        recycleableChunks = new Queue<VoxelChunk>();
+        existingChunks = new Dictionary<Vector2Int, VoxelChunk>();
+
+        terrainNoise = FindObjectOfType<TerrainNoise>();
+        terrainNoise.Startup(voxelResolution, chunkResolution, player);
     }
 
-    public void TriangulateChunks(VoxelChunk[] chunks) {
+    public void TriangulateChunks(List<VoxelChunk> chunks) {
         CreateBuffers();
 
-        foreach (VoxelChunk chunk in chunks) {
-            TriangulateChunkMesh(chunk);
+        Vector2 p = player.position / voxelResolution;
+        Vector2Int playerCoord = new Vector2Int(Mathf.RoundToInt(p.x), Mathf.RoundToInt(p.y));
+
+        float sqrViewDist = viewDistance * viewDistance;
+
+        for (int i = chunks.Count - 1; i >= 0; i--) {
+            VoxelChunk chunk = chunks[i];
+            Vector2Int chunkPos = new Vector2Int(Mathf.RoundToInt(chunk.transform.position.x), Mathf.RoundToInt(chunk.transform.position.y));
+            Vector2 playerOffset = p - chunkPos;
+            Vector2 o = new Vector2(Mathf.Abs(playerOffset.x), Mathf.Abs(playerOffset.y)) - (Vector2.one * viewDistance) / 2;
+            float sqrDst = new Vector2(Mathf.Max(o.x, 0), Mathf.Max(o.y, 0)).sqrMagnitude;
+
+            if (sqrDst > sqrViewDist) {
+                existingChunks.Remove(chunkPos);
+                recycleableChunks.Enqueue(chunk);
+                chunks.RemoveAt(i);
+            }
         }
+
+        for (int y = -chunkResolution / 2, i = 0; y < chunkResolution / 2; y++) {
+            for (int x = -chunkResolution / 2; x < chunkResolution / 2; x++, i++) {
+                Vector2Int coord = new Vector2Int(x, y) + playerCoord;
+
+                if (existingChunks.ContainsKey(coord)) {
+                    continue;
+                }
+
+                Vector2 playerOffset = p - coord;
+                Vector2 o = new Vector2(Mathf.Abs(playerOffset.x), Mathf.Abs(playerOffset.y)) - (Vector2.one * viewDistance) / 2;
+                float sqrDst = o.sqrMagnitude;
+
+                if (sqrDst <= sqrViewDist) {
+                    if (recycleableChunks.Count > 0) {
+                        VoxelChunk recycleChunk = recycleableChunks.Dequeue();
+                        recycleChunk.transform.position = new Vector3(coord.x, coord.y);
+                        existingChunks.Add(coord, recycleChunk);
+                        chunks.Add(recycleChunk);
+                        terrainNoise.GenerateNoise(recycleChunk);
+                        TriangulateChunkMesh(recycleChunk);
+                    } else {
+                        VoxelChunk newChunk = CreateChunk(i, x, y, chunks);
+                        existingChunks.Add(coord, newChunk);
+                        chunks.Add(newChunk);
+                        terrainNoise.GenerateNoise(newChunk);
+                        TriangulateChunkMesh(newChunk);
+                    }
+                }
+            }
+        }
+    }
+
+    private VoxelChunk CreateChunk(int i, int x, int y, List<VoxelChunk> chunks) {
+        VoxelChunk chunk = Instantiate(voxelChunkPrefab) as VoxelChunk;
+        chunk.Initialize(useVoxelReferences, voxelResolution);
+        chunk.transform.parent = transform;
+        chunk.transform.localPosition = new Vector3(x, y);
+        chunk.gameObject.layer = 3;
+
+        if (x > 0) {
+            chunks[i - 1].xNeighbor = chunk;
+        }
+        if (y > 0) {
+            chunks[i - chunkResolution].yNeighbor = chunk;
+            if (x > 0) {
+                chunks[i - chunkResolution - 1].xyNeighbor = chunk;
+            }
+        }
+
+        return chunk;
     }
 
     private void CreateBuffers() {
@@ -85,8 +165,8 @@ public class VoxelMesh : MonoBehaviour {
     private Vector2[] GetUVs(VoxelChunk chunk) {
         Vector2[] uvs = new Vector2[chunk.vertices.Length];
         for (int i = 0; i < chunk.vertices.Length; i++) {
-            float percentX = Mathf.InverseLerp(0, chunkResolution * voxelResolution, chunk.vertices[i].x) * tileAmount;
-            float percentY = Mathf.InverseLerp(0, chunkResolution * voxelResolution, chunk.vertices[i].y) * tileAmount;
+            float percentX = Mathf.InverseLerp(0, chunkResolution * voxelResolution, chunk.vertices[i].x) * textureTileAmount;
+            float percentY = Mathf.InverseLerp(0, chunkResolution * voxelResolution, chunk.vertices[i].y) * textureTileAmount;
             uvs[i] = new Vector2(percentX, percentY);
         }
 
@@ -94,7 +174,7 @@ public class VoxelMesh : MonoBehaviour {
     }
 
     private void ShaderTriangulate(VoxelChunk chunk, out Vector3[] vertices, out int[] triangles, out Color32[] colors) {
-        int numThreadsPerResolution = Mathf.CeilToInt(voxelResolution / ThreadSize);
+        int numThreadsPerResolution = Mathf.CeilToInt(voxelResolution / THREADS);
 
         triangleBuffer.SetCounterValue(0);
         shader.SetBuffer(0, "_Vertices", verticeBuffer);
@@ -184,6 +264,14 @@ public class VoxelMesh : MonoBehaviour {
     private void OnDestroy() {
         if (Application.isPlaying) {
             ReleaseBuffers();
+        }
+    }
+
+    public void PreloadChunks(List<VoxelChunk> chunks) {
+        for (int y = -chunkResolution / 2, i = 0; y < chunkResolution / 2; y++) {
+            for (int x = -chunkResolution / 2; x < chunkResolution / 2; x++, i++) {
+                chunks.Add(CreateChunk(i, x, y, chunks));
+            }
         }
     }
 }

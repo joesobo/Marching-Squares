@@ -17,6 +17,8 @@ public class TerrainNoise : MonoBehaviour {
     private int voxelResolution, chunkResolution;
     private float halfSize;
 
+    private Transform player;
+
     public float height1, height2, height3, height4 = 0;
 
     public enum TerrainType {
@@ -27,9 +29,10 @@ public class TerrainNoise : MonoBehaviour {
         Perlin
     }
 
-    public void Startup(int voxelResolution, int chunkResolution) {
+    public void Startup(int voxelResolution, int chunkResolution, Transform player) {
         this.voxelResolution = voxelResolution;
         this.chunkResolution = chunkResolution;
+        this.player = player;
         halfSize = 0.5f * chunkResolution;
 
         if (!mapDisplay) {
@@ -39,21 +42,19 @@ public class TerrainNoise : MonoBehaviour {
         noiseMap = new float[voxelResolution * chunkResolution, voxelResolution * chunkResolution];
     }
 
-    public void GenerateNoise(VoxelChunk[] chunks) {
+    public void GenerateNoise(VoxelChunk chunk) {
         if (useRandomSeed) {
             seed = Random.Range(0f, 10000f);
         }
 
-        foreach (VoxelChunk chunk in chunks) {
-            GenerateTerrainValues(chunk);
-        }
+        GenerateTerrainValues(chunk);
 
         if (mapDisplay) { mapDisplay.DrawNoiseMap(noiseMap); }
     }
 
     private void GenerateTerrainValues(VoxelChunk chunk) {
-        float centeredChunkX = chunk.transform.position.x + halfSize;
-        float centeredChunkY = chunk.transform.position.y + halfSize;
+        float centeredChunkX = chunk.transform.position.x;
+        float centeredChunkY = chunk.transform.position.y;
 
         foreach (Voxel voxel in chunk.voxels) {
             switch (terrainType) {
@@ -89,10 +90,10 @@ public class TerrainNoise : MonoBehaviour {
         float maxHeight = Mathf.PerlinNoise(scaledXHeight + seed, 0) * (chunkResolution * voxelResolution);
 
         if (y > maxHeight) {
-            noiseMap[(int)x, (int)y] = 0;
+            // noiseMap[(int)x, (int)y] = 0;
             voxel.state = 0;
         } else {
-            noiseMap[(int)x, (int)y] = noiseVal;
+            // noiseMap[(int)x, (int)y] = noiseVal;
 
             if (y < height1 * chunkResolution * voxelResolution) {
                 //random 3/0
@@ -109,8 +110,7 @@ public class TerrainNoise : MonoBehaviour {
 
             if (InRange(y, Mathf.RoundToInt(maxHeight), 3)) {
                 voxel.state = 4;
-            }
-            else if (InRange(y, Mathf.RoundToInt(maxHeight), 8)) {
+            } else if (InRange(y, Mathf.RoundToInt(maxHeight), 8)) {
                 voxel.state = noiseVal > 0.2f ? 2 : 1;
             }
         }

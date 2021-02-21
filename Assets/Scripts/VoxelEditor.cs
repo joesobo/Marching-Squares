@@ -13,7 +13,7 @@ public class VoxelEditor : MonoBehaviour {
     private int fillTypeIndex, radiusIndex, stencilIndex;
 
     private VoxelMesh voxelMesh;
-    private VoxelChunk[] chunks;
+    private List<VoxelChunk> chunks;
     private VoxelMap voxelMap;
 
     private VoxelStencil[] stencils = {
@@ -21,7 +21,7 @@ public class VoxelEditor : MonoBehaviour {
         new VoxelStencilCircle()
     };
 
-    public void Startup(int voxelResolution, int chunkResolution, VoxelChunk[] chunks, VoxelMap voxelMap) {
+    public void Startup(int voxelResolution, int chunkResolution, List<VoxelChunk> chunks, VoxelMap voxelMap) {
         this.voxelResolution = voxelResolution;
         this.chunkResolution = chunkResolution;
         this.chunks = chunks;

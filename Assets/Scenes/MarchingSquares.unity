@@ -165,7 +165,7 @@ Rigidbody2D:
   m_Interpolate: 1
   m_SleepingMode: 1
   m_CollisionDetection: 1
-  m_Constraints: 4
+  m_Constraints: 7
 --- !u!61 &547865865
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -309,7 +309,7 @@ MonoBehaviour:
   scaleHeightNoise: 2
   scaleTerrainNoise: 1
   seed: 0
-  useRandomSeed: 1
+  useRandomSeed: 0
   terrainType: 4
   height1: 0.05
   height2: 0.2
@@ -562,12 +562,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   voxelResolution: 8
-  chunkResolution: 8
-  voxelChunkPrefab: {fileID: 7782940093856803487, guid: 3865adb193875b742ba5dd4d18ee8c72,
-    type: 3}
-  useVoxelReferences: 0
+  chunkResolution: 16
   shader: {fileID: 7200000, guid: 82bebc4886c0ef2479b2a7ebe8b6f899, type: 3}
-  useColliders: 1
+  useColliders: 0
 --- !u!4 &911654351
 Transform:
   m_ObjectHideFlags: 0
@@ -636,7 +633,7 @@ Camera:
   far clip plane: 1000
   field of view: 60
   orthographic: 1
-  orthographic size: 1
+  orthographic size: 16
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -892,6 +889,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   shader: {fileID: 7200000, guid: 82bebc4886c0ef2479b2a7ebe8b6f899, type: 3}
+  viewDistance: 4
+  voxelChunkPrefab: {fileID: 7782940093856803487, guid: 3865adb193875b742ba5dd4d18ee8c72,
+    type: 3}
+  useVoxelReferences: 0
 --- !u!4 &1917315890
 Transform:
   m_ObjectHideFlags: 0

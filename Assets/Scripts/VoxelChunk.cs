@@ -12,7 +12,7 @@ public class VoxelChunk : MonoBehaviour {
     private ComputeShader shader;
 
     public Voxel[] voxels;
-    private float voxelSize, gridSize;
+    private float voxelSize;
     private List<Material> voxelMaterials = new List<Material>();
     public Mesh mesh;
     public Material material;
@@ -27,7 +27,6 @@ public class VoxelChunk : MonoBehaviour {
         this.useVoxelPoints = useVoxelPoints;
         this.resolution = resolution;
 
-        gridSize = 1f;
         voxelSize = 1f / resolution;
         voxels = new Voxel[resolution * resolution];
 
