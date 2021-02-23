@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class TerrainNoise : MonoBehaviour {
@@ -11,7 +9,6 @@ public class TerrainNoise : MonoBehaviour {
     public bool useRandomSeed;
     public TerrainType terrainType = TerrainType.Perlin;
 
-    private MapDisplay mapDisplay;
     private float[,] noiseMap;
 
     private int voxelResolution, chunkResolution;
@@ -35,10 +32,6 @@ public class TerrainNoise : MonoBehaviour {
         this.player = player;
         halfSize = 0.5f * chunkResolution;
 
-        if (!mapDisplay) {
-            mapDisplay = FindObjectOfType<MapDisplay>();
-        }
-
         noiseMap = new float[voxelResolution * chunkResolution, voxelResolution * chunkResolution];
     }
 
@@ -48,8 +41,6 @@ public class TerrainNoise : MonoBehaviour {
         }
 
         GenerateTerrainValues(chunk);
-
-        if (mapDisplay) { mapDisplay.DrawNoiseMap(noiseMap); }
     }
 
     private void GenerateTerrainValues(VoxelChunk chunk) {
@@ -90,11 +81,8 @@ public class TerrainNoise : MonoBehaviour {
         float maxHeight = Mathf.PerlinNoise(scaledXHeight + seed, 0) * (chunkResolution * voxelResolution);
 
         if (y > maxHeight) {
-            // noiseMap[(int)x, (int)y] = 0;
             voxel.state = 0;
         } else {
-            // noiseMap[(int)x, (int)y] = noiseVal;
-
             if (y < height1 * chunkResolution * voxelResolution) {
                 //random 3/0
                 voxel.state = noiseVal > 0.33f ? 3 : 0;
