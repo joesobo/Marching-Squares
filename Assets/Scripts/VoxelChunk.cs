@@ -13,7 +13,7 @@ public class VoxelChunk : MonoBehaviour {
     private ComputeShader shader;
 
     public Voxel[] voxels;
-    private float voxelSize;
+    private float voxelSize, halfSize;
     private List<Material> voxelMaterials = new List<Material>();
     public Mesh mesh;
     public Material material;
@@ -29,6 +29,7 @@ public class VoxelChunk : MonoBehaviour {
         this.resolution = resolution;
 
         voxelSize = 1f / resolution;
+        halfSize = 0.5f * resolution;
         voxels = new Voxel[resolution * resolution];
 
         for (int i = 0, y = 0; y < resolution; y++) {
@@ -110,5 +111,10 @@ public class VoxelChunk : MonoBehaviour {
         xyNeighbor = null;
         transform.position = new Vector3(x, y);
         shouldUpdateMesh = true;
+    }
+
+    private void OnDrawGizmos() {
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireCube(new Vector3(transform.position.x + halfSize, transform.position.y + halfSize), Vector3.one * resolution);
     }
 }

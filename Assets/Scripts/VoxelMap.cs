@@ -4,17 +4,21 @@ using UnityEngine;
 public partial class VoxelMap : MonoBehaviour {
     [Range(8, 56)]
     public int voxelResolution = 8;
+    private int chunkResolution;
     [Range(1, 16)]
-    public int chunkResolution = 2;
+    public int viewDistance = 3;
     public ComputeShader shader;
     public bool useColliders = false;
 
     private VoxelMesh voxelMesh;
     private VoxelEditor voxelEditor;
 
-    private List<VoxelChunk> chunks;
-
     private float voxelSize, halfSize;
+
+    private List<VoxelChunk> chunks;
+    private Dictionary<Vector2Int, VoxelChunk> existingChunks;
+
+    private Transform player;
 
     private void Awake() {
         voxelMesh = FindObjectOfType<VoxelMesh>();
@@ -25,10 +29,14 @@ public partial class VoxelMap : MonoBehaviour {
             Destroy(oldChunks[i].gameObject);
         }
 
+        chunkResolution = viewDistance * 4;
+        player = FindObjectOfType<PlayerController>().transform;
+
         chunks = new List<VoxelChunk>();
-        voxelMesh.Startup(voxelResolution, chunkResolution, useColliders);
-        voxelEditor.Startup(voxelResolution, chunkResolution, chunks, this);
-        
+        existingChunks = new Dictionary<Vector2Int, VoxelChunk>();
+        voxelMesh.Startup(voxelResolution, chunkResolution, viewDistance, existingChunks, useColliders);
+        voxelEditor.Startup(voxelResolution, chunkResolution, viewDistance, existingChunks, chunks, this);
+
         voxelMesh.PreloadChunks(chunks);
 
         GenerateTerrain();
@@ -47,5 +55,12 @@ public partial class VoxelMap : MonoBehaviour {
         voxelMesh.TriangulateChunks(chunks);
 
         transform.parent.localScale = Vector3.one * voxelResolution;
+    }
+
+    private void OnDrawGizmosSelected() {
+        if (player) {
+            Gizmos.color = new Color(0, 0, 1, 0.25f);
+            Gizmos.DrawSphere(player.position, voxelResolution * chunkResolution / 2);
+        }
     }
 }

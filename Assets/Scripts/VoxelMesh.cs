@@ -1,12 +1,11 @@
 using System.Collections.Generic;
 using UnityEngine;
-using System.Linq;
 
 public class VoxelMesh : MonoBehaviour {
     const int THREADS = 8;
 
     public ComputeShader shader;
-    public float viewDistance = 3;
+    private float viewDistance;
 
     public VoxelChunk voxelChunkPrefab;
     public bool useVoxelReferences = false;
@@ -29,9 +28,11 @@ public class VoxelMesh : MonoBehaviour {
 
     private TerrainNoise terrainNoise;
 
-    public void Startup(int voxelResolution, int chunkResolution, bool useColliders) {
+    public void Startup(int voxelResolution, int chunkResolution, float viewDistance, Dictionary<Vector2Int, VoxelChunk> existingChunks, bool useColliders) {
         this.voxelResolution = voxelResolution;
         this.chunkResolution = chunkResolution;
+        this.existingChunks = existingChunks;
+        this.viewDistance = viewDistance;
         this.useColliders = useColliders;
 
         textureTileAmount = (voxelResolution * chunkResolution) / 2;
@@ -42,7 +43,6 @@ public class VoxelMesh : MonoBehaviour {
         player = FindObjectOfType<PlayerController>().transform;
 
         recycleableChunks = new Queue<VoxelChunk>();
-        existingChunks = new Dictionary<Vector2Int, VoxelChunk>();
 
         terrainNoise = FindObjectOfType<TerrainNoise>();
         terrainNoise.Startup(voxelResolution, chunkResolution, player);
@@ -142,12 +142,11 @@ public class VoxelMesh : MonoBehaviour {
                 tempChunk = existingChunks[Aycoord];
                 tempChunk.shouldUpdateMesh = true;
                 tempChunk.yNeighbor = chunk;
-
-                if (existingChunks.ContainsKey(Axycoord)) {
-                    tempChunk = existingChunks[Axycoord];
-                    tempChunk.shouldUpdateMesh = true;
-                    tempChunk.xyNeighbor = chunk;
-                }
+            }
+            if (existingChunks.ContainsKey(Axycoord)) {
+                tempChunk = existingChunks[Axycoord];
+                tempChunk.shouldUpdateMesh = true;
+                tempChunk.xyNeighbor = chunk;
             }
 
             if (existingChunks.ContainsKey(Bxcoord)) {
@@ -157,11 +156,10 @@ public class VoxelMesh : MonoBehaviour {
             if (existingChunks.ContainsKey(Bycoord)) {
                 tempChunk = existingChunks[Bycoord];
                 chunk.yNeighbor = tempChunk;
-
-                if (existingChunks.ContainsKey(Bxycoord)) {
-                    tempChunk = existingChunks[Bxycoord];
-                    chunk.xyNeighbor = tempChunk;
-                }
+            }
+            if (existingChunks.ContainsKey(Bxycoord)) {
+                tempChunk = existingChunks[Bxycoord];
+                chunk.xyNeighbor = tempChunk;
             }
         }
     }
