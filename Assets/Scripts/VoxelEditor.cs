@@ -43,8 +43,8 @@ public class VoxelEditor : MonoBehaviour {
 
         }
         box = gameObject.AddComponent<BoxCollider>();
-        box.center = new Vector3(voxelResolution / 2, voxelResolution);
-        box.size = new Vector3(chunkResolution / 2 * (voxelResolution + viewDistance - 1), chunkResolution / 2 * (voxelResolution + viewDistance));
+        box.center = Vector3.one * (voxelResolution / 2);
+        box.size = new Vector3((chunkResolution - viewDistance) * voxelResolution, (chunkResolution - viewDistance) * voxelResolution);
     }
 
     private void Update() {
@@ -52,25 +52,23 @@ public class VoxelEditor : MonoBehaviour {
             RaycastHit hitInfo;
             if (Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out hitInfo)) {
                 if (hitInfo.collider.gameObject == gameObject) {
-                    EditVoxels(transform.InverseTransformPoint(hitInfo.point));
+                    EditVoxels(hitInfo.point);
                 }
             }
         }
     }
 
     private void EditVoxels(Vector3 point) {
-        Vector2 p = player.position / voxelResolution;
-        Vector3 playerCoord = new Vector3(Mathf.RoundToInt(p.x), Mathf.RoundToInt(p.y));
-        Vector3 clickPos = point + playerCoord;
-        Vector3 absClickPos = point + player.position;
-        Vector3 chunkPos = new Vector3(Mathf.Floor(absClickPos.x / voxelResolution), Mathf.Floor(absClickPos.y / voxelResolution));
+        Vector3 p = player.position / voxelResolution;
+        Vector3 clickPos = point;
+        Vector3 chunkPos = new Vector3(Mathf.Floor(clickPos.x / voxelResolution), Mathf.Floor(clickPos.y / voxelResolution));
 
         Vector2Int checkPos = new Vector2Int((int)chunkPos.x, (int)chunkPos.y);
         Vector3 chunkVectorPos = chunkPos * voxelResolution;
         Vector3 diff = new Vector3(Mathf.Abs(clickPos.x - chunkVectorPos.x), Mathf.Abs(clickPos.y - chunkVectorPos.y));
 
-        int centerX = (int)Mathf.Abs(diff.x);
-        int centerY = (int)Mathf.Abs(diff.y);
+        int centerX = (int)(diff.x);
+        int centerY = (int)(diff.y);
 
         int xStart = (centerX - radiusIndex - 1) / voxelResolution;
         if (xStart <= -chunkResolution) {

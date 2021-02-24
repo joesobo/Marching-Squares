@@ -37,7 +37,8 @@ public partial class VoxelMap : MonoBehaviour {
         voxelMesh.Startup(voxelResolution, chunkResolution, viewDistance, existingChunks, useColliders);
         voxelEditor.Startup(voxelResolution, chunkResolution, viewDistance, existingChunks, chunks, this);
 
-        voxelMesh.PreloadChunks(chunks);
+        halfSize = 0.5f * chunkResolution;
+        voxelSize = 1f / voxelResolution;
 
         GenerateTerrain();
     }
@@ -47,9 +48,6 @@ public partial class VoxelMap : MonoBehaviour {
     }
 
     public void GenerateTerrain() {
-        halfSize = 0.5f * chunkResolution;
-        voxelSize = 1f / voxelResolution;
-
         transform.parent.localScale = Vector3.one;
 
         voxelMesh.TriangulateChunks(chunks);

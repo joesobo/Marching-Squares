@@ -60,7 +60,7 @@ public class VoxelMesh : MonoBehaviour {
         for (int i = chunks.Count - 1; i >= 0; i--) {
             VoxelChunk chunk = chunks[i];
             Vector2Int chunkPos = new Vector2Int(Mathf.RoundToInt(chunk.transform.position.x), Mathf.RoundToInt(chunk.transform.position.y));
-            Vector2 playerOffset = p - chunkPos;
+            Vector2 playerOffset = playerCoord - chunkPos;
             Vector2 o = new Vector2(Mathf.Abs(playerOffset.x), Mathf.Abs(playerOffset.y)) - (Vector2.one * viewDistance) / 2;
             float sqrDst = new Vector2(Mathf.Max(o.x, 0), Mathf.Max(o.y, 0)).sqrMagnitude;
 
@@ -91,6 +91,12 @@ public class VoxelMesh : MonoBehaviour {
                         existingChunks.Add(coord, recycleChunk);
                         chunks.Add(recycleChunk);
                         terrainNoise.GenerateNoise(recycleChunk);
+                    } else {
+                        VoxelChunk newChunk = CreateChunk(i, x, y, chunks);
+                        newChunk.SetNewChunk(coord.x, coord.y);
+                        existingChunks.Add(coord, newChunk);
+                        chunks.Add(newChunk);
+                        terrainNoise.GenerateNoise(newChunk);
                     }
                 }
             }
@@ -307,14 +313,6 @@ public class VoxelMesh : MonoBehaviour {
     private void OnDestroy() {
         if (Application.isPlaying) {
             ReleaseBuffers();
-        }
-    }
-
-    public void PreloadChunks(List<VoxelChunk> chunks) {
-        for (int y = -chunkResolution / 2, i = 0; y < chunkResolution / 2; y++) {
-            for (int x = -chunkResolution / 2; x < chunkResolution / 2; x++, i++) {
-                chunks.Add(CreateChunk(i, x, y, chunks));
-            }
         }
     }
 }
