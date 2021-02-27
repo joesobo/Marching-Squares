@@ -96,16 +96,36 @@ public class VoxelEditor : MonoBehaviour {
             for (int x = xEnd; x >= xStart; x--) {
                 activeStencil.SetCenter(centerX - voxelXOffset, centerY - voxelYOffset);
 
-                if (existingChunks.ContainsKey(checkPos)) {
-                    VoxelChunk chunk = existingChunks[checkPos];
-                    chunk.Apply(activeStencil);
+                // if (existingChunks.ContainsKey(checkPos)) {
+                //     VoxelChunk chunk = existingChunks[checkPos];
+                //     chunk.Apply(activeStencil);
 
-                    voxelMesh.TriangulateChunkMesh(chunk);
-                }
+                //     voxelMesh.TriangulateChunkMesh(chunk);
+                // }
+
+                EditChunkAndNeighbors(activeStencil, checkPos);
 
                 voxelXOffset -= voxelResolution;
             }
             voxelYOffset -= voxelResolution;
+        }
+    }
+
+    private void EditChunkAndNeighbors(VoxelStencil activeStencil, Vector2Int checkPos) {
+        for (int x = -1; x < 1; x++) {
+            for (int y = -1; y < 1; y++) {
+                Vector2Int current = new Vector2Int(checkPos.x + x, checkPos.y + y);
+
+                if (existingChunks.ContainsKey(current)) {
+                    VoxelChunk chunk = existingChunks[current];
+
+                    if(current == checkPos) {
+                        chunk.Apply(activeStencil);
+                    }
+
+                    voxelMesh.TriangulateChunkMesh(chunk);
+                }
+            }
         }
     }
 
