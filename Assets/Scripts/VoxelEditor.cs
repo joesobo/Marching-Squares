@@ -63,7 +63,6 @@ public class VoxelEditor : MonoBehaviour {
         Vector3 clickPos = point;
         Vector3 chunkPos = new Vector3(Mathf.Floor(clickPos.x / voxelResolution), Mathf.Floor(clickPos.y / voxelResolution));
 
-        // Vector2Int checkPos = new Vector2Int((int)chunkPos.x, (int)chunkPos.y);
         Vector3 chunkVectorPos = chunkPos * voxelResolution;
         Vector3 diff = new Vector3(Mathf.Abs(clickPos.x - chunkVectorPos.x), Mathf.Abs(clickPos.y - chunkVectorPos.y));
 
@@ -94,8 +93,8 @@ public class VoxelEditor : MonoBehaviour {
         for (int y = yEnd; y >= yStart - 1; y--) {
             int voxelXOffset = xEnd * voxelResolution;
             for (int x = xEnd; x >= xStart - 1; x--) {
-                Vector3 truePos = new Vector3(Mathf.Floor((clickPos.x + voxelXOffset) / voxelResolution), Mathf.Floor((clickPos.y + voxelYOffset) / voxelResolution));
-                Vector2Int checkPos = new Vector2Int((int)truePos.x, (int)truePos.y);
+                Vector3 absChunkPos = new Vector3(Mathf.Floor((clickPos.x + voxelXOffset) / voxelResolution), Mathf.Floor((clickPos.y + voxelYOffset) / voxelResolution));
+                Vector2Int checkPos = new Vector2Int((int)absChunkPos.x, (int)absChunkPos.y);
                 activeStencil.SetCenter(centerX - voxelXOffset, centerY - voxelYOffset);
 
                 EditChunkAndNeighbors(activeStencil, checkPos);
