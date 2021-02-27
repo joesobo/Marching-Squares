@@ -90,13 +90,13 @@ public class VoxelMesh : MonoBehaviour {
                         recycleChunk.SetNewChunk(coord.x, coord.y);
                         existingChunks.Add(coord, recycleChunk);
                         chunks.Add(recycleChunk);
-                        terrainNoise.GenerateNoise(recycleChunk);
+                        terrainNoise.GenerateNoiseValues(recycleChunk);
                     } else {
                         VoxelChunk newChunk = CreateChunk(i, x, y, chunks);
                         newChunk.SetNewChunk(coord.x, coord.y);
                         existingChunks.Add(coord, newChunk);
                         chunks.Add(newChunk);
-                        terrainNoise.GenerateNoise(newChunk);
+                        terrainNoise.GenerateNoiseValues(newChunk);
                     }
                 }
             }

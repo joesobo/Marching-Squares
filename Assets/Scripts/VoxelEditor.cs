@@ -133,7 +133,7 @@ public class VoxelEditor : MonoBehaviour {
         stencilIndex = GUILayout.SelectionGrid(stencilIndex, stencilNames, 2);
         GUILayout.Label("Regenerate");
         if (GUI.Button(new Rect(0, 225, 150f, 20f), "Generate")) {
-            voxelMap.GenerateTerrain();
+            voxelMap.FreshGeneration();
         }
         GUILayout.EndArea();
     }

@@ -33,17 +33,13 @@ public class TerrainNoise : MonoBehaviour {
         halfSize = 0.5f * chunkResolution;
 
         noiseMap = new float[voxelResolution * chunkResolution, voxelResolution * chunkResolution];
-    }
 
-    public void GenerateNoise(VoxelChunk chunk) {
         if (useRandomSeed) {
             seed = Random.Range(0f, 10000f);
         }
-
-        GenerateTerrainValues(chunk);
     }
 
-    private void GenerateTerrainValues(VoxelChunk chunk) {
+    public void GenerateNoiseValues(VoxelChunk chunk) {
         float centeredChunkX = chunk.transform.position.x;
         float centeredChunkY = chunk.transform.position.y;
 
