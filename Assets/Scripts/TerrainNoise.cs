@@ -1,21 +1,25 @@
 using UnityEngine;
 
 public class TerrainNoise : MonoBehaviour {
-    [Range(0.3f, 100)]
-    public float scaleHeightNoise;
-    [Range(0.3f, 100)]
-    public float scaleTerrainNoise;
-    public float seed = 0;
-    public bool useRandomSeed;
     public TerrainType terrainType = TerrainType.Perlin;
 
-    private float[,] noiseMap;
+    [DrawIf(nameof (terrainType), TerrainType.Perlin, ComparisonType.Equals)]
+    [Range(0.3f, 100)]
+    public float scaleHeightNoise;
+    [DrawIf(nameof (terrainType), TerrainType.Perlin, ComparisonType.Equals)]
+    [Range(0.3f, 100)]
+    public float scaleTerrainNoise;
+    [DrawIf(nameof (terrainType), TerrainType.Perlin, ComparisonType.Equals)]
+    public float seed = 0;
+    [DrawIf(nameof (terrainType), TerrainType.Perlin, ComparisonType.Equals)]
+    public bool useRandomSeed;
 
+    private float[,] noiseMap;
     private int voxelResolution, chunkResolution;
     private float halfSize;
-
     private Transform player;
 
+    [DrawIf(nameof (terrainType), TerrainType.Perlin, ComparisonType.Equals)]
     public float height1, height2, height3, height4 = 0;
 
     public enum TerrainType {
