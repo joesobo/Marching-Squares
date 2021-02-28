@@ -122,7 +122,6 @@ public class VoxelMesh : MonoBehaviour {
                 if (Vector3.Distance(p, chunk.transform.position) < colliderRadius) {
                     chunkCollider.Generate2DCollider(chunk, chunkResolution);
                     chunk.shouldUpdateCollider = false;
-                    Debug.Log(chunk.transform.position);
                 }
             }
         }
@@ -209,6 +208,8 @@ public class VoxelMesh : MonoBehaviour {
 
         GetUVs(chunk);
 
+        AddVerticeToDictionary(chunk);
+
         mesh.vertices = chunk.vertices;
         mesh.triangles = chunk.triangles;
         mesh.uv = uvs;
@@ -222,6 +223,14 @@ public class VoxelMesh : MonoBehaviour {
             float percentX = Mathf.InverseLerp(0, chunkResolution * voxelResolution, chunk.vertices[i].x) * textureTileAmount;
             float percentY = Mathf.InverseLerp(0, chunkResolution * voxelResolution, chunk.vertices[i].y) * textureTileAmount;
             uvs[i] = new Vector2(percentX, percentY);
+        }
+    }
+
+    private void AddVerticeToDictionary(VoxelChunk chunk) {
+        for (int i = 0; i < chunk.vertices.Length; i++) {
+            if(!chunk.verticeDictionary.ContainsKey(chunk.vertices[i])) {
+                chunk.verticeDictionary.Add(chunk.vertices[i], i);
+            }
         }
     }
 

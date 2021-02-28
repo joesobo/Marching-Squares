@@ -19,6 +19,7 @@ public class VoxelChunk : MonoBehaviour {
     public Mesh mesh;
     public Material material;
     public Vector3[] vertices;
+    public Dictionary<Vector3, int> verticeDictionary;
     public int[] triangles;
     public Color32[] colors;
     public HashSet<int> checkedVertices;
@@ -110,6 +111,7 @@ public class VoxelChunk : MonoBehaviour {
         checkedVertices = new HashSet<int>();
         outlines = new List<List<int>>();
         triangleDictionary = new Dictionary<Vector2, List<Triangle>>();
+        verticeDictionary = new Dictionary<Vector3, int>();
     }
 
     public void SetNewChunk(int x, int y) {

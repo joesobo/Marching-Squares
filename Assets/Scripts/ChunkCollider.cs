@@ -60,7 +60,9 @@ public class ChunkCollider : MonoBehaviour {
         foreach (Triangle triangle in chunk.triangleDictionary[chunk.vertices[vertexIndex]]) {
             for (int i = 0; i < 3; i++) {
                 if (triangle[i].x == chunk.vertices[vertexIndex].x / chunkResolution && triangle[i].y == chunk.vertices[vertexIndex].y / chunkResolution) {
-                    int nextVertexIndex = System.Array.IndexOf(chunk.vertices, triangle[(i + 1) % 3] * chunkResolution);
+                    Vector3 findVertice = triangle[(i + 1) % 3] * chunkResolution;
+                    int nextVertexIndex = chunk.verticeDictionary[findVertice];
+                    // int nextVertexIndex = System.Array.IndexOf(chunk.vertices, findVertice);
                     if (!chunk.checkedVertices.Contains(nextVertexIndex) && IsOutlineEdge(vertexIndex, nextVertexIndex, chunk)) {
                         return nextVertexIndex;
                     }

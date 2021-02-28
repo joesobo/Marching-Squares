@@ -31,6 +31,8 @@ public class VoxelEditor : MonoBehaviour {
         new VoxelStencilCircle()
     };
 
+    private int interval = 2;
+
     public void Startup(int voxelResolution, int chunkResolution, float viewDistance, Dictionary<Vector2Int, VoxelChunk> existingChunks, List<VoxelChunk> chunks, VoxelMap voxelMap) {
         this.voxelResolution = voxelResolution;
         this.chunkResolution = chunkResolution;
@@ -55,12 +57,14 @@ public class VoxelEditor : MonoBehaviour {
     }
 
     private void Update() {
-        if (Input.GetMouseButton(0)) {
-            if (Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out hitInfo)) {
-                if (hitInfo.collider.gameObject == gameObject && (oldPoint != hitInfo.point || oldTypeIndex != fillTypeIndex)) {
-                    EditVoxels(hitInfo.point);
-                    oldPoint = hitInfo.point;
-                    oldTypeIndex = fillTypeIndex;
+        if (Time.frameCount % interval == 0) {
+            if (Input.GetMouseButton(0)) {
+                if (Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out hitInfo)) {
+                    if (hitInfo.collider.gameObject == gameObject && (oldPoint != hitInfo.point || oldTypeIndex != fillTypeIndex)) {
+                        EditVoxels(hitInfo.point);
+                        oldPoint = hitInfo.point;
+                        oldTypeIndex = fillTypeIndex;
+                    }
                 }
             }
         }
@@ -91,11 +95,6 @@ public class VoxelEditor : MonoBehaviour {
         activeStencil = stencils[stencilIndex];
         activeStencil.Initialize(fillTypeIndex, radiusIndex);
 
-        if (existingChunks.ContainsKey(checkPos)) {
-            currentChunk = existingChunks[checkPos];
-            currentChunk.shouldUpdateCollider = true;
-        }
-
         int voxelYOffset = yEnd * voxelResolution;
         for (int y = yEnd; y >= yStart - 1; y--) {
             int voxelXOffset = xEnd * voxelResolution;
@@ -118,6 +117,7 @@ public class VoxelEditor : MonoBehaviour {
         if (existingChunks.ContainsKey(checkPos)) {
             currentChunk = existingChunks[checkPos];
             result = currentChunk.Apply(activeStencil);
+            currentChunk.shouldUpdateCollider = true;
         }
 
         for (int x = -1; x < 1; x++) {
@@ -129,7 +129,6 @@ public class VoxelEditor : MonoBehaviour {
 
                     if (result) {
                         voxelMesh.TriangulateChunkMesh(currentChunk);
-                        Debug.Log(1);
                     }
                 }
             }
