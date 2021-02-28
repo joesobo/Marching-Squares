@@ -7,6 +7,7 @@ public class VoxelChunk : MonoBehaviour {
     public int resolution;
     public bool useVoxelPoints;
     public bool shouldUpdateMesh = false;
+    public bool shouldUpdateCollider = false;
     public GameObject voxelPointPrefab;
     [HideInInspector]
     public VoxelChunk xNeighbor, yNeighbor, xyNeighbor;

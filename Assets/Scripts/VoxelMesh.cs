@@ -89,12 +89,14 @@ public class VoxelMesh : MonoBehaviour {
                         VoxelChunk recycleChunk = recycleableChunks.Dequeue();
                         recycleChunk.SetNewChunk(coord.x, coord.y);
                         existingChunks.Add(coord, recycleChunk);
+                        recycleChunk.shouldUpdateCollider = true;
                         chunks.Add(recycleChunk);
                         terrainNoise.GenerateNoiseValues(recycleChunk);
                     } else {
                         VoxelChunk newChunk = CreateChunk(i, x, y, chunks);
                         newChunk.SetNewChunk(coord.x, coord.y);
                         existingChunks.Add(coord, newChunk);
+                        newChunk.shouldUpdateCollider = true;
                         chunks.Add(newChunk);
                         terrainNoise.GenerateNoiseValues(newChunk);
                     }
@@ -198,8 +200,9 @@ public class VoxelMesh : MonoBehaviour {
 
         ShaderTriangulate(chunk, out chunk.vertices, out chunk.triangles, out chunk.colors);
 
-        if (useColliders) {
+        if (useColliders && chunk.shouldUpdateCollider) {
             chunkCollider.Generate2DCollider(chunk, chunkResolution);
+            chunk.shouldUpdateCollider = false;
         }
 
         Vector2[] uvs = GetUVs(chunk);

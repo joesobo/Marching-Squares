@@ -115,6 +115,7 @@ public class VoxelEditor : MonoBehaviour {
 
                     if (current == checkPos) {
                         chunk.Apply(activeStencil);
+                        chunk.shouldUpdateCollider = true;
                     }
 
                     voxelMesh.TriangulateChunkMesh(chunk);
