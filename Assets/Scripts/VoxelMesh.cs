@@ -5,37 +5,38 @@ public class VoxelMesh : MonoBehaviour {
     const int THREADS = 8;
 
     public ComputeShader shader;
-    private float viewDistance;
 
     public VoxelChunk voxelChunkPrefab;
     public bool useVoxelReferences = false;
 
-    private int voxelResolution, chunkResolution;
+    private int voxelResolution, chunkResolution, textureTileAmount;
     private bool useColliders;
-    private int textureTileAmount;
     private int[] statePositions;
+    private float viewDistance, colliderRadius;
 
-    private ChunkCollider chunkCollider;
-    private Transform player;
-
-    ComputeBuffer verticeBuffer;
-    ComputeBuffer triangleBuffer;
-    ComputeBuffer triCountBuffer;
-    ComputeBuffer stateBuffer;
+    private Vector2 p, playerOffset, offset;
+    private Vector2Int playerCoord, testChunkPos, coord;
+    private Vector2[] uvs;
+    private VoxelChunk testChunk, currentChunk;
+    private float sqrViewDist, sqrDst;
+    private Mesh mesh;
 
     private Queue<VoxelChunk> recycleableChunks;
     private Dictionary<Vector2Int, VoxelChunk> existingChunks;
 
+    private ChunkCollider chunkCollider;
+    private Transform player;
     private TerrainNoise terrainNoise;
 
-    public float colliderRadius = 1;
+    ComputeBuffer verticeBuffer, triangleBuffer, triCountBuffer, stateBuffer;
 
-    public void Startup(int voxelResolution, int chunkResolution, float viewDistance, Dictionary<Vector2Int, VoxelChunk> existingChunks, bool useColliders) {
+    public void Startup(int voxelResolution, int chunkResolution, float viewDistance, Dictionary<Vector2Int, VoxelChunk> existingChunks, bool useColliders, float colliderRadius) {
         this.voxelResolution = voxelResolution;
         this.chunkResolution = chunkResolution;
         this.existingChunks = existingChunks;
         this.viewDistance = viewDistance;
         this.useColliders = useColliders;
+        this.colliderRadius = colliderRadius;
 
         textureTileAmount = (voxelResolution * chunkResolution) / 2;
 
@@ -53,22 +54,22 @@ public class VoxelMesh : MonoBehaviour {
     public void TriangulateChunks(List<VoxelChunk> chunks) {
         CreateBuffers();
 
-        Vector2 p = player.position / voxelResolution;
-        Vector2Int playerCoord = new Vector2Int(Mathf.RoundToInt(p.x), Mathf.RoundToInt(p.y));
+        p = player.position / voxelResolution;
+        playerCoord = new Vector2Int(Mathf.RoundToInt(p.x), Mathf.RoundToInt(p.y));
 
-        float sqrViewDist = viewDistance * viewDistance;
+        sqrViewDist = viewDistance * viewDistance;
 
         // Remove chunks out of range
         for (int i = chunks.Count - 1; i >= 0; i--) {
-            VoxelChunk chunk = chunks[i];
-            Vector2Int chunkPos = new Vector2Int(Mathf.RoundToInt(chunk.transform.position.x), Mathf.RoundToInt(chunk.transform.position.y));
-            Vector2 playerOffset = playerCoord - chunkPos;
-            Vector2 o = new Vector2(Mathf.Abs(playerOffset.x), Mathf.Abs(playerOffset.y)) - (Vector2.one * viewDistance) / 2;
-            float sqrDst = new Vector2(Mathf.Max(o.x, 0), Mathf.Max(o.y, 0)).sqrMagnitude;
+            testChunk = chunks[i];
+            testChunkPos = new Vector2Int(Mathf.RoundToInt(testChunk.transform.position.x), Mathf.RoundToInt(testChunk.transform.position.y));
+            playerOffset = playerCoord - testChunkPos;
+            offset = new Vector2(Mathf.Abs(playerOffset.x), Mathf.Abs(playerOffset.y)) - (Vector2.one * viewDistance) / 2;
+            sqrDst = new Vector2(Mathf.Max(offset.x, 0), Mathf.Max(offset.y, 0)).sqrMagnitude;
 
             if (sqrDst > sqrViewDist) {
-                existingChunks.Remove(chunkPos);
-                recycleableChunks.Enqueue(chunk);
+                existingChunks.Remove(testChunkPos);
+                recycleableChunks.Enqueue(testChunk);
                 chunks.RemoveAt(i);
             }
         }
@@ -76,32 +77,28 @@ public class VoxelMesh : MonoBehaviour {
         // Create new chunks in range
         for (int y = -chunkResolution / 2, i = 0; y < chunkResolution / 2; y++) {
             for (int x = -chunkResolution / 2; x < chunkResolution / 2; x++, i++) {
-                Vector2Int coord = new Vector2Int(x, y) + playerCoord;
+                coord = new Vector2Int(x, y) + playerCoord;
 
                 if (existingChunks.ContainsKey(coord)) {
                     continue;
                 }
 
-                Vector2 playerOffset = p - coord;
-                Vector2 o = new Vector2(Mathf.Abs(playerOffset.x), Mathf.Abs(playerOffset.y)) - (Vector2.one * viewDistance) / 2;
-                float sqrDst = o.sqrMagnitude;
+                playerOffset = p - coord;
+                offset = new Vector2(Mathf.Abs(playerOffset.x), Mathf.Abs(playerOffset.y)) - (Vector2.one * viewDistance) / 2;
+                sqrDst = offset.sqrMagnitude;
 
                 if (sqrDst <= sqrViewDist - 4) {
                     if (recycleableChunks.Count > 0) {
-                        VoxelChunk recycleChunk = recycleableChunks.Dequeue();
-                        recycleChunk.SetNewChunk(coord.x, coord.y);
-                        existingChunks.Add(coord, recycleChunk);
-                        recycleChunk.shouldUpdateCollider = true;
-                        chunks.Add(recycleChunk);
-                        terrainNoise.GenerateNoiseValues(recycleChunk);
+                        currentChunk = recycleableChunks.Dequeue();
                     } else {
-                        VoxelChunk newChunk = CreateChunk(i, x, y, chunks);
-                        newChunk.SetNewChunk(coord.x, coord.y);
-                        existingChunks.Add(coord, newChunk);
-                        newChunk.shouldUpdateCollider = true;
-                        chunks.Add(newChunk);
-                        terrainNoise.GenerateNoiseValues(newChunk);
+                        currentChunk = CreateChunk(i, x, y, chunks);
                     }
+
+                    currentChunk.SetNewChunk(coord.x, coord.y);
+                    existingChunks.Add(coord, currentChunk);
+                    currentChunk.shouldUpdateCollider = true;
+                    chunks.Add(currentChunk);
+                    terrainNoise.GenerateNoiseValues(currentChunk);
                 }
             }
         }
@@ -109,7 +106,7 @@ public class VoxelMesh : MonoBehaviour {
         // update chunk neighbors for new chunks
         foreach (VoxelChunk chunk in chunks) {
             if (chunk.shouldUpdateMesh) {
-                Vector2Int coord = new Vector2Int(Mathf.RoundToInt(chunk.transform.position.x), Mathf.RoundToInt(chunk.transform.position.y));
+                coord = new Vector2Int(Mathf.RoundToInt(chunk.transform.position.x), Mathf.RoundToInt(chunk.transform.position.y));
                 SetupChunkNeighbors(coord, chunk);
             }
         }
@@ -125,7 +122,6 @@ public class VoxelMesh : MonoBehaviour {
                 if (Vector3.Distance(p, chunk.transform.position) < colliderRadius) {
                     chunkCollider.Generate2DCollider(chunk, chunkResolution);
                     chunk.shouldUpdateCollider = false;
-                    Debug.Log(chunk.transform.position);
                 }
             }
         }
@@ -205,22 +201,12 @@ public class VoxelMesh : MonoBehaviour {
     }
 
     public void TriangulateChunkMesh(VoxelChunk chunk) {
-        Mesh mesh = chunk.mesh;
+        mesh = chunk.mesh;
         chunk.ResetValues();
 
         ShaderTriangulate(chunk, out chunk.vertices, out chunk.triangles, out chunk.colors);
 
-        // if (useColliders) {
-        //     Vector3 p = player.position / voxelResolution;
-
-        //     if (Vector3.Distance(p, chunk.transform.position) < colliderRadius) {
-        //         chunkCollider.Generate2DCollider(chunk, chunkResolution);
-        //         chunk.shouldUpdateCollider = false;
-        //         Debug.Log(chunk.transform.position);
-        //     }
-        // }
-
-        Vector2[] uvs = GetUVs(chunk);
+        GetUVs(chunk);
 
         mesh.vertices = chunk.vertices;
         mesh.triangles = chunk.triangles;
@@ -229,15 +215,13 @@ public class VoxelMesh : MonoBehaviour {
         mesh.RecalculateNormals();
     }
 
-    private Vector2[] GetUVs(VoxelChunk chunk) {
-        Vector2[] uvs = new Vector2[chunk.vertices.Length];
+    private void GetUVs(VoxelChunk chunk) {
+        uvs = new Vector2[chunk.vertices.Length];
         for (int i = 0; i < chunk.vertices.Length; i++) {
             float percentX = Mathf.InverseLerp(0, chunkResolution * voxelResolution, chunk.vertices[i].x) * textureTileAmount;
             float percentY = Mathf.InverseLerp(0, chunkResolution * voxelResolution, chunk.vertices[i].y) * textureTileAmount;
             uvs[i] = new Vector2(percentX, percentY);
         }
-
-        return uvs;
     }
 
     private void ShaderTriangulate(VoxelChunk chunk, out Vector3[] vertices, out int[] triangles, out Color32[] colors) {

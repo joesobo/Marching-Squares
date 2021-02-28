@@ -7,6 +7,7 @@ public partial class VoxelMap : MonoBehaviour {
     private int chunkResolution;
     [Range(1, 16)]
     public int viewDistance = 3;
+    public float colliderRadius = 1;
     public ComputeShader shader;
     public bool useColliders = false;
 
@@ -52,7 +53,7 @@ public partial class VoxelMap : MonoBehaviour {
 
         chunks = new List<VoxelChunk>();
         existingChunks = new Dictionary<Vector2Int, VoxelChunk>();
-        voxelMesh.Startup(voxelResolution, chunkResolution, viewDistance, existingChunks, useColliders);
+        voxelMesh.Startup(voxelResolution, chunkResolution, viewDistance, existingChunks, useColliders, colliderRadius);
         voxelEditor.Startup(voxelResolution, chunkResolution, viewDistance, existingChunks, chunks, this);
 
         GenerateTerrain();

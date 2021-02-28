@@ -2,14 +2,16 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ChunkCollider : MonoBehaviour
-{
+public class ChunkCollider : MonoBehaviour {
     private float chunkResolution;
+    private EdgeCollider2D[] currentColliders;
+    private EdgeCollider2D currentCollider;
+    private Vector2[] edgePoints;
 
     public void Generate2DCollider(VoxelChunk chunk, int chunkResolution) {
         this.chunkResolution = (float)chunkResolution;
 
-        EdgeCollider2D[] currentColliders = chunk.gameObject.GetComponents<EdgeCollider2D>();
+        currentColliders = chunk.gameObject.GetComponents<EdgeCollider2D>();
         for (int i = 0; i < currentColliders.Length; i++) {
             Destroy(currentColliders[i]);
         }
@@ -17,13 +19,13 @@ public class ChunkCollider : MonoBehaviour
         CalculateMeshOutlines(chunk);
 
         foreach (List<int> outline in chunk.outlines) {
-            EdgeCollider2D edgeCollider = chunk.gameObject.AddComponent<EdgeCollider2D>();
-            Vector2[] edgePoints = new Vector2[outline.Count];
+            currentCollider = chunk.gameObject.AddComponent<EdgeCollider2D>();
+            edgePoints = new Vector2[outline.Count];
 
             for (int i = 0; i < outline.Count; i++) {
                 edgePoints[i] = new Vector2(chunk.vertices[outline[i]].x, chunk.vertices[outline[i]].y);
             }
-            edgeCollider.points = edgePoints;
+            currentCollider.points = edgePoints;
         }
     }
 
@@ -45,9 +47,7 @@ public class ChunkCollider : MonoBehaviour
     }
 
     private void FollowOutline(int vertexIndex, VoxelChunk chunk) {
-        int outlineIndex = chunk.outlines.Count - 1;
-
-        chunk.outlines[outlineIndex].Add(vertexIndex);
+        chunk.outlines[chunk.outlines.Count - 1].Add(vertexIndex);
         chunk.checkedVertices.Add(vertexIndex);
         int nextVertexIndex = GetConnectedOutlineVertex(vertexIndex, chunk);
 
@@ -57,13 +57,9 @@ public class ChunkCollider : MonoBehaviour
     }
 
     private int GetConnectedOutlineVertex(int vertexIndex, VoxelChunk chunk) {
-        List<Triangle> trianglesContainingVertex = chunk.triangleDictionary[chunk.vertices[vertexIndex]];
-
-        foreach (Triangle triangle in trianglesContainingVertex) {
+        foreach (Triangle triangle in chunk.triangleDictionary[chunk.vertices[vertexIndex]]) {
             for (int i = 0; i < 3; i++) {
-                Vector2 chunkVertice = new Vector2(chunk.vertices[vertexIndex].x / chunkResolution, chunk.vertices[vertexIndex].y / chunkResolution);
-
-                if (chunkVertice == triangle[i]) {
+                if (triangle[i].x == chunk.vertices[vertexIndex].x / chunkResolution && triangle[i].y == chunk.vertices[vertexIndex].y / chunkResolution) {
                     int nextVertexIndex = System.Array.IndexOf(chunk.vertices, triangle[(i + 1) % 3] * chunkResolution);
                     if (!chunk.checkedVertices.Contains(nextVertexIndex) && IsOutlineEdge(vertexIndex, nextVertexIndex, chunk)) {
                         return nextVertexIndex;
@@ -78,11 +74,11 @@ public class ChunkCollider : MonoBehaviour
     private bool IsOutlineEdge(int vertexA, int vertexB, VoxelChunk chunk) {
         List<Triangle> trianglesContainingVertexA = chunk.triangleDictionary[chunk.vertices[vertexA]];
         int sharedTriangleCount = 0;
+        Vector2 chunkVertice = new Vector2(chunk.vertices[vertexB].x, chunk.vertices[vertexB].y);
 
         for (int i = 0; i < trianglesContainingVertexA.Count; i++) {
-            Vector2 chunkVertice = new Vector2(chunk.vertices[vertexB].x, chunk.vertices[vertexB].y);
-            if (trianglesContainingVertexA[i].a * chunkResolution == chunkVertice || 
-                trianglesContainingVertexA[i].b * chunkResolution == chunkVertice || 
+            if (trianglesContainingVertexA[i].a * chunkResolution == chunkVertice ||
+                trianglesContainingVertexA[i].b * chunkResolution == chunkVertice ||
                 trianglesContainingVertexA[i].c * chunkResolution == chunkVertice
             ) {
                 sharedTriangleCount++;

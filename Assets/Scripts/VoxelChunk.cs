@@ -72,7 +72,7 @@ public class VoxelChunk : MonoBehaviour {
         }
     }
 
-    public void Apply(VoxelStencil stencil) {
+    public bool Apply(VoxelStencil stencil) {
         int xStart = stencil.XStart;
         if (xStart < 0) {
             xStart = 0;
@@ -90,13 +90,19 @@ public class VoxelChunk : MonoBehaviour {
             yEnd = resolution - 1;
         }
 
+        bool didUpdate = false;
+        int i;
         for (int y = yStart; y <= yEnd; y++) {
-            int i = y * resolution + xStart;
+            i = y * resolution + xStart;
             for (int x = xStart; x <= xEnd; x++, i++) {
-                voxels[i].state = stencil.Apply(x, y, voxels[i].state);
+                if (voxels[i].state != stencil.fillType) {
+                    voxels[i].state = stencil.Apply(x, y, voxels[i].state);
+                    didUpdate = true;
+                }
             }
         }
         Refresh();
+        return didUpdate;
     }
 
     public void ResetValues() {
