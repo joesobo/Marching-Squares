@@ -210,15 +210,15 @@ public class VoxelMesh : MonoBehaviour {
 
         ShaderTriangulate(chunk, out chunk.vertices, out chunk.triangles, out chunk.colors);
 
-        if (useColliders) {
-            Vector3 p = player.position / voxelResolution;
+        // if (useColliders) {
+        //     Vector3 p = player.position / voxelResolution;
 
-            if (Vector3.Distance(p, chunk.transform.position) < colliderRadius) {
-                chunkCollider.Generate2DCollider(chunk, chunkResolution);
-                chunk.shouldUpdateCollider = false;
-                Debug.Log(chunk.transform.position);
-            }
-        }
+        //     if (Vector3.Distance(p, chunk.transform.position) < colliderRadius) {
+        //         chunkCollider.Generate2DCollider(chunk, chunkResolution);
+        //         chunk.shouldUpdateCollider = false;
+        //         Debug.Log(chunk.transform.position);
+        //     }
+        // }
 
         Vector2[] uvs = GetUVs(chunk);
 

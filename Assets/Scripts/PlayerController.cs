@@ -12,11 +12,11 @@ public class PlayerController : MonoBehaviour {
     public LayerMask layerMaskForGrounded;
 
     private Rigidbody2D rb;
-    private BoxCollider2D boxCollider;
+    private Collider2D boxCollider;
 
     private void Awake() {
         rb = GetComponent<Rigidbody2D>();
-        boxCollider = GetComponent<BoxCollider2D>();
+        boxCollider = GetComponent<Collider2D>();
     }
 
     private void Update() {
