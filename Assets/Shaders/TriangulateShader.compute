@@ -116,6 +116,27 @@ void TriangulateCellRows(int2 uv) {
   if (cState > 0) cellType |= 4; //C
   if (dState > 0) cellType |= 8; //D
 
+  if(cellType >= 15) {
+    if (aState != bState && aState != cState && aState != dState && bState == cState && bState == dState) {
+      cellType = 16;
+    }
+    else if (bState != aState && bState != cState && bState != dState && aState == cState && aState == dState) {
+      cellType = 17;
+    }
+    else if (cState != dState && cState != aState && cState != bState && aState == bState && aState == dState) {
+      cellType = 18;
+    }
+    else if (dState != aState && dState != bState && dState != cState && aState == bState && aState == cState) {
+      cellType = 19;
+    }
+    else if (aState != bState && cState != bState && bState == dState) {
+      cellType = 20;
+    }
+    else if (bState != aState && dState != aState && aState == cState) {
+      cellType = 21;
+    }
+  }
+
   float2 offset = float2(resLen * 0.5, resLen * 0.5);
 
   float2 A = float2(uv) / res;
@@ -236,6 +257,66 @@ void TriangulateCellRows(int2 uv) {
         addTriangle(center, C, b, cColor);
         addTriangle(center, c, C, cColor);
         addTriangle(d, c, center, dColor);
+        addTriangle(d, D, c, dColor);
+        break;
+      case 16:
+        addTriangle(A, d, a, aColor);
+        addTriangle(a, d, center, bColor);
+        addTriangle(a, b, B, bColor);
+        addTriangle(a, center, b, bColor);
+        addTriangle(center, C, b, cColor);
+        addTriangle(center, c, C, cColor);
+        addTriangle(d, c, center, dColor);
+        addTriangle(d, D, c, dColor);
+        break;
+      case 17: 
+        addTriangle(A, center, a, aColor);
+        addTriangle(A, d, center, aColor);
+        addTriangle(a, b, B, bColor);
+        addTriangle(a, center, b, aColor);
+        addTriangle(center, C, b, cColor);
+        addTriangle(center, c, C, cColor);
+        addTriangle(d, c, center, dColor);
+        addTriangle(d, D, c, dColor);
+        break;
+      case 18: 
+        addTriangle(A, center, a, aColor);
+        addTriangle(A, d, center, aColor);
+        addTriangle(a, b, B, bColor);
+        addTriangle(a, center, b, bColor);
+        addTriangle(b, center, c, aColor);
+        addTriangle(b, c, C, cColor);
+        addTriangle(d, c, center, dColor);
+        addTriangle(d, D, c, dColor);
+        break;
+      case 19: 
+        addTriangle(A, center, a, aColor);
+        addTriangle(A, d, center, aColor);
+        addTriangle(a, b, B, bColor);
+        addTriangle(a, center, b, bColor);
+        addTriangle(center, C, b, cColor);
+        addTriangle(center, c, C, cColor);
+        addTriangle(d, c, center, aColor);
+        addTriangle(d, D, c, dColor);
+        break;
+      case 20: 
+        addTriangle(A, d, a, aColor);
+        addTriangle(a, d, center, bColor);
+        addTriangle(a, b, B, bColor);
+        addTriangle(a, center, b, bColor);
+        addTriangle(b, center, c, bColor);
+        addTriangle(b, c, C, cColor);
+        addTriangle(d, c, center, dColor);
+        addTriangle(d, D, c, dColor);
+        break;
+      case 21: 
+        addTriangle(A, center, a, aColor);
+        addTriangle(A, d, center, aColor);
+        addTriangle(a, b, B, bColor);
+        addTriangle(a, center, b, cColor);
+        addTriangle(center, C, b, cColor);
+        addTriangle(center, c, C, cColor);
+        addTriangle(d, c, center, cColor);
         addTriangle(d, D, c, dColor);
         break;
     }
