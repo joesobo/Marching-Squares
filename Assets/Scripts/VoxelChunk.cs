@@ -103,6 +103,9 @@ public class VoxelChunk : MonoBehaviour {
             }
         }
         Refresh();
+        if (didUpdate) {
+            shouldUpdateCollider = true;
+        }
         return didUpdate;
     }
 

@@ -62,7 +62,6 @@ public class ChunkCollider : MonoBehaviour {
                 if (triangle[i].x == chunk.vertices[vertexIndex].x / chunkResolution && triangle[i].y == chunk.vertices[vertexIndex].y / chunkResolution) {
                     Vector3 findVertice = triangle[(i + 1) % 3] * chunkResolution;
                     int nextVertexIndex = chunk.verticeDictionary[findVertice];
-                    // int nextVertexIndex = System.Array.IndexOf(chunk.vertices, findVertice);
                     if (!chunk.checkedVertices.Contains(nextVertexIndex) && IsOutlineEdge(vertexIndex, nextVertexIndex, chunk)) {
                         return nextVertexIndex;
                     }
@@ -76,12 +75,12 @@ public class ChunkCollider : MonoBehaviour {
     private bool IsOutlineEdge(int vertexA, int vertexB, VoxelChunk chunk) {
         List<Triangle> trianglesContainingVertexA = chunk.triangleDictionary[chunk.vertices[vertexA]];
         int sharedTriangleCount = 0;
-        Vector2 chunkVertice = new Vector2(chunk.vertices[vertexB].x, chunk.vertices[vertexB].y);
+        Vector2 chunkVertice = new Vector2(chunk.vertices[vertexB].x / chunkResolution, chunk.vertices[vertexB].y / chunkResolution);
 
         for (int i = 0; i < trianglesContainingVertexA.Count; i++) {
-            if (trianglesContainingVertexA[i].a * chunkResolution == chunkVertice ||
-                trianglesContainingVertexA[i].b * chunkResolution == chunkVertice ||
-                trianglesContainingVertexA[i].c * chunkResolution == chunkVertice
+            if (trianglesContainingVertexA[i].a == chunkVertice ||
+                trianglesContainingVertexA[i].b == chunkVertice ||
+                trianglesContainingVertexA[i].c == chunkVertice
             ) {
                 sharedTriangleCount++;
                 if (sharedTriangleCount > 1) {

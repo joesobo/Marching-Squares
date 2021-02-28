@@ -117,7 +117,6 @@ public class VoxelEditor : MonoBehaviour {
         if (existingChunks.ContainsKey(checkPos)) {
             currentChunk = existingChunks[checkPos];
             result = currentChunk.Apply(activeStencil);
-            currentChunk.shouldUpdateCollider = true;
         }
 
         for (int x = -1; x < 1; x++) {
