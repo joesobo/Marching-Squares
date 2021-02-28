@@ -68,6 +68,7 @@ public class VoxelEditor : MonoBehaviour {
 
     private void EditVoxels(Vector3 point) {
         chunkPos = new Vector3(Mathf.Floor(point.x / voxelResolution), Mathf.Floor(point.y / voxelResolution));
+        Vector2Int checkPos = new Vector2Int((int)chunkPos.x, (int)chunkPos.y);
         diff = new Vector2Int((int)Mathf.Abs(point.x - (chunkPos * voxelResolution).x), (int)Mathf.Abs(point.y - (chunkPos * voxelResolution).y));
 
         xStart = (diff.x - radiusIndex - 1) / voxelResolution;
@@ -89,6 +90,11 @@ public class VoxelEditor : MonoBehaviour {
 
         activeStencil = stencils[stencilIndex];
         activeStencil.Initialize(fillTypeIndex, radiusIndex);
+
+        if (existingChunks.ContainsKey(checkPos)) {
+            currentChunk = existingChunks[checkPos];
+            currentChunk.shouldUpdateCollider = true;
+        }
 
         int voxelYOffset = yEnd * voxelResolution;
         for (int y = yEnd; y >= yStart - 1; y--) {
@@ -112,7 +118,6 @@ public class VoxelEditor : MonoBehaviour {
         if (existingChunks.ContainsKey(checkPos)) {
             currentChunk = existingChunks[checkPos];
             result = currentChunk.Apply(activeStencil);
-            currentChunk.shouldUpdateCollider = true;
         }
 
         for (int x = -1; x < 1; x++) {
@@ -124,6 +129,7 @@ public class VoxelEditor : MonoBehaviour {
 
                     if (result) {
                         voxelMesh.TriangulateChunkMesh(currentChunk);
+                        Debug.Log(1);
                     }
                 }
             }

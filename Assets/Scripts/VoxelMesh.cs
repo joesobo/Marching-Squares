@@ -122,6 +122,7 @@ public class VoxelMesh : MonoBehaviour {
                 if (Vector3.Distance(p, chunk.transform.position) < colliderRadius) {
                     chunkCollider.Generate2DCollider(chunk, chunkResolution);
                     chunk.shouldUpdateCollider = false;
+                    Debug.Log(chunk.transform.position);
                 }
             }
         }
