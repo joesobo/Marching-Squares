@@ -307,11 +307,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5bf713b57817c754b8b0302424a29995, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  terrainType: 4
+  terrainType: 1
   scaleHeightNoise: 2
   scaleTerrainNoise: 1
   seed: 0
-  useRandomSeed: 0
+  useRandomSeed: 1
   height1: 0.05
   height2: 0.2
   height3: 0.3
@@ -453,7 +453,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   voxelResolution: 8
-  viewDistance: 5
+  viewDistance: 4
   shader: {fileID: 7200000, guid: 82bebc4886c0ef2479b2a7ebe8b6f899, type: 3}
   useColliders: 1
 --- !u!4 &911654351
@@ -783,6 +783,7 @@ MonoBehaviour:
   voxelChunkPrefab: {fileID: 7782940093856803487, guid: 3865adb193875b742ba5dd4d18ee8c72,
     type: 3}
   useVoxelReferences: 0
+  colliderRadius: 2
 --- !u!4 &1917315890
 Transform:
   m_ObjectHideFlags: 0

@@ -28,6 +28,8 @@ public class VoxelMesh : MonoBehaviour {
 
     private TerrainNoise terrainNoise;
 
+    public float colliderRadius = 1;
+
     public void Startup(int voxelResolution, int chunkResolution, float viewDistance, Dictionary<Vector2Int, VoxelChunk> existingChunks, bool useColliders) {
         this.voxelResolution = voxelResolution;
         this.chunkResolution = chunkResolution;
@@ -84,7 +86,7 @@ public class VoxelMesh : MonoBehaviour {
                 Vector2 o = new Vector2(Mathf.Abs(playerOffset.x), Mathf.Abs(playerOffset.y)) - (Vector2.one * viewDistance) / 2;
                 float sqrDst = o.sqrMagnitude;
 
-                if (sqrDst <= sqrViewDist) {
+                if (sqrDst <= sqrViewDist - 4) {
                     if (recycleableChunks.Count > 0) {
                         VoxelChunk recycleChunk = recycleableChunks.Dequeue();
                         recycleChunk.SetNewChunk(coord.x, coord.y);
@@ -117,6 +119,14 @@ public class VoxelMesh : MonoBehaviour {
             if (chunk.shouldUpdateMesh) {
                 TriangulateChunkMesh(chunk);
                 chunk.shouldUpdateMesh = false;
+            }
+
+            if (useColliders && chunk.shouldUpdateCollider) {
+                if (Vector3.Distance(p, chunk.transform.position) < colliderRadius) {
+                    chunkCollider.Generate2DCollider(chunk, chunkResolution);
+                    chunk.shouldUpdateCollider = false;
+                    Debug.Log(chunk.transform.position);
+                }
             }
         }
     }
@@ -200,9 +210,14 @@ public class VoxelMesh : MonoBehaviour {
 
         ShaderTriangulate(chunk, out chunk.vertices, out chunk.triangles, out chunk.colors);
 
-        if (useColliders && chunk.shouldUpdateCollider) {
-            chunkCollider.Generate2DCollider(chunk, chunkResolution);
-            chunk.shouldUpdateCollider = false;
+        if (useColliders) {
+            Vector3 p = player.position / voxelResolution;
+
+            if (Vector3.Distance(p, chunk.transform.position) < colliderRadius) {
+                chunkCollider.Generate2DCollider(chunk, chunkResolution);
+                chunk.shouldUpdateCollider = false;
+                Debug.Log(chunk.transform.position);
+            }
         }
 
         Vector2[] uvs = GetUVs(chunk);

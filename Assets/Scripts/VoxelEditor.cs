@@ -24,6 +24,9 @@ public class VoxelEditor : MonoBehaviour {
         new VoxelStencilCircle()
     };
 
+    private Vector3 oldPoint;
+    private int oldTypeIndex;
+
     public void Startup(int voxelResolution, int chunkResolution, float viewDistance, Dictionary<Vector2Int, VoxelChunk> existingChunks, List<VoxelChunk> chunks, VoxelMap voxelMap) {
         this.voxelResolution = voxelResolution;
         this.chunkResolution = chunkResolution;
@@ -51,8 +54,10 @@ public class VoxelEditor : MonoBehaviour {
         if (Input.GetMouseButton(0)) {
             RaycastHit hitInfo;
             if (Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out hitInfo)) {
-                if (hitInfo.collider.gameObject == gameObject) {
+                if (hitInfo.collider.gameObject == gameObject && (oldPoint != hitInfo.point || oldTypeIndex != fillTypeIndex)) {
                     EditVoxels(hitInfo.point);
+                    oldPoint = hitInfo.point;
+                    oldTypeIndex = fillTypeIndex;
                 }
             }
         }
@@ -94,10 +99,10 @@ public class VoxelEditor : MonoBehaviour {
             int voxelXOffset = xEnd * voxelResolution;
             for (int x = xEnd; x >= xStart - 1; x--) {
                 Vector3 absChunkPos = new Vector3(Mathf.Floor((clickPos.x + voxelXOffset) / voxelResolution), Mathf.Floor((clickPos.y + voxelYOffset) / voxelResolution));
-                Vector2Int checkPos = new Vector2Int((int)absChunkPos.x, (int)absChunkPos.y);
+                Vector2Int absCheckPos = new Vector2Int((int)absChunkPos.x, (int)absChunkPos.y);
                 activeStencil.SetCenter(centerX - voxelXOffset, centerY - voxelYOffset);
 
-                EditChunkAndNeighbors(activeStencil, checkPos);
+                EditChunkAndNeighbors(activeStencil, absCheckPos);
 
                 voxelXOffset -= voxelResolution;
             }
