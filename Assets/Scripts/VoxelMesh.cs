@@ -90,6 +90,10 @@ public class VoxelMesh : MonoBehaviour {
                 if (sqrDst <= sqrViewDist - 4) {
                     if (recycleableChunks.Count > 0) {
                         currentChunk = recycleableChunks.Dequeue();
+                        EdgeCollider2D[] currentColliders = currentChunk.gameObject.GetComponents<EdgeCollider2D>();
+                        for (int j = 0; j < currentColliders.Length; j++) {
+                            Destroy(currentColliders[j]);
+                        }
                     } else {
                         currentChunk = CreateChunk(i, x, y, chunks);
                     }
