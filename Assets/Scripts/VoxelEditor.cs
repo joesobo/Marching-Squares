@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class VoxelEditor : MonoBehaviour {
-    private static string[] fillTypeNames = { "Empty", "Stone", "Dirt", "Rock", "Grass" };
-    private static string[] radiusNames = { "0", "1", "2", "3", "4", "5" };
-    private static string[] stencilNames = { "Square", "Circle" };
+    private const int UPDATE_INTERVAL = 2;
+
+    private static readonly string[] FillTypeNames = {"Empty", "Stone", "Dirt", "Rock", "Grass"};
+    private static readonly string[] RadiusNames = {"0", "1", "2", "3", "4", "5"};
+    private static readonly string[] StencilNames = {"Square", "Circle"};
 
     private int voxelResolution, chunkResolution;
     private float viewDistance, halfSize, voxelSize;
@@ -26,14 +28,13 @@ public class VoxelEditor : MonoBehaviour {
     private VoxelStencil activeStencil;
     private VoxelChunk currentChunk;
 
-    private VoxelStencil[] stencils = {
+    private readonly VoxelStencil[] stencils = {
         new VoxelStencil(),
         new VoxelStencilCircle()
     };
 
-    private int interval = 2;
-
-    public void Startup(int voxelResolution, int chunkResolution, float viewDistance, Dictionary<Vector2Int, VoxelChunk> existingChunks, List<VoxelChunk> chunks, VoxelMap voxelMap) {
+    public void Startup(int voxelResolution, int chunkResolution, float viewDistance,
+        Dictionary<Vector2Int, VoxelChunk> existingChunks, List<VoxelChunk> chunks, VoxelMap voxelMap) {
         this.voxelResolution = voxelResolution;
         this.chunkResolution = chunkResolution;
         this.viewDistance = viewDistance;
@@ -49,22 +50,23 @@ public class VoxelEditor : MonoBehaviour {
         box = gameObject.GetComponent<BoxCollider>();
         if (box != null) {
             DestroyImmediate(box);
-
         }
+
         box = gameObject.AddComponent<BoxCollider>();
-        box.center = Vector3.one * (voxelResolution / 2);
-        box.size = new Vector3((chunkResolution - viewDistance) * voxelResolution, (chunkResolution - viewDistance) * voxelResolution);
+        box.center = Vector3.one * (voxelResolution / 2f);
+        box.size = new Vector3((chunkResolution - viewDistance) * voxelResolution,
+            (chunkResolution - viewDistance) * voxelResolution);
     }
 
     private void Update() {
-        if (Time.frameCount % interval == 0) {
-            if (Input.GetMouseButton(0)) {
-                if (Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out hitInfo)) {
-                    if (hitInfo.collider.gameObject == gameObject && (oldPoint != hitInfo.point || oldTypeIndex != fillTypeIndex)) {
-                        EditVoxels(hitInfo.point);
-                        oldPoint = hitInfo.point;
-                        oldTypeIndex = fillTypeIndex;
-                    }
+        if (Time.frameCount % UPDATE_INTERVAL != 0) return;
+        if (Input.GetMouseButton(0)) {
+            if (Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out hitInfo)) {
+                if (hitInfo.collider.gameObject == gameObject &&
+                    (oldPoint != hitInfo.point || oldTypeIndex != fillTypeIndex)) {
+                    EditVoxels(hitInfo.point);
+                    oldPoint = hitInfo.point;
+                    oldTypeIndex = fillTypeIndex;
                 }
             }
         }
@@ -72,21 +74,25 @@ public class VoxelEditor : MonoBehaviour {
 
     private void EditVoxels(Vector3 point) {
         chunkPos = new Vector3(Mathf.Floor(point.x / voxelResolution), Mathf.Floor(point.y / voxelResolution));
-        Vector2Int checkPos = new Vector2Int((int)chunkPos.x, (int)chunkPos.y);
-        diff = new Vector2Int((int)Mathf.Abs(point.x - (chunkPos * voxelResolution).x), (int)Mathf.Abs(point.y - (chunkPos * voxelResolution).y));
+        var checkPos = new Vector2Int((int) chunkPos.x, (int) chunkPos.y);
+        diff = new Vector2Int((int) Mathf.Abs(point.x - (chunkPos * voxelResolution).x),
+            (int) Mathf.Abs(point.y - (chunkPos * voxelResolution).y));
 
         xStart = (diff.x - radiusIndex - 1) / voxelResolution;
         if (xStart <= -chunkResolution) {
             xStart = -chunkResolution + 1;
         }
+
         xEnd = (diff.x + radiusIndex) / voxelResolution;
         if (xEnd >= chunkResolution) {
             xEnd = chunkResolution - 1;
         }
+
         yStart = (diff.y - radiusIndex - 1) / voxelResolution;
         if (yStart <= -chunkResolution) {
             yStart = -chunkResolution + 1;
         }
+
         yEnd = (diff.y + radiusIndex) / voxelResolution;
         if (yEnd >= chunkResolution) {
             yEnd = chunkResolution - 1;
@@ -99,19 +105,21 @@ public class VoxelEditor : MonoBehaviour {
         for (int y = yEnd; y >= yStart - 1; y--) {
             int voxelXOffset = xEnd * voxelResolution;
             for (int x = xEnd; x >= xStart - 1; x--) {
-                absChunkPos = new Vector3(Mathf.Floor((point.x + voxelXOffset) / voxelResolution), Mathf.Floor((point.y + voxelYOffset) / voxelResolution));
-                absCheckPos = new Vector2Int((int)absChunkPos.x, (int)absChunkPos.y);
+                absChunkPos = new Vector3(Mathf.Floor((point.x + voxelXOffset) / voxelResolution),
+                    Mathf.Floor((point.y + voxelYOffset) / voxelResolution));
+                absCheckPos = new Vector2Int((int) absChunkPos.x, (int) absChunkPos.y);
                 activeStencil.SetCenter(diff.x - voxelXOffset, diff.y - voxelYOffset);
 
-                EditChunkAndNeighbors(activeStencil, absCheckPos);
+                EditChunkAndNeighbors(absCheckPos);
 
                 voxelXOffset -= voxelResolution;
             }
+
             voxelYOffset -= voxelResolution;
         }
     }
 
-    private void EditChunkAndNeighbors(VoxelStencil activeStencil, Vector2Int checkPos) {
+    private void EditChunkAndNeighbors(Vector2Int checkPos) {
         bool result = false;
 
         if (existingChunks.ContainsKey(checkPos)) {
@@ -137,15 +145,16 @@ public class VoxelEditor : MonoBehaviour {
     private void OnGUI() {
         GUILayout.BeginArea(new Rect(4f, 4f, 150f, 1000f));
         GUILayout.Label("Fill Type");
-        fillTypeIndex = GUILayout.SelectionGrid(fillTypeIndex, fillTypeNames, 2);
+        fillTypeIndex = GUILayout.SelectionGrid(fillTypeIndex, FillTypeNames, 2);
         GUILayout.Label("Radius");
-        radiusIndex = GUILayout.SelectionGrid(radiusIndex, radiusNames, 6);
+        radiusIndex = GUILayout.SelectionGrid(radiusIndex, RadiusNames, 6);
         GUILayout.Label("Stencil");
-        stencilIndex = GUILayout.SelectionGrid(stencilIndex, stencilNames, 2);
+        stencilIndex = GUILayout.SelectionGrid(stencilIndex, StencilNames, 2);
         GUILayout.Label("Regenerate");
         if (GUI.Button(new Rect(0, 225, 150f, 20f), "Generate")) {
             voxelMap.FreshGeneration();
         }
+
         GUILayout.EndArea();
     }
 }

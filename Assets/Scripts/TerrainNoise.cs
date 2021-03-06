@@ -1,17 +1,20 @@
+using System;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class TerrainNoise : MonoBehaviour {
     public TerrainType terrainType = TerrainType.Perlin;
 
-    [DrawIf(nameof (terrainType), TerrainType.Perlin, ComparisonType.Equals)]
-    [Range(0.3f, 100)]
+    [DrawIf(nameof(terrainType), TerrainType.Perlin, ComparisonType.Equals)] [Range(0.3f, 100)]
     public float scaleHeightNoise;
-    [DrawIf(nameof (terrainType), TerrainType.Perlin, ComparisonType.Equals)]
-    [Range(0.3f, 100)]
+
+    [DrawIf(nameof(terrainType), TerrainType.Perlin, ComparisonType.Equals)] [Range(0.3f, 100)]
     public float scaleTerrainNoise;
-    [DrawIf(nameof (terrainType), TerrainType.Perlin, ComparisonType.Equals)]
+
+    [DrawIf(nameof(terrainType), TerrainType.Perlin, ComparisonType.Equals)]
     public float seed = 0;
-    [DrawIf(nameof (terrainType), TerrainType.Perlin, ComparisonType.Equals)]
+
+    [DrawIf(nameof(terrainType), TerrainType.Perlin, ComparisonType.Equals)]
     public bool useRandomSeed;
 
     private float[,] noiseMap;
@@ -19,7 +22,7 @@ public class TerrainNoise : MonoBehaviour {
     private float halfSize;
     private Transform player;
 
-    [DrawIf(nameof (terrainType), TerrainType.Perlin, ComparisonType.Equals)]
+    [DrawIf(nameof(terrainType), TerrainType.Perlin, ComparisonType.Equals)]
     public float height1, height2, height3, height4 = 0;
 
     public enum TerrainType {
@@ -44,10 +47,11 @@ public class TerrainNoise : MonoBehaviour {
     }
 
     public void GenerateNoiseValues(VoxelChunk chunk) {
-        float centeredChunkX = chunk.transform.position.x;
-        float centeredChunkY = chunk.transform.position.y;
+        var position = chunk.transform.position;
+        float centeredChunkX = position.x;
+        float centeredChunkY = position.y;
 
-        foreach (Voxel voxel in chunk.voxels) {
+        foreach (var voxel in chunk.voxels) {
             switch (terrainType) {
                 case TerrainType.Off:
                     voxel.state = 0;
@@ -64,6 +68,8 @@ public class TerrainNoise : MonoBehaviour {
                 case TerrainType.Perlin:
                     PerlinNoise(centeredChunkX, centeredChunkY, voxel);
                     break;
+                default:
+                    throw new ArgumentOutOfRangeException();
             }
         }
     }
@@ -82,23 +88,28 @@ public class TerrainNoise : MonoBehaviour {
 
         if (y > maxHeight) {
             voxel.state = 0;
-        } else {
+        }
+        else {
             if (y < height1 * chunkResolution * voxelResolution) {
                 //random 3/0
                 voxel.state = noiseVal > 0.33f ? 3 : 0;
-            } else if (y < height2 * chunkResolution * voxelResolution) {
+            }
+            else if (y < height2 * chunkResolution * voxelResolution) {
                 //random 3/1/0
                 voxel.state = noiseVal > 0.65f ? 3 : noiseVal > 0.33f ? 1 : 0;
-            } else if (y < height3 * chunkResolution * voxelResolution) {
+            }
+            else if (y < height3 * chunkResolution * voxelResolution) {
                 //random 2/1/0
                 voxel.state = noiseVal > 0.66f ? 2 : noiseVal > 0.33f ? 1 : 0;
-            } else {
+            }
+            else {
                 voxel.state = noiseVal > 0.5f ? 2 : 1;
             }
 
             if (InRange(y, Mathf.RoundToInt(maxHeight), 3)) {
                 voxel.state = 4;
-            } else if (InRange(y, Mathf.RoundToInt(maxHeight), 8)) {
+            }
+            else if (InRange(y, Mathf.RoundToInt(maxHeight), 8)) {
                 voxel.state = noiseVal > 0.2f ? 2 : 1;
             }
         }

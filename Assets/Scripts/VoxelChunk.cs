@@ -9,8 +9,7 @@ public class VoxelChunk : MonoBehaviour {
     public bool shouldUpdateMesh = false;
     public bool shouldUpdateCollider = false;
     public GameObject voxelPointPrefab;
-    [HideInInspector]
-    public VoxelChunk xNeighbor, yNeighbor, xyNeighbor;
+    [HideInInspector] public VoxelChunk xNeighbor, yNeighbor, xyNeighbor;
     private ComputeShader shader;
 
     public Voxel[] voxels;
@@ -25,6 +24,7 @@ public class VoxelChunk : MonoBehaviour {
     public HashSet<int> checkedVertices;
     public List<List<int>> outlines;
     public Dictionary<Vector2, List<Triangle>> triangleDictionary;
+    private static readonly int Resolution = Shader.PropertyToID("Resolution");
 
     public void Initialize(bool useVoxelPoints, int resolution) {
         this.useVoxelPoints = useVoxelPoints;
@@ -41,7 +41,7 @@ public class VoxelChunk : MonoBehaviour {
         }
 
         GetComponent<MeshFilter>().mesh = mesh = new Mesh();
-        material.SetVector("Resolution", Vector2.one * resolution);
+        material.SetVector(Resolution, Vector2.one * resolution);
         GetComponent<MeshRenderer>().material = material;
         mesh.name = "VoxelChunk Mesh";
 
@@ -52,12 +52,12 @@ public class VoxelChunk : MonoBehaviour {
 
     private void CreateVoxelPoint(int i, int x, int y) {
         if (useVoxelPoints) {
-            GameObject o = Instantiate(voxelPointPrefab) as GameObject;
-            o.transform.parent = transform;
+            var o = Instantiate(voxelPointPrefab, transform, true) as GameObject;
             o.transform.localPosition = new Vector3((x + 0.5f) * voxelSize, (y + 0.5f) * voxelSize, -0.01f);
-            o.transform.localScale = Vector3.one * voxelSize * 0.1f;
+            o.transform.localScale = Vector3.one * (voxelSize * 0.1f);
             voxelMaterials.Add(o.GetComponent<MeshRenderer>().material);
         }
+
         voxels[i] = new Voxel(x, y, voxelSize);
     }
 
@@ -66,10 +66,9 @@ public class VoxelChunk : MonoBehaviour {
     }
 
     private void SetVoxelColors() {
-        if (voxelMaterials.Count > 0) {
-            for (int i = 0; i < voxels.Length; i++) {
-                voxelMaterials[i].color = voxels[i].state == 0 ? Color.black : Color.white;
-            }
+        if (voxelMaterials.Count <= 0) return;
+        for (int i = 0; i < voxels.Length; i++) {
+            voxelMaterials[i].color = voxels[i].state == 0 ? Color.black : Color.white;
         }
     }
 
@@ -78,23 +77,25 @@ public class VoxelChunk : MonoBehaviour {
         if (xStart < 0) {
             xStart = 0;
         }
+
         int xEnd = stencil.XEnd;
         if (xEnd >= resolution) {
             xEnd = resolution - 1;
         }
+
         int yStart = stencil.YStart;
         if (yStart < 0) {
             yStart = 0;
         }
+
         int yEnd = stencil.YEnd;
         if (yEnd >= resolution) {
             yEnd = resolution - 1;
         }
 
         bool didUpdate = false;
-        int i;
         for (int y = yStart; y <= yEnd; y++) {
-            i = y * resolution + xStart;
+            int i = y * resolution + xStart;
             for (int x = xStart; x <= xEnd; x++, i++) {
                 if (voxels[i].state != stencil.fillType) {
                     voxels[i].state = stencil.Apply(x, y, voxels[i].state);
@@ -102,10 +103,12 @@ public class VoxelChunk : MonoBehaviour {
                 }
             }
         }
+
         Refresh();
         if (didUpdate) {
             shouldUpdateCollider = true;
         }
+
         return didUpdate;
     }
 
@@ -127,6 +130,7 @@ public class VoxelChunk : MonoBehaviour {
 
     private void OnDrawGizmos() {
         Gizmos.color = Color.red;
-        Gizmos.DrawWireCube(new Vector3(transform.position.x + halfSize, transform.position.y + halfSize), Vector3.one * resolution);
+        var position = transform.position;
+        Gizmos.DrawWireCube(new Vector3(position.x + halfSize, position.y + halfSize), Vector3.one * resolution);
     }
 }

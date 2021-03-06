@@ -3,7 +3,6 @@ using System;
 
 [Serializable]
 public class Voxel {
-
     public int state;
 
     public Vector2 position;

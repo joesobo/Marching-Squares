@@ -20,9 +20,10 @@ public class PlayerController : MonoBehaviour {
     }
 
     private void Update() {
-        if (Input.GetKeyDown(KeyCode.Space) && isGrounded()) {
+        if (Input.GetKeyDown(KeyCode.Space) && IsGrounded()) {
             velocity.y = jumpforce;
-        }else{
+        }
+        else {
             if (velocity.y > 0) {
                 velocity.y -= Time.deltaTime * jumpDecelleration;
             }
@@ -38,15 +39,13 @@ public class PlayerController : MonoBehaviour {
 
         velocity.x = Mathf.MoveTowards(velocity.x, (speed / 100) * xInput, walkAcceleration * Time.deltaTime);
 
-        rb.velocity = (Vector2)velocity;
+        rb.velocity = (Vector2) velocity;
     }
 
-    private bool isGrounded() {
-        RaycastHit2D hit = Physics2D.BoxCast(boxCollider.bounds.center, boxCollider.bounds.size, 0f, Vector2.down, .1f, layerMaskForGrounded.value);
-        if (hit.collider != null) {
-            return true;
-        }
-
-        return false;
+    private bool IsGrounded() {
+        var bounds = boxCollider.bounds;
+        var hit = Physics2D.BoxCast(bounds.center, bounds.size, 0f, Vector2.down, .1f,
+            layerMaskForGrounded.value);
+        return hit.collider;
     }
 }

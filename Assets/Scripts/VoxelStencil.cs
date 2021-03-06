@@ -1,33 +1,17 @@
 ﻿using UnityEngine;
 
 public class VoxelStencil {
-
     public int fillType;
-    protected int centerX, centerY, radius;
+    protected int centerX, centerY;
+    private int radius;
 
-    public int XStart {
-        get {
-            return centerX - radius;
-        }
-    }
+    public int XStart => centerX - radius;
 
-    public int XEnd {
-        get {
-            return centerX + radius;
-        }
-    }
+    public int XEnd => centerX + radius;
 
-    public int YStart {
-        get {
-            return centerY - radius;
-        }
-    }
+    public int YStart => centerY - radius;
 
-    public int YEnd {
-        get {
-            return centerY + radius;
-        }
-    }
+    public int YEnd => centerY + radius;
 
     public virtual void Initialize(int fillType, int radius) {
         this.fillType = fillType;

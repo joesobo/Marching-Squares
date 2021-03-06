@@ -2,11 +2,9 @@
 using UnityEngine;
 
 public partial class VoxelMap : MonoBehaviour {
-    [Range(8, 56)]
-    public int voxelResolution = 8;
+    [Range(8, 56)] public int voxelResolution = 8;
     private int chunkResolution;
-    [Range(1, 16)]
-    public int viewDistance = 3;
+    [Range(1, 16)] public int viewDistance = 3;
     public float colliderRadius = 1;
     public ComputeShader shader;
     public bool useColliders = false;
@@ -37,7 +35,7 @@ public partial class VoxelMap : MonoBehaviour {
         GenerateTerrain();
     }
 
-    public void GenerateTerrain() {
+    private void GenerateTerrain() {
         transform.parent.localScale = Vector3.one;
 
         voxelMesh.TriangulateChunks(chunks);
@@ -62,7 +60,7 @@ public partial class VoxelMap : MonoBehaviour {
     private void OnDrawGizmosSelected() {
         if (player) {
             Gizmos.color = new Color(0, 0, 1, 0.25f);
-            Gizmos.DrawSphere(player.position, voxelResolution * chunkResolution / 2);
+            Gizmos.DrawSphere(player.position, voxelResolution * chunkResolution / 2f);
         }
     }
 }
