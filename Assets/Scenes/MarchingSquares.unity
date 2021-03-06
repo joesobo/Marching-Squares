@@ -560,6 +560,9 @@ MonoBehaviour:
   colliderRadius: 2
   shader: {fileID: 7200000, guid: 82bebc4886c0ef2479b2a7ebe8b6f899, type: 3}
   useColliders: 1
+  voxelChunkPrefab: {fileID: 7782940093856803487, guid: 3865adb193875b742ba5dd4d18ee8c72,
+    type: 3}
+  useVoxelReferences: 0
 --- !u!4 &911654351
 Transform:
   m_ObjectHideFlags: 0
@@ -884,9 +887,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   shader: {fileID: 7200000, guid: 82bebc4886c0ef2479b2a7ebe8b6f899, type: 3}
-  voxelChunkPrefab: {fileID: 7782940093856803487, guid: 3865adb193875b742ba5dd4d18ee8c72,
-    type: 3}
-  useVoxelReferences: 0
 --- !u!4 &1917315890
 Transform:
   m_ObjectHideFlags: 0
