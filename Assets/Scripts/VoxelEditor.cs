@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class VoxelEditor : MonoBehaviour {
-    private const int UPDATE_INTERVAL = 2;
+    private const int UPDATE_INTERVAL = 1;
 
     private static readonly string[] FillTypeNames = {"Empty", "Stone", "Dirt", "Rock", "Grass"};
     private static readonly string[] RadiusNames = {"0", "1", "2", "3", "4", "5"};
@@ -33,14 +33,13 @@ public class VoxelEditor : MonoBehaviour {
         new VoxelStencilCircle()
     };
 
-    public void Startup(int voxelResolution, int chunkResolution, float viewDistance,
-        Dictionary<Vector2Int, VoxelChunk> existingChunks, List<VoxelChunk> chunks, VoxelMap voxelMap) {
-        this.voxelResolution = voxelResolution;
-        this.chunkResolution = chunkResolution;
-        this.viewDistance = viewDistance;
-        this.existingChunks = existingChunks;
-        this.chunks = chunks;
-        this.voxelMap = voxelMap;
+    public void Startup(VoxelMap map) {
+        voxelResolution = map.voxelResolution;
+        chunkResolution = map.chunkResolution;
+        viewDistance = map.viewDistance;
+        existingChunks = map.existingChunks;
+        chunks = map.chunks;
+        voxelMap = map;
         halfSize = 0.5f * chunkResolution;
         voxelSize = 1f / voxelResolution;
 
@@ -154,7 +153,6 @@ public class VoxelEditor : MonoBehaviour {
         if (GUI.Button(new Rect(0, 225, 150f, 20f), "Generate")) {
             voxelMap.FreshGeneration();
         }
-
         GUILayout.EndArea();
     }
 }
