@@ -119,9 +119,10 @@ public class VoxelEditor : MonoBehaviour {
     }
 
     // TODO: Keep refactoring here
-    // current only updates neighbors when edge voxel is updated
-    // make it so it only updates specific neighbor based on voxel position
     // try to fix bigger radius brush size
+
+    // IDEAS: 
+    // refactor out applied chunk so its applied in every updated chunk
     private void EditChunkAndNeighbors(Vector2Int checkPos, Vector2 pos) {
         bool mainRes = false;
 
@@ -138,24 +139,25 @@ public class VoxelEditor : MonoBehaviour {
                 if (existingChunks.ContainsKey(currentPos)) {
                     currentChunk = existingChunks[currentPos];
 
-                    if (Mathf.Abs(pos.x) == 8 || pos.x == 0) {
+                    if (x == -1 && y == -1 && (Mathf.Abs(pos.x) == 8 || pos.x == 0) && (Mathf.Abs(pos.y) == 8 || pos.y == 0)) {
                         result = true;
-                    } else if (Mathf.Abs(pos.y) == 8 || pos.y == 0) {
+                    }
+                    else if (x == -1 && y == 0 && (Mathf.Abs(pos.x) == 8 || pos.x == 0)) {
+                        result = true;
+                    }
+                    else if (x == 0 && y == -1 && (Mathf.Abs(pos.y) == 8 || pos.y == 0)) {
                         result = true;
                     }
 
                     if (result && (x != 0 || y != 0)) {
                         voxelMesh.TriangulateChunkMesh(currentChunk);
                     }
-
-
                 }
             }
         }
 
         if (mainRes) {
             voxelMesh.TriangulateChunkMesh(currentChunk);
-            Debug.Log(2);
         }
     }
 
