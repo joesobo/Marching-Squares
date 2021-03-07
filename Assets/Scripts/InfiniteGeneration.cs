@@ -81,31 +81,30 @@ public class InfiniteGeneration : MonoBehaviour {
             for (int x = -chunkResolution / 2; x < chunkResolution / 2; x++, i++) {
                 coord = new Vector2Int(x, y) + playerCoord;
 
-                if (!existingChunks.ContainsKey(coord)) {
-                    playerOffset = p - coord;
-                    offset = new Vector2(Mathf.Abs(playerOffset.x), Mathf.Abs(playerOffset.y)) -
-                             (Vector2.one * viewDistance) / 2;
-                    sqrDst = offset.sqrMagnitude;
+                if (existingChunks.ContainsKey(coord)) continue;
+                playerOffset = p - coord;
+                offset = new Vector2(Mathf.Abs(playerOffset.x), Mathf.Abs(playerOffset.y)) -
+                         (Vector2.one * viewDistance) / 2;
+                sqrDst = offset.sqrMagnitude;
 
-                    if (sqrDst <= sqrViewDist - 4) {
-                        VoxelChunk currentChunk;
-                        if (recycleableChunks.Count > 0) {
-                            currentChunk = recycleableChunks.Dequeue();
-                            var currentColliders = currentChunk.gameObject.GetComponents<EdgeCollider2D>();
-                            foreach (var t in currentColliders) {
-                                Destroy(t);
-                            }
+                if (sqrDst <= sqrViewDist - 4) {
+                    VoxelChunk currentChunk;
+                    if (recycleableChunks.Count > 0) {
+                        currentChunk = recycleableChunks.Dequeue();
+                        var currentColliders = currentChunk.gameObject.GetComponents<EdgeCollider2D>();
+                        foreach (var t in currentColliders) {
+                            Destroy(t);
                         }
-                        else {
-                            currentChunk = CreateChunk(i, x, y);
-                        }
-
-                        currentChunk.SetNewChunk(coord.x, coord.y);
-                        existingChunks.Add(coord, currentChunk);
-                        currentChunk.shouldUpdateCollider = true;
-                        chunks.Add(currentChunk);
-                        terrainNoise.GenerateNoiseValues(currentChunk);
                     }
+                    else {
+                        currentChunk = CreateChunk(i, x, y);
+                    }
+
+                    currentChunk.SetNewChunk(coord.x, coord.y);
+                    existingChunks.Add(coord, currentChunk);
+                    currentChunk.shouldUpdateCollider = true;
+                    chunks.Add(currentChunk);
+                    terrainNoise.GenerateNoiseValues(currentChunk);
                 }
             }
         }

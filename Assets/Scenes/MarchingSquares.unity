@@ -561,13 +561,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   voxelResolution: 8
+  chunkResolution: 0
   viewDistance: 4
   colliderRadius: 2
-  shader: {fileID: 7200000, guid: 82bebc4886c0ef2479b2a7ebe8b6f899, type: 3}
   useColliders: 1
-  voxelChunkPrefab: {fileID: 7782940093856803487, guid: 3865adb193875b742ba5dd4d18ee8c72,
-    type: 3}
   useVoxelReferences: 0
+  player: {fileID: 0}
+  chunks: []
 --- !u!4 &911654351
 Transform:
   m_ObjectHideFlags: 0
@@ -594,6 +594,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 71a7f1664ae943acb1ee770fc6e81402, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  voxelChunkPrefab: {fileID: 7782940093856803487, guid: 3865adb193875b742ba5dd4d18ee8c72,
+    type: 3}
 --- !u!1 &963194225
 GameObject:
   m_ObjectHideFlags: 0

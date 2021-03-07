@@ -42,6 +42,7 @@ public partial class VoxelMap : MonoBehaviour {
         transform.parent.localScale = Vector3.one * voxelResolution;
     }
 
+    // ReSharper disable Unity.PerformanceAnalysis
     public void FreshGeneration() {
         var oldChunks = FindObjectsOfType<VoxelChunk>();
         for (int i = oldChunks.Length - 1; i >= 0; i--) {
