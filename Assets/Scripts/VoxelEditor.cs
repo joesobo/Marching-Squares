@@ -1,9 +1,10 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class VoxelEditor : MonoBehaviour {
-    private const int UPDATE_INTERVAL = 1;
+    private const int UPDATE_INTERVAL = 2;
 
     private static readonly string[] FillTypeNames = { "Empty", "Stone", "Dirt", "Rock", "Grass" };
     private static readonly string[] RadiusNames = { "0", "1", "2", "3", "4", "5" };
@@ -27,6 +28,7 @@ public class VoxelEditor : MonoBehaviour {
     private RaycastHit hitInfo;
     private VoxelStencil activeStencil;
     private VoxelChunk currentChunk;
+    private Dictionary<VoxelChunk, int> updateChunkDictionary = new Dictionary<VoxelChunk, int>();
 
     private readonly VoxelStencil[] stencils = {
         new VoxelStencil(),
@@ -101,29 +103,40 @@ public class VoxelEditor : MonoBehaviour {
         activeStencil.Initialize(fillTypeIndex, radiusIndex);
 
         int voxelYOffset = yEnd * voxelResolution;
-        for (int y = yStart - 1; y < yEnd; y++) {
+        updateChunkDictionary.Clear();
+
+        for (int y = yStart - 1; y < yEnd + 1; y++) {
             int voxelXOffset = xEnd * voxelResolution;
-            for (int x = xStart - 1; x < xEnd; x++) {
+            for (int x = xStart - 1; x < xEnd + 1; x++) {
                 absChunkPos = new Vector3(Mathf.Floor((point.x + voxelXOffset) / voxelResolution),
                     Mathf.Floor((point.y + voxelYOffset) / voxelResolution));
                 absCheckPos = new Vector2Int((int)absChunkPos.x, (int)absChunkPos.y);
                 activeStencil.SetCenter(diff.x - voxelXOffset, diff.y - voxelYOffset);
 
-                EditChunkAndNeighbors(absCheckPos, new Vector3(Mathf.Floor(point.x + voxelXOffset), Mathf.Floor(point.y + voxelYOffset)));
+                EditChunkAndNeighbors(absCheckPos,
+                    new Vector3(Mathf.Floor(point.x + voxelXOffset), Mathf.Floor(point.y + voxelYOffset)), checkPos);
 
                 voxelXOffset -= voxelResolution;
             }
 
             voxelYOffset -= voxelResolution;
         }
+
+        var list = updateChunkDictionary.Keys.ToList();
+        list.Sort(SortByPosition);
+        foreach (var chunk in list) {
+            // Debug.Log(chunk.transform.position / voxelResolution);
+            voxelMesh.TriangulateChunkMesh(chunk);
+        }
     }
 
-    // TODO: Keep refactoring here
-    // try to fix bigger radius brush size
+    private static int SortByPosition(VoxelChunk c1, VoxelChunk c2) {
+        var position1 = c1.transform.position;
+        var position2 = c2.transform.position;
+        return (position1.x < position2.x && position1.y < position2.y) ? 1 : 0;
+    }
 
-    // IDEAS: 
-    // refactor out applied chunk so its applied in every updated chunk
-    private void EditChunkAndNeighbors(Vector2Int checkPos, Vector2 pos) {
+    private void EditChunkAndNeighbors(Vector2Int checkPos, Vector2 pos, Vector2Int origin) {
         bool mainRes = false;
 
         if (existingChunks.ContainsKey(checkPos)) {
@@ -131,33 +144,38 @@ public class VoxelEditor : MonoBehaviour {
             mainRes = currentChunk.Apply(activeStencil);
         }
 
+        currentChunk.Apply(activeStencil);
+
+        // TODO: allow editing neighbors when radius > 1 and moving up/right
         for (int x = -1; x < 1; x++) {
             for (int y = -1; y < 1; y++) {
                 bool result = false;
                 currentPos = new Vector2Int(checkPos.x + x, checkPos.y + y);
 
-                if (existingChunks.ContainsKey(currentPos)) {
-                    currentChunk = existingChunks[currentPos];
+                if (!existingChunks.ContainsKey(currentPos)) continue;
+                currentChunk = existingChunks[currentPos];
 
-                    if (x == -1 && y == -1 && (Mathf.Abs(pos.x) == 8 || pos.x == 0) && (Mathf.Abs(pos.y) == 8 || pos.y == 0)) {
+                switch (x) {
+                    case -1 when y == -1 && (Mathf.Abs(pos.x - radiusIndex) % 8 == 0) &&
+                                (Mathf.Abs(pos.y - radiusIndex) % 8 == 0):
+                    case 0 when y == -1 && (Mathf.Abs(pos.y - radiusIndex) % 8 == 0):
+                    case -1 when y == 0 && (Mathf.Abs(pos.x - radiusIndex) % 8 == 0):
                         result = true;
-                    }
-                    else if (x == -1 && y == 0 && (Mathf.Abs(pos.x) == 8 || pos.x == 0)) {
-                        result = true;
-                    }
-                    else if (x == 0 && y == -1 && (Mathf.Abs(pos.y) == 8 || pos.y == 0)) {
-                        result = true;
-                    }
+                        break;
+                }
 
-                    if (result && (x != 0 || y != 0)) {
-                        voxelMesh.TriangulateChunkMesh(currentChunk);
-                    }
+                if (!result || (x == 0 && y == 0)) continue;
+                if (!updateChunkDictionary.ContainsKey(currentChunk)) {
+                    updateChunkDictionary.Add(currentChunk, 0);
                 }
             }
         }
 
         if (mainRes) {
-            voxelMesh.TriangulateChunkMesh(currentChunk);
+            currentChunk = existingChunks[checkPos];
+            if (!updateChunkDictionary.ContainsKey(currentChunk)) {
+                updateChunkDictionary.Add(currentChunk, 0);
+            }
         }
     }
 
@@ -173,6 +191,7 @@ public class VoxelEditor : MonoBehaviour {
         if (GUI.Button(new Rect(0, 225, 150f, 20f), "Generate")) {
             voxelMap.FreshGeneration();
         }
+
         GUILayout.EndArea();
     }
 }

@@ -80,9 +80,12 @@ public class ChunkCollider : MonoBehaviour {
             chunk.vertices[vertexB].y / chunkResolution);
 
         for (int i = 0; i < trianglesContainingVertexA.Count; i++) {
-            if (trianglesContainingVertexA[i].a == chunkVertice ||
-                trianglesContainingVertexA[i].b == chunkVertice ||
-                trianglesContainingVertexA[i].c == chunkVertice
+            if ((trianglesContainingVertexA[i].a.x == chunkVertice.x &&
+                 trianglesContainingVertexA[i].a.y == chunkVertice.y) ||
+                (trianglesContainingVertexA[i].b.x == chunkVertice.x &&
+                 trianglesContainingVertexA[i].b.y == chunkVertice.y) ||
+                (trianglesContainingVertexA[i].c.x == chunkVertice.x &&
+                 trianglesContainingVertexA[i].c.y == chunkVertice.y)
             ) {
                 sharedTriangleCount++;
                 if (sharedTriangleCount > 1) {
