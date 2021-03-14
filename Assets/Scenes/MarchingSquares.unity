@@ -573,7 +573,7 @@ MonoBehaviour:
   viewDistance: 4
   colliderRadius: 2
   useColliders: 1
-  useVoxelReferences: 1
+  useVoxelReferences: 0
   player: {fileID: 0}
   chunks: []
 --- !u!4 &911654351

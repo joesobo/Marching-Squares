@@ -11,24 +11,23 @@ public class VoxelEditor : MonoBehaviour {
     private static readonly string[] StencilNames = { "Square", "Circle" };
 
     private int voxelResolution, chunkResolution;
-    private float viewDistance, halfSize, voxelSize;
+    private float viewDistance;
 
     private int fillTypeIndex, radiusIndex, stencilIndex;
 
     private VoxelMesh voxelMesh;
     private ChunkCollider chunkCollider;
-    private List<VoxelChunk> chunks;
     private Dictionary<Vector2Int, VoxelChunk> existingChunks;
     private VoxelMap voxelMap;
-    private Transform player;
     private BoxCollider box;
+    private Camera mainCamera;
 
     private Vector3 oldPoint, chunkPos, absChunkPos;
     private Vector2Int diff, absCheckPos, currentPos;
     private int oldTypeIndex, xStart, xEnd, yStart, yEnd;
     private RaycastHit hitInfo;
     private VoxelStencil activeStencil;
-    private List<Vector2Int> updateChunkPositions = new List<Vector2Int>();
+    private readonly List<Vector2Int> updateChunkPositions = new List<Vector2Int>();
 
     private readonly VoxelStencil[] stencils = {
         new VoxelStencil(),
@@ -40,14 +39,11 @@ public class VoxelEditor : MonoBehaviour {
         chunkResolution = map.chunkResolution;
         viewDistance = map.viewDistance;
         existingChunks = map.existingChunks;
-        chunks = map.chunks;
         voxelMap = map;
-        halfSize = 0.5f * chunkResolution;
-        voxelSize = 1f / voxelResolution;
+        mainCamera = Camera.main;
 
         voxelMesh = FindObjectOfType<VoxelMesh>();
         chunkCollider = FindObjectOfType<ChunkCollider>();
-        player = FindObjectOfType<PlayerController>().transform;
 
         box = gameObject.GetComponent<BoxCollider>();
         if (box != null) {
@@ -63,7 +59,7 @@ public class VoxelEditor : MonoBehaviour {
     private void Update() {
         if (Time.frameCount % UPDATE_INTERVAL != 0) return;
         if (Input.GetMouseButton(0)) {
-            if (Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out hitInfo)) {
+            if (Physics.Raycast(mainCamera.ScreenPointToRay(Input.mousePosition), out hitInfo)) {
                 if (hitInfo.collider.gameObject == gameObject &&
                     (oldPoint != hitInfo.point || oldTypeIndex != fillTypeIndex)) {
                     EditVoxels(hitInfo.point);
@@ -76,7 +72,6 @@ public class VoxelEditor : MonoBehaviour {
 
     private void EditVoxels(Vector3 point) {
         chunkPos = new Vector3(Mathf.Floor(point.x / voxelResolution), Mathf.Floor(point.y / voxelResolution));
-        var checkPos = new Vector2Int((int)chunkPos.x, (int)chunkPos.y);
         diff = new Vector2Int((int)Mathf.Abs(point.x - (chunkPos * voxelResolution).x),
             (int)Mathf.Abs(point.y - (chunkPos * voxelResolution).y));
 
@@ -104,25 +99,23 @@ public class VoxelEditor : MonoBehaviour {
         activeStencil.Initialize(fillTypeIndex, radiusIndex);
 
         int voxelYOffset = yEnd * voxelResolution;
-        int voxelXOffset;
         Vector2Int checkChunk;
         updateChunkPositions.Clear();
 
         bool result = false;
 
         for (int y = yStart - 1; y < yEnd + 1; y++) {
-            voxelXOffset = xEnd * voxelResolution;
+            int voxelXOffset = xEnd * voxelResolution;
             for (int x = xStart - 1; x < xEnd + 1; x++) {
-                bool tempRes = false;
                 activeStencil.SetCenter(diff.x - voxelXOffset, diff.y - voxelYOffset);
 
                 checkChunk = new Vector2Int((int)Mathf.Floor((point.x + voxelXOffset) / voxelResolution), (int)Mathf.Floor((point.y + voxelYOffset) / voxelResolution));
 
                 if (existingChunks.ContainsKey(checkChunk)) {
                     var currentChunk = existingChunks[checkChunk];
-                    tempRes = currentChunk.Apply(activeStencil);
+                    bool tempRes = currentChunk.Apply(activeStencil);
                     if (!result && tempRes) {
-                        result = tempRes;
+                        result = true;
                     }
                 }
                 voxelXOffset -= voxelResolution;
@@ -131,16 +124,12 @@ public class VoxelEditor : MonoBehaviour {
         }
 
         if (result) {
-            voxelYOffset = yEnd * voxelResolution;
-            voxelXOffset = xEnd * voxelResolution;
             checkChunk = new Vector2Int((int)Mathf.Floor((point.x) / voxelResolution), (int)Mathf.Floor((point.y) / voxelResolution));
 
             EditChunkAndNeighbors(checkChunk, new Vector3(Mathf.Floor(point.x), Mathf.Floor(point.y)));
 
             updateChunkPositions.Sort(SortByPosition);
-            foreach (Vector2Int pos in updateChunkPositions) {
-                if (!existingChunks.ContainsKey(pos)) continue;
-                var chunk = existingChunks[pos];
+            foreach (var chunk in from pos in updateChunkPositions where existingChunks.ContainsKey(pos) select existingChunks[pos]) {
                 voxelMesh.TriangulateChunkMesh(chunk);
                 chunkCollider.Generate2DCollider(chunk, chunkResolution);
             }
@@ -156,9 +145,6 @@ public class VoxelEditor : MonoBehaviour {
             for (int y = -1; y <= 1; y++) {
                 bool result = false;
                 var currentChunkPos = new Vector2Int(checkChunk.x + x, checkChunk.y + y);
-
-                if (!existingChunks.ContainsKey(currentChunkPos)) continue;
-                var currentChunk = existingChunks[currentChunkPos];
 
                 for (int index = 0; index <= radiusIndex; index++) {
                     for (int index2 = 0; index2 <= radiusIndex; index2++) {
