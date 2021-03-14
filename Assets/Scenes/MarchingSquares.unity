@@ -297,7 +297,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5bf713b57817c754b8b0302424a29995, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  terrainType: 4
+  terrainType: 1
   scaleHeightNoise: 2
   scaleTerrainNoise: 1
   seed: 0
@@ -420,6 +420,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 168050, guid: 0abab5bb77339e4428787a870eb31bd3, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 177638, guid: 0abab5bb77339e4428787a870eb31bd3, type: 3}
       propertyPath: m_Name
       value: '[Graphy]'
@@ -528,6 +532,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 1000013357413722, guid: 0abab5bb77339e4428787a870eb31bd3, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 0abab5bb77339e4428787a870eb31bd3, type: 3}
 --- !u!1 &911654349
@@ -565,7 +573,7 @@ MonoBehaviour:
   viewDistance: 4
   colliderRadius: 2
   useColliders: 1
-  useVoxelReferences: 0
+  useVoxelReferences: 1
   player: {fileID: 0}
   chunks: []
 --- !u!4 &911654351

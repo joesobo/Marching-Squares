@@ -16,6 +16,7 @@ public class VoxelEditor : MonoBehaviour {
     private int fillTypeIndex, radiusIndex, stencilIndex;
 
     private VoxelMesh voxelMesh;
+    private ChunkCollider chunkCollider;
     private List<VoxelChunk> chunks;
     private Dictionary<Vector2Int, VoxelChunk> existingChunks;
     private VoxelMap voxelMap;
@@ -27,8 +28,7 @@ public class VoxelEditor : MonoBehaviour {
     private int oldTypeIndex, xStart, xEnd, yStart, yEnd;
     private RaycastHit hitInfo;
     private VoxelStencil activeStencil;
-    private VoxelChunk currentChunk;
-    private Dictionary<VoxelChunk, int> updateChunkDictionary = new Dictionary<VoxelChunk, int>();
+    private List<Vector2Int> updateChunkPositions = new List<Vector2Int>();
 
     private readonly VoxelStencil[] stencils = {
         new VoxelStencil(),
@@ -46,6 +46,7 @@ public class VoxelEditor : MonoBehaviour {
         voxelSize = 1f / voxelResolution;
 
         voxelMesh = FindObjectOfType<VoxelMesh>();
+        chunkCollider = FindObjectOfType<ChunkCollider>();
         player = FindObjectOfType<PlayerController>().transform;
 
         box = gameObject.GetComponent<BoxCollider>();
@@ -103,78 +104,88 @@ public class VoxelEditor : MonoBehaviour {
         activeStencil.Initialize(fillTypeIndex, radiusIndex);
 
         int voxelYOffset = yEnd * voxelResolution;
-        updateChunkDictionary.Clear();
+        int voxelXOffset;
+        Vector2Int checkChunk;
+        updateChunkPositions.Clear();
+
+        bool result = false;
 
         for (int y = yStart - 1; y < yEnd + 1; y++) {
-            int voxelXOffset = xEnd * voxelResolution;
+            voxelXOffset = xEnd * voxelResolution;
             for (int x = xStart - 1; x < xEnd + 1; x++) {
-                absChunkPos = new Vector3(Mathf.Floor((point.x + voxelXOffset) / voxelResolution),
-                    Mathf.Floor((point.y + voxelYOffset) / voxelResolution));
-                absCheckPos = new Vector2Int((int)absChunkPos.x, (int)absChunkPos.y);
+                bool tempRes = false;
                 activeStencil.SetCenter(diff.x - voxelXOffset, diff.y - voxelYOffset);
 
-                EditChunkAndNeighbors(absCheckPos,
-                    new Vector3(Mathf.Floor(point.x + voxelXOffset), Mathf.Floor(point.y + voxelYOffset)), checkPos);
+                checkChunk = new Vector2Int((int)Mathf.Floor((point.x + voxelXOffset) / voxelResolution), (int)Mathf.Floor((point.y + voxelYOffset) / voxelResolution));
 
+                if (existingChunks.ContainsKey(checkChunk)) {
+                    var currentChunk = existingChunks[checkChunk];
+                    tempRes = currentChunk.Apply(activeStencil);
+                    if (!result && tempRes) {
+                        result = tempRes;
+                    }
+                }
                 voxelXOffset -= voxelResolution;
             }
-
             voxelYOffset -= voxelResolution;
         }
 
-        var list = updateChunkDictionary.Keys.ToList();
-        list.Sort(SortByPosition);
-        foreach (var chunk in list) {
-            // Debug.Log(chunk.transform.position / voxelResolution);
-            voxelMesh.TriangulateChunkMesh(chunk);
-        }
-    }
+        if (result) {
+            voxelYOffset = yEnd * voxelResolution;
+            voxelXOffset = xEnd * voxelResolution;
+            checkChunk = new Vector2Int((int)Mathf.Floor((point.x) / voxelResolution), (int)Mathf.Floor((point.y) / voxelResolution));
 
-    private static int SortByPosition(VoxelChunk c1, VoxelChunk c2) {
-        var position1 = c1.transform.position;
-        var position2 = c2.transform.position;
-        return (position1.x < position2.x && position1.y < position2.y) ? 1 : 0;
-    }
+            EditChunkAndNeighbors(checkChunk, new Vector3(Mathf.Floor(point.x), Mathf.Floor(point.y)));
 
-    private void EditChunkAndNeighbors(Vector2Int checkPos, Vector2 pos, Vector2Int origin) {
-        bool mainRes = false;
-
-        if (existingChunks.ContainsKey(checkPos)) {
-            currentChunk = existingChunks[checkPos];
-            mainRes = currentChunk.Apply(activeStencil);
-        }
-
-        currentChunk.Apply(activeStencil);
-
-        // TODO: allow editing neighbors when radius > 1 and moving up/right
-        for (int x = -1; x < 1; x++) {
-            for (int y = -1; y < 1; y++) {
-                bool result = false;
-                currentPos = new Vector2Int(checkPos.x + x, checkPos.y + y);
-
-                if (!existingChunks.ContainsKey(currentPos)) continue;
-                currentChunk = existingChunks[currentPos];
-
-                switch (x) {
-                    case -1 when y == -1 && (Mathf.Abs(pos.x - radiusIndex) % 8 == 0) &&
-                                (Mathf.Abs(pos.y - radiusIndex) % 8 == 0):
-                    case 0 when y == -1 && (Mathf.Abs(pos.y - radiusIndex) % 8 == 0):
-                    case -1 when y == 0 && (Mathf.Abs(pos.x - radiusIndex) % 8 == 0):
-                        result = true;
-                        break;
-                }
-
-                if (!result || (x == 0 && y == 0)) continue;
-                if (!updateChunkDictionary.ContainsKey(currentChunk)) {
-                    updateChunkDictionary.Add(currentChunk, 0);
-                }
+            updateChunkPositions.Sort(SortByPosition);
+            foreach (Vector2Int pos in updateChunkPositions) {
+                if (!existingChunks.ContainsKey(pos)) continue;
+                var chunk = existingChunks[pos];
+                voxelMesh.TriangulateChunkMesh(chunk);
+                chunkCollider.Generate2DCollider(chunk, chunkResolution);
             }
         }
+    }
 
-        if (mainRes) {
-            currentChunk = existingChunks[checkPos];
-            if (!updateChunkDictionary.ContainsKey(currentChunk)) {
-                updateChunkDictionary.Add(currentChunk, 0);
+    private static int SortByPosition(Vector2Int c1, Vector2Int c2) {
+        return (c1.x < c2.x && c1.y < c2.y) ? 1 : 0;
+    }
+
+    private void EditChunkAndNeighbors(Vector2Int checkChunk, Vector2 pos) {
+        for (int x = -1; x <= 1; x++) {
+            for (int y = -1; y <= 1; y++) {
+                bool result = false;
+                var currentChunkPos = new Vector2Int(checkChunk.x + x, checkChunk.y + y);
+
+                if (!existingChunks.ContainsKey(currentChunkPos)) continue;
+                var currentChunk = existingChunks[currentChunkPos];
+
+                for (int index = 0; index <= radiusIndex; index++) {
+                    for (int index2 = 0; index2 <= radiusIndex; index2++) {
+                        switch (x) {
+                            // TODO: Fix when radius >= 2
+                            case -1 when y == -1 && (Mathf.Abs(pos.x - index) % 8 == 0) && (Mathf.Abs(pos.y - index2) % 8 == 0): //1
+                            case 0 when y == -1 && (Mathf.Abs(pos.y - index) % 8 == 0): //2
+                            case 1 when y == -1 && (Mathf.Abs(pos.x + 1 - index) % 8 == 0) && (Mathf.Abs(pos.y - index2) % 8 == 0): //3
+                            case -1 when y == 0 && (Mathf.Abs(pos.x - index) % 8 == 0): //4
+                            case 0 when y == 0: //5
+                            case 1 when y == 0 && (Mathf.Abs(pos.x + 1 - index) % 8 == 0): //6
+                            case -1 when y == 1 && (Mathf.Abs(pos.x - index) % 8 == 0) && (Mathf.Abs(pos.y + 1 - index2) % 8 == 0): //7
+                            case 0 when y == 1 && (Mathf.Abs(pos.y + 1 - index) % 8 == 0): //8
+                            case 1 when y == 1 && (Mathf.Abs(pos.x + 1 - index) % 8 == 0) && (Mathf.Abs(pos.y + 1 - index2) % 8 == 0): //9
+                                result = true;
+                                break;
+                        }
+                        if (result) break;
+                    }
+                    if (result) break;
+                }
+
+                if (result) {
+                    if (!updateChunkPositions.Contains(currentChunkPos)) {
+                        updateChunkPositions.Add(currentChunkPos);
+                    }
+                }
             }
         }
     }
