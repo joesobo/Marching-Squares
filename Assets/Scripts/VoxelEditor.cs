@@ -149,16 +149,15 @@ public class VoxelEditor : MonoBehaviour {
                 for (int index = 0; index <= radiusIndex; index++) {
                     for (int index2 = 0; index2 <= radiusIndex; index2++) {
                         switch (x) {
-                            // TODO: Fix when radius >= 2
                             case -1 when y == -1 && (Mathf.Abs(pos.x - index) % 8 == 0) && (Mathf.Abs(pos.y - index2) % 8 == 0): //1
                             case 0 when y == -1 && (Mathf.Abs(pos.y - index) % 8 == 0): //2
-                            case 1 when y == -1 && (Mathf.Abs(pos.x + 1 - index) % 8 == 0) && (Mathf.Abs(pos.y - index2) % 8 == 0): //3
+                            case 1 when y == -1 && (Mathf.Abs(pos.x + 1 + index) % 8 == 0) && (Mathf.Abs(pos.y - index2) % 8 == 0): //3
                             case -1 when y == 0 && (Mathf.Abs(pos.x - index) % 8 == 0): //4
                             case 0 when y == 0: //5
-                            case 1 when y == 0 && (Mathf.Abs(pos.x + 1 - index) % 8 == 0): //6
-                            case -1 when y == 1 && (Mathf.Abs(pos.x - index) % 8 == 0) && (Mathf.Abs(pos.y + 1 - index2) % 8 == 0): //7
-                            case 0 when y == 1 && (Mathf.Abs(pos.y + 1 - index) % 8 == 0): //8
-                            case 1 when y == 1 && (Mathf.Abs(pos.x + 1 - index) % 8 == 0) && (Mathf.Abs(pos.y + 1 - index2) % 8 == 0): //9
+                            case 1 when y == 0 && (Mathf.Abs(pos.x + 1 + index) % 8 == 0): //6
+                            case -1 when y == 1 && (Mathf.Abs(pos.x - index) % 8 == 0) && (Mathf.Abs(pos.y + 1 + index2) % 8 == 0): //7
+                            case 0 when y == 1 && (Mathf.Abs(pos.y + 1 + index) % 8 == 0): //8
+                            case 1 when y == 1 && (Mathf.Abs(pos.x + 1 - index) % 8 == 0) && (Mathf.Abs(pos.y + 1 + index2) % 8 == 0): //9
                                 result = true;
                                 break;
                         }

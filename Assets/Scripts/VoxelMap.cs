@@ -3,7 +3,7 @@ using UnityEngine;
 
 public partial class VoxelMap : MonoBehaviour {
     [Range(8, 56)] public int voxelResolution = 8;
-    [HideInInspector] public int chunkResolution;
+    [HideInInspector] public int chunkResolution = 16;
     [Range(1, 16)] public int viewDistance = 3;
     public float colliderRadius = 1;
     public bool useColliders;
@@ -22,8 +22,6 @@ public partial class VoxelMap : MonoBehaviour {
 
         infiniteGeneration = FindObjectOfType<InfiniteGeneration>();
         player = FindObjectOfType<PlayerController>().transform;
-
-        chunkResolution = viewDistance * 4;
 
         recycleableChunks = new Queue<VoxelChunk>();
 

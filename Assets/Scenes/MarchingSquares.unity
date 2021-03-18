@@ -570,7 +570,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   voxelResolution: 8
   chunkResolution: 0
-  viewDistance: 4
+  viewDistance: 5
   colliderRadius: 2
   useColliders: 1
   useVoxelReferences: 0
