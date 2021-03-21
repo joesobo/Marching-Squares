@@ -69,6 +69,8 @@ public class InfiniteGeneration : MonoBehaviour {
             sqrDst = new Vector2(Mathf.Max(offset.x, 0), Mathf.Max(offset.y, 0)).sqrMagnitude;
 
             if (sqrDst > sqrViewDist) {
+                ChunkSaveLoadManager.SaveChunk(existingChunks[testChunkPos]);
+
                 existingChunks.Remove(testChunkPos);
                 recycleableChunks.Enqueue(testChunk);
                 chunks.RemoveAt(i);
@@ -95,22 +97,37 @@ public class InfiniteGeneration : MonoBehaviour {
                         foreach (var t in currentColliders) {
                             Destroy(t);
                         }
-                    }
-                    else {
-                        currentChunk = CreateChunk(i, x, y);
+                    } else {
+                        currentChunk = CreateChunk(x, y);
                     }
 
                     currentChunk.SetNewChunk(coord.x, coord.y);
                     existingChunks.Add(coord, currentChunk);
                     currentChunk.shouldUpdateCollider = true;
                     chunks.Add(currentChunk);
-                    terrainNoise.GenerateNoiseValues(currentChunk);
+                    ChunkData loadedChunkData = ChunkSaveLoadManager.LoadChunk(coord);
+                    if (loadedChunkData != null) {
+                        for (int j = 0, count = 0; j < currentChunk.voxels.Length; j++, count += 2) {
+                            currentChunk.voxels[j].position = new Vector2(loadedChunkData.voxelPositions[count], loadedChunkData.voxelPositions[count + 1]);
+                            currentChunk.voxels[j].state = loadedChunkData.voxelStates[j];
+                        }
+                    } else {
+                        terrainNoise.GenerateNoiseValues(currentChunk);
+                    }
                 }
             }
         }
     }
 
-    private VoxelChunk CreateChunk(int i, int x, int y) {
+    void OnApplicationQuit() {
+        Debug.Log("Saving all chunks");
+
+        foreach (var chunk in chunks) {
+            ChunkSaveLoadManager.SaveChunk(chunk);
+        }
+    }
+
+    private VoxelChunk CreateChunk(int x, int y) {
         var chunk = Instantiate(voxelChunkPrefab, transform, true) as VoxelChunk;
         chunk.Initialize(useVoxelReferences, voxelResolution);
         chunk.transform.localPosition = new Vector3(x, y);
