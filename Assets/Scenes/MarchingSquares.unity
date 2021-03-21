@@ -297,7 +297,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5bf713b57817c754b8b0302424a29995, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  terrainType: 4
+  terrainType: 1
   scaleHeightNoise: 2
   scaleTerrainNoise: 1
   seed: 0
@@ -568,6 +568,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6eb9418d0cc024695928b083ccdb9813, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  regionResolution: 8
   voxelResolution: 8
   chunkResolution: 0
   viewDistance: 4

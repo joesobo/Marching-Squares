@@ -2,6 +2,7 @@
 using UnityEngine;
 
 public partial class VoxelMap : MonoBehaviour {
+    public int regionResolution = 8;
     [Range(8, 56)] public int voxelResolution = 8;
     [HideInInspector] public int chunkResolution;
     [Range(1, 16)] public int viewDistance = 3;

@@ -13,7 +13,7 @@ public class InfiniteGeneration : MonoBehaviour {
     private Vector2Int playerCoord, testChunkPos, coord;
     private float sqrViewDist, sqrDst;
     private Queue<VoxelChunk> recycleableChunks;
-    private int chunkResolution, voxelResolution, viewDistance;
+    private int chunkResolution, voxelResolution, viewDistance, regionResolution;
     private List<VoxelChunk> chunks;
     private Dictionary<Vector2Int, VoxelChunk> existingChunks;
     private bool useVoxelReferences;
@@ -21,12 +21,15 @@ public class InfiniteGeneration : MonoBehaviour {
     private bool useColliders;
     private ChunkCollider chunkCollider;
 
+    private List<Transform> regionList;
+
     public void StartUp(VoxelMap map) {
         voxelMesh = FindObjectOfType<VoxelMesh>();
         terrainNoise = FindObjectOfType<TerrainNoise>();
         chunkCollider = FindObjectOfType<ChunkCollider>();
 
         recycleableChunks = map.recycleableChunks;
+        regionResolution = map.regionResolution;
         chunkResolution = map.chunkResolution;
         voxelResolution = map.voxelResolution;
         viewDistance = map.viewDistance;
@@ -39,6 +42,8 @@ public class InfiniteGeneration : MonoBehaviour {
 
         terrainNoise.Startup(voxelResolution, chunkResolution, player);
         voxelMesh.Startup(voxelResolution, chunkResolution, viewDistance, useColliders, colliderRadius);
+
+        regionList = new List<Transform>();
     }
 
     public void UpdateAroundPlayer() {
@@ -74,6 +79,15 @@ public class InfiniteGeneration : MonoBehaviour {
                 existingChunks.Remove(testChunkPos);
                 recycleableChunks.Enqueue(testChunk);
                 chunks.RemoveAt(i);
+            }
+        }
+
+        for (int i = 0; i < regionList.Count; i++) {
+            var temp = regionList[i];
+            if (temp.childCount == 0) {
+                regionList.RemoveAt(i);
+                Destroy(temp.gameObject);
+                i--;
             }
         }
     }
@@ -114,6 +128,8 @@ public class InfiniteGeneration : MonoBehaviour {
                     } else {
                         terrainNoise.GenerateNoiseValues(currentChunk);
                     }
+
+                    currentChunk.transform.parent = GetRegionTransform(coord.x, coord.y);
                 }
             }
         }
@@ -128,12 +144,38 @@ public class InfiniteGeneration : MonoBehaviour {
     }
 
     private VoxelChunk CreateChunk(int x, int y) {
-        var chunk = Instantiate(voxelChunkPrefab, transform, true) as VoxelChunk;
+        var chunk = Instantiate(voxelChunkPrefab, null, true) as VoxelChunk;
         chunk.Initialize(useVoxelReferences, voxelResolution);
         chunk.transform.localPosition = new Vector3(x, y);
         chunk.gameObject.layer = 3;
 
         return chunk;
+    }
+
+    private Transform GetRegionTransform(int x, int y) {
+        int halfRes = regionResolution / 2;
+        float xVal = x / (float)halfRes;
+        float yVal = y / (float)halfRes;
+
+        int regionX = xVal < 0f ? (int)Mathf.Ceil(xVal) : (int)Mathf.Floor(xVal);
+        int regionY = yVal < 0f ? (int)Mathf.Ceil(yVal) : (int)Mathf.Floor(yVal);
+
+        foreach (Transform region in regionList) {
+            var name = region.name.Substring(7);
+            string[] checkPos = name.Split(',');
+            int checkX = int.Parse(checkPos[0]);
+            int checkY = int.Parse(checkPos[1]);
+
+            if (checkX == regionX && checkY == regionY) {
+                return region;
+            }
+        }
+
+        var newRegion = new GameObject();
+        newRegion.transform.parent = transform;
+        newRegion.transform.name = "Region " + regionX + "," + regionY;
+        regionList.Add(newRegion.transform);
+        return newRegion.transform;
     }
 
     private void UpdateNewChunks() {
