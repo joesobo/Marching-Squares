@@ -12,6 +12,7 @@ public partial class VoxelMap : MonoBehaviour {
 
     private VoxelEditor voxelEditor;
     private InfiniteGeneration infiniteGeneration;
+    [HideInInspector] public ChunkSaveLoadManager chunkSaveLoadManager;
     [HideInInspector] public Transform player;
 
     [HideInInspector] public List<VoxelChunk> chunks;
@@ -20,8 +21,8 @@ public partial class VoxelMap : MonoBehaviour {
 
     private void Awake() {
         voxelEditor = FindObjectOfType<VoxelEditor>();
-
         infiniteGeneration = FindObjectOfType<InfiniteGeneration>();
+        chunkSaveLoadManager = FindObjectOfType<ChunkSaveLoadManager>();
         player = FindObjectOfType<PlayerController>().transform;
 
         chunkResolution = 16;

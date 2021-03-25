@@ -4,30 +4,53 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.IO;
 using System;
 
-public static class ChunkSaveLoadManager {
-    public static void SaveChunk(VoxelChunk chunk) {
-        BinaryFormatter bf = new BinaryFormatter();
-        Vector2 pos = chunk.transform.localPosition;
-        String path = Application.persistentDataPath + "/chunks(" + pos.x + "," + pos.y + ").sav";
+public class ChunkSaveLoadManager : MonoBehaviour {
+    private BinaryFormatter bf = new BinaryFormatter();
+    private List<FileStream> streams = new List<FileStream>();
+    private List<Vector2> streamPositions = new List<Vector2>();
 
-        FileStream stream = new FileStream(path, FileMode.OpenOrCreate);
-        ChunkData chunkData = new ChunkData(chunk);
+    public void OpenRegion(Vector2 pos) {
+        String path = Application.persistentDataPath + "/region(" + pos.x + "," + pos.y + ").sav";
 
-        bf.Serialize(stream, chunkData);
-        stream.Close();
+        if (!streamPositions.Contains(pos)) {
+            streams.Add(new FileStream(path, FileMode.OpenOrCreate));
+            streamPositions.Add(pos);
+        }
     }
 
-    public static ChunkData LoadChunk(Vector2 pos) {
-        String path = Application.persistentDataPath + "/chunks(" + pos.x + "," + pos.y + ").sav";
+    public void CloseRegion(Vector2 pos) {
+        if (streamPositions.Contains(pos)) {
+            int index = streamPositions.IndexOf(pos);
 
-        if (File.Exists(path)) {
-            BinaryFormatter bf = new BinaryFormatter();
-            FileStream stream = new FileStream(path, FileMode.Open);
+            streams[index].Close();
+            streams.RemoveAt(index);
+            streamPositions.RemoveAt(index);
+        }
+    }
 
-            ChunkData test = (ChunkData)bf.Deserialize(stream);
-            stream.Close();
+    public void UpdateRegionData(Vector2 pos, List<VoxelChunk> chunks) {
+        String path = Application.persistentDataPath + "/region(" + pos.x + "," + pos.y + ").sav";
 
-            return test;
+        if (streamPositions.Contains(pos)) {
+            int index = streamPositions.IndexOf(pos);
+            FileStream stream = streams[index];
+            RegionData regionData = new RegionData(chunks);
+
+            stream.SetLength(0);
+            bf.Serialize(stream, regionData);
+        }
+    }
+
+    public RegionData LoadRegionData(Vector2 pos) {
+        String path = Application.persistentDataPath + "/region(" + pos.x + "," + pos.y + ").sav";
+
+        if (File.Exists(path) && streamPositions.Contains(pos) && streams[streamPositions.IndexOf(pos)].Length > 0) {
+            FileStream stream = streams[streamPositions.IndexOf(pos)];
+
+            stream.Position = 0;
+            RegionData regionData = (RegionData)bf.Deserialize(stream);
+
+            return regionData;
         }
 
         return null;
@@ -35,11 +58,27 @@ public static class ChunkSaveLoadManager {
 }
 
 [Serializable]
+public class RegionData {
+    public List<ChunkData> chunkDatas = new List<ChunkData>();
+
+    public RegionData(List<VoxelChunk> chunks) {
+        foreach (VoxelChunk chunk in chunks) {
+            chunkDatas.Add(new ChunkData(chunk));
+        }
+    }
+}
+
+[Serializable]
 public class ChunkData {
+    public float xPos;
+    public float yPos;
     public List<float> voxelPositions = new List<float>();
     public List<int> voxelStates = new List<int>();
 
     public ChunkData(VoxelChunk chunk) {
+        xPos = chunk.transform.position.x / 8;
+        yPos = chunk.transform.position.y / 8;
+
         foreach (Voxel voxel in chunk.voxels) {
             voxelPositions.Add(voxel.position.x);
             voxelPositions.Add(voxel.position.y);
