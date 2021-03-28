@@ -53,7 +53,7 @@ public class VoxelChunk : MonoBehaviour {
     private void CreateVoxelPoint(int i, int x, int y) {
         if (useVoxelPoints) {
             var o = Instantiate(voxelPointPrefab, transform, true) as GameObject;
-            o.transform.localPosition = new Vector3((x + 0.5f) * voxelSize, (y + 0.5f) * voxelSize, -0.01f);
+            o.transform.position = new Vector3((x + 0.5f) * voxelSize, (y + 0.5f) * voxelSize, -0.01f);
             o.transform.localScale = Vector3.one * (voxelSize * 0.1f);
             voxelMaterials.Add(o.GetComponent<MeshRenderer>().material);
         }
@@ -120,11 +120,11 @@ public class VoxelChunk : MonoBehaviour {
         verticeDictionary = new Dictionary<Vector3, int>();
     }
 
-    public void SetNewChunk(int x, int y) {
+    public void SetNewChunk(Vector2 chunkPos) {
         xNeighbor = null;
         yNeighbor = null;
         xyNeighbor = null;
-        transform.position = new Vector3(x, y);
+        transform.position = chunkPos;
         shouldUpdateMesh = true;
     }
 

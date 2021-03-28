@@ -165,7 +165,7 @@ Rigidbody2D:
   m_Interpolate: 1
   m_SleepingMode: 1
   m_CollisionDetection: 1
-  m_Constraints: 4
+  m_Constraints: 7
 --- !u!58 &547865865
 CircleCollider2D:
   m_ObjectHideFlags: 0
@@ -297,7 +297,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5bf713b57817c754b8b0302424a29995, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  terrainType: 4
+  terrainType: 1
   scaleHeightNoise: 2
   scaleTerrainNoise: 1
   seed: 0
