@@ -1,0 +1,22 @@
+fileFormatVersion: 2
+guid: 5b0d4aab17c0562408f6f7e9789caf7e
+TrueTypeFontImporter:
+  externalObjects: {}
+  serializedVersion: 4
+  fontSize: 16
+  forceTextureCase: -2
+  characterSpacing: 0
+  characterPadding: 1
+  includeFontData: 1
+  fontNames:
+  - Takoyaki
+  fallbackFontReferences:
+  - {fileID: 12800000, guid: 45ad0a4b9f251f6429ade28a728c1584, type: 3}
+  customCharacters: 
+  fontRenderingMode: 0
+  ascentCalculationMode: 1
+  useLegacyBoundsCalculation: 0
+  shouldRoundAdvanceValue: 1
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
