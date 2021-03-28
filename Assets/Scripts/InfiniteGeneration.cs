@@ -103,6 +103,7 @@ public class InfiniteGeneration : MonoBehaviour {
                     VoxelChunk currentChunk;
                     if (recycleableChunks.Count > 0) {
                         currentChunk = recycleableChunks.Dequeue();
+                        currentChunk.Startup();
                         var currentColliders = currentChunk.gameObject.GetComponents<EdgeCollider2D>();
                         foreach (var t in currentColliders) {
                             Destroy(t);
@@ -115,6 +116,7 @@ public class InfiniteGeneration : MonoBehaviour {
                     VoxelChunk resultChunk = chunkSaveLoadManager.LoadChunk(coord, currentChunk);
                     if (resultChunk != null) {
                         currentChunk = resultChunk;
+                        currentChunk.SetNewChunk(coord);
                     } else {
                         terrainNoise.GenerateNoiseValues(currentChunk);
                     }

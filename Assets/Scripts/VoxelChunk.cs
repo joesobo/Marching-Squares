@@ -30,15 +30,7 @@ public class VoxelChunk : MonoBehaviour {
         this.useVoxelPoints = useVoxelPoints;
         this.resolution = resolution;
 
-        voxelSize = 1f / resolution;
-        halfSize = 0.5f * resolution;
-        voxels = new Voxel[resolution * resolution];
-
-        for (int i = 0, y = 0; y < resolution; y++) {
-            for (int x = 0; x < resolution; x++, i++) {
-                CreateVoxelPoint(i, x, y);
-            }
-        }
+        Startup();
 
         GetComponent<MeshFilter>().mesh = mesh = new Mesh();
         material.SetVector(Resolution, Vector2.one * resolution);
@@ -59,6 +51,18 @@ public class VoxelChunk : MonoBehaviour {
         }
 
         voxels[i] = new Voxel(x, y, voxelSize);
+    }
+
+    public void Startup() {
+        voxelSize = 1f / resolution;
+        halfSize = 0.5f * resolution;
+        voxels = new Voxel[resolution * resolution];
+
+        for (int i = 0, y = 0; y < resolution; y++) {
+            for (int x = 0; x < resolution; x++, i++) {
+                CreateVoxelPoint(i, x, y);
+            }
+        }
     }
 
     private void Refresh() {
