@@ -60,13 +60,12 @@ public class InfiniteGeneration : MonoBehaviour {
         RecreateUpdatedChunkMeshes();
     }
 
-    // TODO: keep fixing here
     private void RemoveOutOfBoundsChunks() {
         sqrViewDist = viewDistance * viewDistance;
 
         for (int i = chunks.Count - 1; i >= 0; i--) {
             var testChunk = chunks[i];
-            if (testChunk != null) {
+            if (!ReferenceEquals(testChunk, null)) {
                 var position = testChunk.transform.position;
                 testChunkPos = new Vector2Int(Mathf.RoundToInt(position.x), Mathf.RoundToInt(position.y));
                 playerOffset = playerCoord - testChunkPos;
@@ -87,10 +86,8 @@ public class InfiniteGeneration : MonoBehaviour {
     }
 
     private void CreateNewChunksInRange() {
-        List<Vector2> activeRegions = new List<Vector2>();
-
-        for (int y = -chunkResolution / 2, i = 0; y < chunkResolution / 2; y++) {
-            for (int x = -chunkResolution / 2; x < chunkResolution / 2; x++, i++) {
+        for (int y = -chunkResolution / 2; y < chunkResolution / 2; y++) {
+            for (int x = -chunkResolution / 2; x < chunkResolution / 2; x++) {
                 coord = new Vector2Int(x, y) + playerCoord;
 
                 if (existingChunks.ContainsKey(coord)) continue;
@@ -104,17 +101,13 @@ public class InfiniteGeneration : MonoBehaviour {
                     if (recycleableChunks.Count > 0) {
                         currentChunk = recycleableChunks.Dequeue();
                         currentChunk.Startup();
-                        var currentColliders = currentChunk.gameObject.GetComponents<EdgeCollider2D>();
-                        foreach (var t in currentColliders) {
-                            Destroy(t);
-                        }
                     } else {
                         currentChunk = CreateChunk();
                     }
 
                     currentChunk.SetNewChunk(coord);
-                    VoxelChunk resultChunk = chunkSaveLoadManager.LoadChunk(coord, currentChunk);
-                    if (resultChunk != null) {
+                    var resultChunk = chunkSaveLoadManager.LoadChunk(coord, currentChunk);
+                    if (!ReferenceEquals(resultChunk, null)) {
                         currentChunk = resultChunk;
                         currentChunk.SetNewChunk(coord);
                     } else {
@@ -132,7 +125,7 @@ public class InfiniteGeneration : MonoBehaviour {
     }
 
     private VoxelChunk CreateChunk() {
-        var chunk = Instantiate(voxelChunkPrefab, null, true) as VoxelChunk;
+        var chunk = Instantiate(voxelChunkPrefab, null, true);
         chunk.Initialize(useVoxelReferences, voxelResolution);
         chunk.gameObject.layer = 3;
 

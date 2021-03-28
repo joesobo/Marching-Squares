@@ -3,24 +3,24 @@ using UnityEngine;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.IO;
 using System;
+using System.Linq;
+using Object = UnityEngine.Object;
 
 public class ChunkSaveLoadManager : MonoBehaviour {
-    private BinaryFormatter bf = new BinaryFormatter();
-    private List<FileStream> streams = new List<FileStream>();
-    private List<Vector2> streamPositions = new List<Vector2>();
-    private List<Transform> regionList = new List<Transform>();
+    private readonly BinaryFormatter bf = new BinaryFormatter();
+    private readonly List<FileStream> streams = new List<FileStream>();
+    private readonly List<Vector2> streamPositions = new List<Vector2>();
+    private readonly List<Transform> regionList = new List<Transform>();
     private Transform parent;
-    private int regionResolution;
     private int halfRes;
 
     public void Startup(InfiniteGeneration ig, int regionResolution) {
-        this.parent = ig.transform;
-        this.regionResolution = regionResolution;
+        parent = ig.transform;
         halfRes = regionResolution / 2;
     }
 
     private void OpenRegion(Vector2 regionPos) {
-        String path = Application.persistentDataPath + "/region(" + regionPos.x + "," + regionPos.y + ").sav";
+        string path = Application.persistentDataPath + "/region(" + regionPos.x + "," + regionPos.y + ").sav";
 
         if (!streamPositions.Contains(regionPos)) {
             streams.Add(new FileStream(path, FileMode.OpenOrCreate));
@@ -39,11 +39,9 @@ public class ChunkSaveLoadManager : MonoBehaviour {
     }
 
     private void UpdateRegionData(Vector2 regionPos, RegionData regionData) {
-        String path = Application.persistentDataPath + "/region(" + regionPos.x + "," + regionPos.y + ").sav";
-
         if (streamPositions.Contains(regionPos)) {
             int index = streamPositions.IndexOf(regionPos);
-            FileStream stream = streams[index];
+            var stream = streams[index];
 
             stream.SetLength(0);
             bf.Serialize(stream, regionData);
@@ -51,38 +49,36 @@ public class ChunkSaveLoadManager : MonoBehaviour {
     }
 
     private RegionData LoadRegionData(Vector2 regionPos) {
-        String path = Application.persistentDataPath + "/region(" + regionPos.x + "," + regionPos.y + ").sav";
+        string path = Application.persistentDataPath + "/region(" + regionPos.x + "," + regionPos.y + ").sav";
 
         if (streamPositions.Contains(regionPos) && streams[streamPositions.IndexOf(regionPos)].Length > 0) {
             if (File.Exists(path)) {
-                FileStream stream = streams[streamPositions.IndexOf(regionPos)];
-
+                var stream = streams[streamPositions.IndexOf(regionPos)];
                 stream.Position = 0;
-                RegionData regionData = (RegionData)bf.Deserialize(stream);
 
-                return regionData;
+                return (RegionData) bf.Deserialize(stream);
             }
         }
+
         return new RegionData(new List<VoxelChunk>());
     }
 
     private Vector2 RegionPosFromChunkPos(Vector2 chunkPos) {
-        float xVal = chunkPos.x / (float)halfRes;
-        float yVal = chunkPos.y / (float)halfRes;
-        int regionX = xVal < 0f ? (int)Mathf.Ceil(xVal) : (int)Mathf.Floor(xVal);
-        int regionY = yVal < 0f ? (int)Mathf.Ceil(yVal) : (int)Mathf.Floor(yVal);
+        float xVal = chunkPos.x / (float) halfRes;
+        float yVal = chunkPos.y / (float) halfRes;
+        int regionX = xVal < 0f ? (int) Mathf.Ceil(xVal) : (int) Mathf.Floor(xVal);
+        int regionY = yVal < 0f ? (int) Mathf.Ceil(yVal) : (int) Mathf.Floor(yVal);
         return new Vector2(regionX, regionY);
     }
 
     public Transform GetRegionTransformForChunk(Vector2 chunkPos) {
-        Vector2 regionPos = RegionPosFromChunkPos(chunkPos);
+        var regionPos = RegionPosFromChunkPos(chunkPos);
 
-        foreach (Transform region in regionList) {
-            Vector2 check = GetRegionPosition(region);
-
-            if (check == regionPos) {
-                return region;
-            }
+        foreach (var region in from region in regionList
+            let check = GetRegionPosition(region)
+            where check == regionPos
+            select region) {
+            return region;
         }
 
         var newRegion = new GameObject();
@@ -94,47 +90,50 @@ public class ChunkSaveLoadManager : MonoBehaviour {
     }
 
     public void SaveChunk(Vector2 chunkPos, VoxelChunk saveChunk) {
-        Vector2 regionPos = RegionPosFromChunkPos(chunkPos);
-        RegionData data = LoadRegionData(regionPos);
+        var regionPos = RegionPosFromChunkPos(chunkPos);
+        var data = LoadRegionData(regionPos);
         bool hasBeenAdded = false;
 
-        foreach (ChunkData chunkData in data.chunkDatas) {
-            if (chunkData.xPos == chunkPos.x && chunkData.yPos == chunkPos.y) {
-                hasBeenAdded = true;
-                for (int j = 0, count = 0; j < saveChunk.voxels.Length; j++, count += 2) {
-                    chunkData.voxelPositions[count] = saveChunk.voxels[j].position.x;
-                    chunkData.voxelPositions[count] = saveChunk.voxels[j].position.y;
-                    chunkData.voxelStates[j] = saveChunk.voxels[j].state;
-                }
+        foreach (var chunkData in data.chunkDatas.Where(chunkData =>
+            chunkData.xPos == chunkPos.x && chunkData.yPos == chunkPos.y)) {
+            hasBeenAdded = true;
+            for (int j = 0, count = 0; j < saveChunk.voxels.Length; j++, count += 2) {
+                chunkData.voxelPositions[count] = saveChunk.voxels[j].position.x;
+                chunkData.voxelPositions[count] = saveChunk.voxels[j].position.y;
+                chunkData.voxelStates[j] = saveChunk.voxels[j].state;
             }
         }
+
         if (!hasBeenAdded) {
-            ChunkData newData = new ChunkData(chunkPos, saveChunk);
+            var newData = new ChunkData(chunkPos, saveChunk);
             data.chunkDatas.Add(newData);
         }
+
         UpdateRegionData(regionPos, data);
     }
 
     public VoxelChunk LoadChunk(Vector2 chunkPos, VoxelChunk fillChunk) {
-        Transform region = GetRegionTransformForChunk(chunkPos);
-        Vector2 regionPos = RegionPosFromChunkPos(chunkPos);
-        RegionData data = LoadRegionData(regionPos);
+        GetRegionTransformForChunk(chunkPos);
+        var regionPos = RegionPosFromChunkPos(chunkPos);
+        var data = LoadRegionData(regionPos);
 
-        foreach (ChunkData chunkData in data.chunkDatas) {
-            if (chunkData.xPos == chunkPos.x && chunkData.yPos == chunkPos.y) {
-                for (int j = 0, count = 0; j < fillChunk.voxels.Length; j++, count += 2) {
-                    fillChunk.voxels[j].position = new Vector2(chunkData.voxelPositions[count], chunkData.voxelPositions[count + 1]);
-                    fillChunk.voxels[j].state = chunkData.voxelStates[j];
-                }
-                return fillChunk;
+        foreach (var chunkData in data.chunkDatas.Where(chunkData =>
+            chunkData.xPos == chunkPos.x && chunkData.yPos == chunkPos.y)) {
+            for (int j = 0, count = 0; j < fillChunk.voxels.Length; j++, count += 2) {
+                fillChunk.voxels[j].position =
+                    new Vector2(chunkData.voxelPositions[count], chunkData.voxelPositions[count + 1]);
+                fillChunk.voxels[j].state = chunkData.voxelStates[j];
             }
+
+            return fillChunk;
         }
+
         return null;
     }
 
     public void CheckForEmptyRegions() {
         for (int i = 0; i < regionList.Count - 1; i++) {
-            Transform region = regionList[i];
+            var region = regionList[i];
             if (region.childCount == 0) {
                 CloseRegion(GetRegionPosition(region));
                 regionList.RemoveAt(i);
@@ -147,24 +146,23 @@ public class ChunkSaveLoadManager : MonoBehaviour {
     private void OnApplicationQuit() {
         Debug.Log("Saving all regions");
 
-        foreach (Transform region in regionList) {
-            foreach (Transform child in region) {
-                VoxelChunk chunk = child.GetComponent<VoxelChunk>();
-
-                if (chunk) {
-                    SaveChunk(chunk.transform.position / 8, chunk);
-                }
-            }
+        foreach (var chunk in from region in regionList
+            from Transform child in region
+            select child.GetComponent<VoxelChunk>()
+            into chunk
+            where chunk
+            select chunk) {
+            SaveChunk(chunk.transform.position / 8, chunk);
         }
 
-        foreach (Transform region in regionList) {
+        foreach (var region in regionList) {
             CloseRegion(GetRegionPosition(region));
         }
     }
 
-    private Vector2 GetRegionPosition(Transform region) {
-        var name = region.name.Substring(7);
-        string[] checkPos = name.Split(',');
+    private static Vector2 GetRegionPosition(Object region) {
+        string regionName = region.name.Substring(7);
+        string[] checkPos = regionName.Split(',');
         int xPos = int.Parse(checkPos[0]);
         int yPos = int.Parse(checkPos[1]);
         return new Vector2(xPos, yPos);
@@ -175,8 +173,8 @@ public class ChunkSaveLoadManager : MonoBehaviour {
 public class RegionData {
     public List<ChunkData> chunkDatas = new List<ChunkData>();
 
-    public RegionData(List<VoxelChunk> chunks) {
-        foreach (VoxelChunk chunk in chunks) {
+    public RegionData(IEnumerable<VoxelChunk> chunks) {
+        foreach (var chunk in chunks) {
             chunkDatas.Add(new ChunkData(chunk.transform.position, chunk));
         }
     }
@@ -193,7 +191,7 @@ public class ChunkData {
         xPos = chunkPos.x;
         yPos = chunkPos.y;
 
-        foreach (Voxel voxel in chunk.voxels) {
+        foreach (var voxel in chunk.voxels) {
             voxelPositions.Add(voxel.position.x);
             voxelPositions.Add(voxel.position.y);
             voxelStates.Add(voxel.state);

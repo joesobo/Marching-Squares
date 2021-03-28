@@ -14,7 +14,7 @@ public class VoxelChunk : MonoBehaviour {
 
     public Voxel[] voxels;
     private float voxelSize, halfSize;
-    private List<Material> voxelMaterials = new List<Material>();
+    private readonly List<Material> voxelMaterials = new List<Material>();
     public Mesh mesh;
     public Material material;
     public Vector3[] vertices;
@@ -62,6 +62,11 @@ public class VoxelChunk : MonoBehaviour {
             for (int x = 0; x < resolution; x++, i++) {
                 CreateVoxelPoint(i, x, y);
             }
+        }
+        
+        var currentColliders = gameObject.GetComponents<EdgeCollider2D>();
+        foreach (var t in currentColliders) {
+            Destroy(t);
         }
     }
 

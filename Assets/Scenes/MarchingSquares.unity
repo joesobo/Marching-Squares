@@ -260,9 +260,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   velocity: {x: 0, y: 0, z: 0}
-  speed: 2000
-  walkAcceleration: 1000
-  jumpforce: 50
+  speed: 3000
+  walkAcceleration: 1500
+  jumpforce: 75
   jumpDecelleration: 60
   isGroundedRayLength: 0.15
   layerMaskForGrounded:
