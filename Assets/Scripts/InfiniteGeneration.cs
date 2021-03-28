@@ -75,10 +75,6 @@ public class InfiniteGeneration : MonoBehaviour {
                 sqrDst = new Vector2(Mathf.Max(offset.x, 0), Mathf.Max(offset.y, 0)).sqrMagnitude;
 
                 if (sqrDst > sqrViewDist) {
-                    if (testChunk.transform.localPosition == new Vector3(3, 4)) {
-                        Debug.Log('x');
-                    }
-
                     chunkSaveLoadManager.SaveChunk(testChunk.transform.position, testChunk);
                     existingChunks.Remove(testChunkPos);
                     recycleableChunks.Enqueue(testChunk);
@@ -115,6 +111,7 @@ public class InfiniteGeneration : MonoBehaviour {
                         currentChunk = CreateChunk();
                     }
 
+                    currentChunk.SetNewChunk(coord);
                     VoxelChunk resultChunk = chunkSaveLoadManager.LoadChunk(coord, currentChunk);
                     if (resultChunk != null) {
                         currentChunk = resultChunk;
@@ -123,7 +120,6 @@ public class InfiniteGeneration : MonoBehaviour {
                     }
 
                     currentChunk.transform.parent = chunkSaveLoadManager.GetRegionTransformForChunk(coord);
-                    currentChunk.SetNewChunk(coord);
 
                     existingChunks.Add(coord, currentChunk);
                     currentChunk.shouldUpdateCollider = true;

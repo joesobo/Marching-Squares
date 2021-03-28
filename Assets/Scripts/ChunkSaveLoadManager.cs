@@ -78,12 +78,9 @@ public class ChunkSaveLoadManager : MonoBehaviour {
         Vector2 regionPos = RegionPosFromChunkPos(chunkPos);
 
         foreach (Transform region in regionList) {
-            var name = region.name.Substring(7);
-            string[] checkPos = name.Split(',');
-            int checkX = int.Parse(checkPos[0]);
-            int checkY = int.Parse(checkPos[1]);
+            Vector2 check = GetRegionPosition(region);
 
-            if (checkX == regionPos.x && checkY == regionPos.y) {
+            if (check == regionPos) {
                 return region;
             }
         }
@@ -91,7 +88,6 @@ public class ChunkSaveLoadManager : MonoBehaviour {
         var newRegion = new GameObject();
         newRegion.transform.parent = parent;
         newRegion.transform.name = "Region " + regionPos.x + "," + regionPos.y;
-        newRegion.transform.position = regionPos;
         regionList.Add(newRegion.transform);
         OpenRegion(regionPos);
         return newRegion.transform;
@@ -124,10 +120,6 @@ public class ChunkSaveLoadManager : MonoBehaviour {
         Vector2 regionPos = RegionPosFromChunkPos(chunkPos);
         RegionData data = LoadRegionData(regionPos);
 
-        if (regionPos == new Vector2(1, 1)) {
-            Debug.Log('x');
-        }
-
         foreach (ChunkData chunkData in data.chunkDatas) {
             if (chunkData.xPos == chunkPos.x && chunkData.yPos == chunkPos.y) {
                 for (int j = 0, count = 0; j < fillChunk.voxels.Length; j++, count += 2) {
@@ -143,9 +135,11 @@ public class ChunkSaveLoadManager : MonoBehaviour {
     public void CheckForEmptyRegions() {
         for (int i = 0; i < regionList.Count - 1; i++) {
             Transform region = regionList[i];
-            var regionPos = region.position;
             if (region.childCount == 0) {
-                CloseRegion(regionPos);
+                CloseRegion(GetRegionPosition(region));
+                regionList.RemoveAt(i);
+                i--;
+                Destroy(region.gameObject);
             }
         }
     }
@@ -164,9 +158,16 @@ public class ChunkSaveLoadManager : MonoBehaviour {
         }
 
         foreach (Transform region in regionList) {
-            var regionPos = region.localPosition;
-            CloseRegion(regionPos);
+            CloseRegion(GetRegionPosition(region));
         }
+    }
+
+    private Vector2 GetRegionPosition(Transform region) {
+        var name = region.name.Substring(7);
+        string[] checkPos = name.Split(',');
+        int xPos = int.Parse(checkPos[0]);
+        int yPos = int.Parse(checkPos[1]);
+        return new Vector2(xPos, yPos);
     }
 }
 
