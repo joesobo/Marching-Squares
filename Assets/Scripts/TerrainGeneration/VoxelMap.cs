@@ -12,6 +12,7 @@ public partial class VoxelMap : MonoBehaviour {
 
     private VoxelEditor voxelEditor;
     private InfiniteGeneration infiniteGeneration;
+    private WorldManager worldManager;
     [HideInInspector] public ChunkSaveLoadManager chunkSaveLoadManager;
     [HideInInspector] public Transform player;
 
@@ -19,15 +20,21 @@ public partial class VoxelMap : MonoBehaviour {
     public Dictionary<Vector2Int, VoxelChunk> existingChunks;
     public Queue<VoxelChunk> recycleableChunks;
 
+    public WorldScriptableObject worldScriptableObject;
+
     private void Awake() {
         voxelEditor = FindObjectOfType<VoxelEditor>();
         infiniteGeneration = FindObjectOfType<InfiniteGeneration>();
+        worldManager = FindObjectOfType<WorldManager>();
         chunkSaveLoadManager = FindObjectOfType<ChunkSaveLoadManager>();
         player = FindObjectOfType<PlayerController>().transform;
 
         chunkResolution = 16;
 
         recycleableChunks = new Queue<VoxelChunk>();
+
+        worldScriptableObject.pathName = worldManager.worldPath + "/" + worldManager.worldName;
+        worldScriptableObject.seed = worldManager.seed;
 
         FreshGeneration();
     }
@@ -55,6 +62,7 @@ public partial class VoxelMap : MonoBehaviour {
         existingChunks = new Dictionary<Vector2Int, VoxelChunk>();
         voxelEditor.Startup(this);
         infiniteGeneration.StartUp(this);
+        chunkSaveLoadManager.Startup(infiniteGeneration, worldScriptableObject, regionResolution);
 
         GenerateTerrain();
     }

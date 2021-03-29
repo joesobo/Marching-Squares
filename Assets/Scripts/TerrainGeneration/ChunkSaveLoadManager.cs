@@ -7,7 +7,6 @@ using System.Linq;
 using Object = UnityEngine.Object;
 
 public class ChunkSaveLoadManager : MonoBehaviour {
-    private const string worldName = "Test";
     private readonly BinaryFormatter bf = new BinaryFormatter();
     private readonly List<FileStream> streams = new List<FileStream>();
     private readonly List<Vector2> streamPositions = new List<Vector2>();
@@ -15,14 +14,19 @@ public class ChunkSaveLoadManager : MonoBehaviour {
     private Transform parent;
     private int halfRes;
 
-    public void Startup(InfiniteGeneration ig, int regionResolution) {
+    private WorldScriptableObject worldScriptableObject;
+    private string worldPath;
+
+    public void Startup(InfiniteGeneration ig, WorldScriptableObject world, int regionResolution) {
         parent = ig.transform;
+        worldScriptableObject = world;
+        worldPath = worldScriptableObject.pathName;
         halfRes = regionResolution / 2;
     }
 
     private void OpenRegion(Vector2 regionPos) {
-        Directory.CreateDirectory(Application.persistentDataPath + "/worlds/" + worldName);
-        string path = Application.persistentDataPath + "/worlds/" + worldName + "/region(" + regionPos.x + "," + regionPos.y + ").sav";
+        Directory.CreateDirectory(worldPath);
+        string path = worldPath + "/region(" + regionPos.x + "," + regionPos.y + ").sav";
 
         if (!streamPositions.Contains(regionPos)) {
             streams.Add(new FileStream(path, FileMode.OpenOrCreate));
@@ -51,7 +55,7 @@ public class ChunkSaveLoadManager : MonoBehaviour {
     }
 
     private RegionData LoadRegionData(Vector2 regionPos) {
-        string path = Application.persistentDataPath + "/worlds/" + worldName + "/region(" + regionPos.x + "," + regionPos.y + ").sav";
+        string path = worldPath + "/region(" + regionPos.x + "," + regionPos.y + ").sav";
 
         if (streamPositions.Contains(regionPos) && streams[streamPositions.IndexOf(regionPos)].Length > 0) {
             if (File.Exists(path)) {

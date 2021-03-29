@@ -42,7 +42,6 @@ public class InfiniteGeneration : MonoBehaviour {
 
         terrainNoise.Startup(voxelResolution, chunkResolution, player);
         voxelMesh.Startup(voxelResolution, chunkResolution, viewDistance, useColliders, colliderRadius);
-        chunkSaveLoadManager.Startup(this, regionResolution);
     }
 
     public void UpdateAroundPlayer() {
