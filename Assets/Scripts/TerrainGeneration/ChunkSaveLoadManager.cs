@@ -62,7 +62,7 @@ public class ChunkSaveLoadManager : MonoBehaviour {
                 var stream = streams[streamPositions.IndexOf(regionPos)];
                 stream.Position = 0;
 
-                return (RegionData) bf.Deserialize(stream);
+                return (RegionData)bf.Deserialize(stream);
             }
         }
 
@@ -70,10 +70,10 @@ public class ChunkSaveLoadManager : MonoBehaviour {
     }
 
     private Vector2 RegionPosFromChunkPos(Vector2 chunkPos) {
-        float xVal = chunkPos.x / (float) halfRes;
-        float yVal = chunkPos.y / (float) halfRes;
-        int regionX = xVal < 0f ? (int) Mathf.Ceil(xVal) : (int) Mathf.Floor(xVal);
-        int regionY = yVal < 0f ? (int) Mathf.Ceil(yVal) : (int) Mathf.Floor(yVal);
+        float xVal = chunkPos.x / (float)halfRes;
+        float yVal = chunkPos.y / (float)halfRes;
+        int regionX = xVal < 0f ? (int)Mathf.Ceil(xVal) : (int)Mathf.Floor(xVal);
+        int regionY = yVal < 0f ? (int)Mathf.Ceil(yVal) : (int)Mathf.Floor(yVal);
         return new Vector2(regionX, regionY);
     }
 
@@ -81,9 +81,9 @@ public class ChunkSaveLoadManager : MonoBehaviour {
         var regionPos = RegionPosFromChunkPos(chunkPos);
 
         foreach (var region in from region in regionList
-            let check = GetRegionPosition(region)
-            where check == regionPos
-            select region) {
+                               let check = GetRegionPosition(region)
+                               where check == regionPos
+                               select region) {
             return region;
         }
 
@@ -149,21 +149,25 @@ public class ChunkSaveLoadManager : MonoBehaviour {
         }
     }
 
-    private void OnApplicationQuit() {
+    public void SaveAllChunks() {
         Debug.Log("Saving all regions");
 
         foreach (var chunk in from region in regionList
-            from Transform child in region
-            select child.GetComponent<VoxelChunk>()
+                              from Transform child in region
+                              select child.GetComponent<VoxelChunk>()
             into chunk
-            where chunk
-            select chunk) {
+                              where chunk
+                              select chunk) {
             SaveChunk(chunk.transform.position / 8, chunk);
         }
 
         foreach (var region in regionList) {
             CloseRegion(GetRegionPosition(region));
         }
+    }
+
+    private void OnApplicationQuit() {
+        SaveAllChunks();
     }
 
     private static Vector2 GetRegionPosition(Object region) {
