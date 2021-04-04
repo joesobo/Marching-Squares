@@ -6,6 +6,7 @@ public class WorldManager : MonoBehaviour {
     public string worldPath;
     public string worldName;
     public int seed;
+    public string last_played;
 
     private WorldDataHandler worldDataHandler;
 
@@ -16,5 +17,6 @@ public class WorldManager : MonoBehaviour {
         var worldData = worldDataHandler.LoadCurrentWorld();
         worldName = worldData.name;
         seed = worldData.seed;
+        last_played = worldData.last_played;
     }
 }

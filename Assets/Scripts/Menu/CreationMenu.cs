@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -32,7 +33,7 @@ public class CreationMenu : MonoBehaviour {
             if (worldDataHandler.ContainsWorld(worldName)) {
                 errorText.text = "Error: World Name is already taken";
             } else {
-                worldDataHandler.NewWorld(new WorldData(worldName, seed));
+                worldDataHandler.NewWorld(new WorldData(worldName, seed, DateTime.Now.ToString()));
                 SceneManager.LoadScene(1);
             }
         }

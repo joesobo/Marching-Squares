@@ -12,10 +12,18 @@ public class WorldDataHandler : MonoBehaviour {
     public string currentWorld;
 
     private void Awake() {
+        WorldDataHandler[] handlers = FindObjectsOfType<WorldDataHandler>();
+
+        foreach (WorldDataHandler handler in handlers) {
+            if (this != handler) {
+                Destroy(handler.gameObject);
+            }
+        }
+
         path = Application.persistentDataPath + "/worlds/";
         Directory.CreateDirectory(path);
 
-        DontDestroyOnLoad(this.gameObject);
+        DontDestroyOnLoad(gameObject);
     }
 
     public bool ContainsWorld(string worldName) {
@@ -33,7 +41,7 @@ public class WorldDataHandler : MonoBehaviour {
         Directory.CreateDirectory(worldPath);
         string worldDataPath = worldPath + "/" + currentWorld + "_world.sav";
 
-        var stream = new FileStream(worldDataPath, FileMode.OpenOrCreate);
+        var stream = new FileStream(worldDataPath, FileMode.Create);
         bf.Serialize(stream, data);
 
         stream.Close();
@@ -66,6 +74,21 @@ public class WorldDataHandler : MonoBehaviour {
         }
 
         return worldDataList;
+    }
+
+    public void UpdateWorld() {
+        string worldPath = path + "/" + currentWorld;
+        string worldDataPath = worldPath + "/" + currentWorld + "_world.sav";
+
+        var stream = new FileStream(worldDataPath, FileMode.Open);
+        var worldData = (WorldData)bf.Deserialize(stream);
+
+        worldData.last_played = DateTime.Now.ToString();
+
+        stream.SetLength(0);
+        bf.Serialize(stream, worldData);
+
+        stream.Close();
     }
 
     public void RemoveWorld(string worldName) {

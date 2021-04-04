@@ -1,7 +1,7 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
@@ -19,6 +19,7 @@ public class SelectionMenu : MonoBehaviour {
 
     private void Setup() {
         allWorlds = worldDataHandler.LoadAllWorlds();
+        allWorlds.Sort(SortByTime);
 
         //setup content & clear old children
         foreach (Transform child in contentObject.transform) {
@@ -29,6 +30,10 @@ public class SelectionMenu : MonoBehaviour {
         rt.sizeDelta = new Vector2(rt.sizeDelta.x, 200 * worldCount);
 
         CreateWorlds(allWorlds);
+    }
+
+    private static int SortByTime(WorldData w1, WorldData w2) {
+        return DateTime.Parse(w2.last_played).ToBinary().CompareTo(DateTime.Parse(w1.last_played).ToBinary());
     }
 
     private void CreateWorlds(List<WorldData> allWorlds) {
@@ -45,6 +50,9 @@ public class SelectionMenu : MonoBehaviour {
             var infoParent = worldUI.transform.GetChild(1);
             var titleUI = infoParent.GetChild(0);
             titleUI.GetComponent<Text>().text = world.name;
+
+            var timeUI = infoParent.GetChild(1);
+            timeUI.GetComponent<Text>().text = DateTime.Parse(world.last_played).ToShortDateString() + " " + DateTime.Parse(world.last_played).ToShortTimeString();
 
             var deleteButton = worldUI.transform.GetChild(2).GetComponent<Button>();
             deleteButton.onClick.AddListener(delegate {

@@ -8,9 +8,11 @@ public class PauseMenu : MonoBehaviour {
     private bool needsUpdating = true;
 
     private ChunkSaveLoadManager chunkSaveLoadManager;
+    private WorldDataHandler worldDataHandler;
 
     private void Awake() {
         chunkSaveLoadManager = FindObjectOfType<ChunkSaveLoadManager>();
+        worldDataHandler = FindObjectOfType<WorldDataHandler>();
     }
 
     private void Update() {
@@ -51,6 +53,7 @@ public class PauseMenu : MonoBehaviour {
 
     public void SaveAndQuit() {
         chunkSaveLoadManager.SaveAllChunks();
+        worldDataHandler.UpdateWorld();
 
         SceneManager.LoadScene(0);
     }
