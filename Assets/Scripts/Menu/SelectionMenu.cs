@@ -14,9 +14,16 @@ public class SelectionMenu : MonoBehaviour {
 
     private void Awake() {
         worldDataHandler = FindObjectOfType<WorldDataHandler>();
+        Setup();
+    }
+
+    private void Setup() {
         allWorlds = worldDataHandler.LoadAllWorlds();
 
-        //setup content
+        //setup content & clear old children
+        foreach (Transform child in contentObject.transform) {
+            Destroy(child.gameObject);
+        }
         int worldCount = allWorlds.Count;
         var rt = contentObject.GetComponent<RectTransform>();
         rt.sizeDelta = new Vector2(rt.sizeDelta.x, 200 * worldCount);
@@ -38,6 +45,12 @@ public class SelectionMenu : MonoBehaviour {
             var infoParent = worldUI.transform.GetChild(1);
             var titleUI = infoParent.GetChild(0);
             titleUI.GetComponent<Text>().text = world.name;
+
+            var deleteButton = worldUI.transform.GetChild(2).GetComponent<Button>();
+            deleteButton.onClick.AddListener(delegate {
+                worldDataHandler.RemoveWorld(world.name);
+                Setup();
+            });
         }
     }
 

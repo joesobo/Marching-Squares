@@ -28,7 +28,6 @@ public class WorldDataHandler : MonoBehaviour {
         bf.Serialize(stream, data);
     }
 
-
     public WorldData LoadCurrentWorld() {
         string worldPath = path + "/" + currentWorld;
         string worldDataPath = worldPath + "/" + currentWorld + "_world.sav";
@@ -52,5 +51,10 @@ public class WorldDataHandler : MonoBehaviour {
         }
 
         return worldDataList;
+    }
+
+    public void RemoveWorld(string worldName) {
+        string worldPath = path + "/" + worldName;
+        Directory.Delete(worldPath, true);
     }
 }
