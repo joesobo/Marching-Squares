@@ -26,6 +26,9 @@ public class WorldDataHandler : MonoBehaviour {
 
     public void NewWorld(WorldData data) {
         currentWorld = data.name;
+        PlayerPrefs.SetString("CurrentWorld", data.name);
+        PlayerPrefs.Save();
+
         string worldPath = path + "/" + currentWorld;
         Directory.CreateDirectory(worldPath);
         string worldDataPath = worldPath + "/" + currentWorld + "_world.sav";

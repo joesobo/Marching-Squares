@@ -28,7 +28,7 @@ public class CreationMenu : MonoBehaviour {
     }
 
     public void Play() {
-        if (worldNameField.text != null) {
+        if (worldNameField.text != null || worldNameField.text != "") {
             if (worldDataHandler.ContainsWorld(worldName)) {
                 errorText.text = "Error: World Name is already taken";
             } else {

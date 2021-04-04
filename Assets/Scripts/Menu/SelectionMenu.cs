@@ -59,6 +59,9 @@ public class SelectionMenu : MonoBehaviour {
     }
 
     public void LoadWorld() {
+        PlayerPrefs.SetString("CurrentWorld", worldDataHandler.currentWorld);
+        PlayerPrefs.Save();
+
         SceneManager.LoadScene(1);
     }
 }
