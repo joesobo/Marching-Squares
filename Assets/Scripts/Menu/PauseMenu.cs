@@ -19,9 +19,17 @@ public class PauseMenu : MonoBehaviour {
             needsUpdating = true;
         }
 
+
+
         if (needsUpdating) {
             foreach (Transform child in transform) {
                 child.gameObject.SetActive(activeState);
+            }
+
+            if (activeState) {
+                Time.timeScale = 0;
+            } else {
+                Time.timeScale = 1;
             }
         }
 
@@ -38,7 +46,7 @@ public class PauseMenu : MonoBehaviour {
     }
 
     public void OpenOptions() {
-        
+
     }
 
     public void SaveAndQuit() {
