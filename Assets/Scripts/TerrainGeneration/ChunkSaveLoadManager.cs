@@ -174,33 +174,3 @@ public class ChunkSaveLoadManager : MonoBehaviour {
         return new Vector2(xPos, yPos);
     }
 }
-
-[Serializable]
-public class RegionData {
-    public List<ChunkData> chunkDatas = new List<ChunkData>();
-
-    public RegionData(IEnumerable<VoxelChunk> chunks) {
-        foreach (var chunk in chunks) {
-            chunkDatas.Add(new ChunkData(chunk.transform.position, chunk));
-        }
-    }
-}
-
-[Serializable]
-public class ChunkData {
-    public float xPos;
-    public float yPos;
-    public List<float> voxelPositions = new List<float>();
-    public List<int> voxelStates = new List<int>();
-
-    public ChunkData(Vector2 chunkPos, VoxelChunk chunk) {
-        xPos = chunkPos.x;
-        yPos = chunkPos.y;
-
-        foreach (var voxel in chunk.voxels) {
-            voxelPositions.Add(voxel.position.x);
-            voxelPositions.Add(voxel.position.y);
-            voxelStates.Add(voxel.state);
-        }
-    }
-}

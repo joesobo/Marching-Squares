@@ -1125,6 +1125,50 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 430613281}
   m_CullTransparentMesh: 1
+--- !u!1 &447836614
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 447836616}
+  - component: {fileID: 447836615}
+  m_Layer: 0
+  m_Name: World Data Handler
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &447836615
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 447836614}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1623a6ddf3b05b848b9254a201c1a595, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  currentWorld: 
+--- !u!4 &447836616
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 447836614}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 4
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &495266991
 GameObject:
   m_ObjectHideFlags: 0
@@ -1137,7 +1181,6 @@ GameObject:
   - component: {fileID: 495266994}
   - component: {fileID: 495266993}
   - component: {fileID: 495266995}
-  - component: {fileID: 495266996}
   m_Layer: 5
   m_Name: Content
   m_TagString: Untagged
@@ -1231,20 +1274,6 @@ MonoBehaviour:
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
---- !u!114 &495266996
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 495266991}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1623a6ddf3b05b848b9254a201c1a595, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  worldTitleField: {fileID: 1285289055}
-  seedField: {fileID: 0}
 --- !u!1 &495842502
 GameObject:
   m_ObjectHideFlags: 0
@@ -3136,6 +3165,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1236217233}
   - component: {fileID: 1236217234}
+  - component: {fileID: 1236217235}
   m_Layer: 5
   m_Name: Creation
   m_TagString: Untagged
@@ -3172,6 +3202,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1236217232}
   m_CullTransparentMesh: 1
+--- !u!114 &1236217235
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1236217232}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d7f82cb418817414a936decbc69f0a21, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  worldTitleField: {fileID: 1285289055}
+  seedField: {fileID: 1476807401}
 --- !u!1 &1285289053
 GameObject:
   m_ObjectHideFlags: 0
@@ -3268,9 +3312,9 @@ MonoBehaviour:
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 495266996}
-        m_TargetAssemblyTypeName: WorldDataHandler, Assembly-CSharp
-        m_MethodName: SaveWorldTitle
+      - m_Target: {fileID: 1236217235}
+        m_TargetAssemblyTypeName: CreationMenu, Assembly-CSharp
+        m_MethodName: UpdateWorldTitle
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -3735,9 +3779,9 @@ MonoBehaviour:
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 495266996}
-        m_TargetAssemblyTypeName: WorldDataHandler, Assembly-CSharp
-        m_MethodName: SaveSeed
+      - m_Target: {fileID: 1236217235}
+        m_TargetAssemblyTypeName: CreationMenu, Assembly-CSharp
+        m_MethodName: UpdateSeed
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -4442,8 +4486,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 495266996}
-        m_TargetAssemblyTypeName: WorldDataHandler, Assembly-CSharp
+      - m_Target: {fileID: 1236217235}
+        m_TargetAssemblyTypeName: CreationMenu, Assembly-CSharp
         m_MethodName: Play
         m_Mode: 1
         m_Arguments:
@@ -4453,7 +4497,7 @@ MonoBehaviour:
           m_FloatArgument: 0
           m_StringArgument: 
           m_BoolArgument: 0
-        m_CallState: 1
+        m_CallState: 2
 --- !u!114 &1727277004
 MonoBehaviour:
   m_ObjectHideFlags: 0

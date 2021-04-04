@@ -7,10 +7,14 @@ public class WorldManager : MonoBehaviour {
     public string worldName;
     public int seed;
 
+    private WorldDataHandler worldDataHandler;
+
     private void Awake() {
         worldPath = Application.persistentDataPath + "/worlds/";
-        worldName = PlayerPrefs.GetString("worldName");
-        seed = PlayerPrefs.GetInt("seed");
-        Debug.Log(1);
+        worldDataHandler = FindObjectOfType<WorldDataHandler>();
+
+        var worldData = worldDataHandler.LoadCurrentWorld();
+        worldName = worldData.name;
+        seed = worldData.seed;
     }
 }
