@@ -5,8 +5,9 @@ using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class CreationMenu : MonoBehaviour {
-    public InputField worldTitleField;
+    public InputField worldNameField;
     public InputField seedField;
+    public Text errorText;
 
     private string worldName;
     private int seed;
@@ -14,10 +15,12 @@ public class CreationMenu : MonoBehaviour {
 
     private void Awake() {
         worldDataHandler = FindObjectOfType<WorldDataHandler>();
+        errorText.text = "";
     }
 
     public void UpdateWorldTitle() {
-        worldName = worldTitleField.text;
+        worldName = worldNameField.text;
+        errorText.text = "";
     }
 
     public void UpdateSeed() {
@@ -25,9 +28,13 @@ public class CreationMenu : MonoBehaviour {
     }
 
     public void Play() {
-        if (worldTitleField.text != null) {
-            worldDataHandler.NewWorld(new WorldData(worldName, seed));
-            SceneManager.LoadScene(1);
+        if (worldNameField.text != null) {
+            if (worldDataHandler.ContainsWorld(worldName)) {
+                errorText.text = "Error: World Name is already taken";
+            } else {
+                worldDataHandler.NewWorld(new WorldData(worldName, seed));
+                SceneManager.LoadScene(1);
+            }
         }
     }
 }

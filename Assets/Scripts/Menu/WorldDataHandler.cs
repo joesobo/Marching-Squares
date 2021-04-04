@@ -18,6 +18,12 @@ public class WorldDataHandler : MonoBehaviour {
         DontDestroyOnLoad(this.gameObject);
     }
 
+    public bool ContainsWorld(string worldName) {
+        string worldPath = path + "/" + worldName;
+
+        return Directory.Exists(worldPath);
+    }
+
     public void NewWorld(WorldData data) {
         currentWorld = data.name;
         string worldPath = path + "/" + currentWorld;
