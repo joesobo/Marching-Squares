@@ -21,8 +21,9 @@ public class InfiniteGeneration : MonoBehaviour {
     private float colliderRadius;
     private bool useColliders;
     private ChunkCollider chunkCollider;
+    private WorldScriptableObject worldScriptableObject;
 
-    public void StartUp(VoxelMap map) {
+    public void StartUp(VoxelMap map, WorldScriptableObject worldObject) {
         voxelMesh = FindObjectOfType<VoxelMesh>();
         terrainNoise = FindObjectOfType<TerrainNoise>();
         chunkCollider = FindObjectOfType<ChunkCollider>();
@@ -39,8 +40,10 @@ public class InfiniteGeneration : MonoBehaviour {
         useColliders = map.useColliders;
         player = map.player;
         chunkSaveLoadManager = map.chunkSaveLoadManager;
+        worldScriptableObject = worldObject;
 
         terrainNoise.Startup(voxelResolution, chunkResolution, player);
+        terrainNoise.seed = worldScriptableObject.seed;
         voxelMesh.Startup(voxelResolution, chunkResolution, viewDistance, useColliders, colliderRadius);
     }
 

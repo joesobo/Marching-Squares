@@ -17,9 +17,9 @@ public class ChunkSaveLoadManager : MonoBehaviour {
     private WorldScriptableObject worldScriptableObject;
     private string worldPath;
 
-    public void Startup(InfiniteGeneration ig, WorldScriptableObject world, int regionResolution) {
+    public void Startup(InfiniteGeneration ig, WorldScriptableObject worldObject, int regionResolution) {
         parent = ig.transform;
-        worldScriptableObject = world;
+        worldScriptableObject = worldObject;
         worldPath = worldScriptableObject.pathName;
         halfRes = regionResolution / 2;
     }

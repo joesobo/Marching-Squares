@@ -65,7 +65,7 @@ public partial class VoxelMap : MonoBehaviour {
         chunks = new List<VoxelChunk>();
         existingChunks = new Dictionary<Vector2Int, VoxelChunk>();
         voxelEditor.Startup(this);
-        infiniteGeneration.StartUp(this);
+        infiniteGeneration.StartUp(this, worldScriptableObject);
         chunkSaveLoadManager.Startup(infiniteGeneration, worldScriptableObject, regionResolution);
 
         GenerateTerrain();
