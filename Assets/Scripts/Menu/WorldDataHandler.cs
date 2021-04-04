@@ -45,7 +45,7 @@ public class WorldDataHandler : MonoBehaviour {
             var parts = dir.Split('/');
             string worldName = parts[parts.Length - 1];
             string worldPath = path + "/" + worldName;
-            string worldDataPath = worldPath + worldName + "_world.sav";
+            string worldDataPath = worldPath + "/" + worldName + "_world.sav";
 
             var stream = new FileStream(worldDataPath, FileMode.Open);
             worldDataList.Add((WorldData)bf.Deserialize(stream));
