@@ -35,6 +35,8 @@ public class WorldDataHandler : MonoBehaviour {
 
         var stream = new FileStream(worldDataPath, FileMode.OpenOrCreate);
         bf.Serialize(stream, data);
+
+        stream.Close();
     }
 
     public WorldData LoadCurrentWorld() {
@@ -42,8 +44,11 @@ public class WorldDataHandler : MonoBehaviour {
         string worldDataPath = worldPath + "/" + currentWorld + "_world.sav";
 
         var stream = new FileStream(worldDataPath, FileMode.Open);
+        var worldData = (WorldData)bf.Deserialize(stream);
 
-        return (WorldData)bf.Deserialize(stream);
+        stream.Close();
+
+        return worldData;
     }
 
     public List<WorldData> LoadAllWorlds() {
@@ -57,6 +62,7 @@ public class WorldDataHandler : MonoBehaviour {
 
             var stream = new FileStream(worldDataPath, FileMode.Open);
             worldDataList.Add((WorldData)bf.Deserialize(stream));
+            stream.Close();
         }
 
         return worldDataList;
@@ -65,5 +71,15 @@ public class WorldDataHandler : MonoBehaviour {
     public void RemoveWorld(string worldName) {
         string worldPath = path + "/" + worldName;
         Directory.Delete(worldPath, true);
+    }
+
+    public void RemoveAllWorlds() {
+        foreach (string dir in Directory.EnumerateDirectories(path)) {
+            var parts = dir.Split('/');
+            string worldName = parts[parts.Length - 1];
+            string worldPath = path + "/" + worldName;
+
+            Directory.Delete(worldPath, true);
+        }
     }
 }

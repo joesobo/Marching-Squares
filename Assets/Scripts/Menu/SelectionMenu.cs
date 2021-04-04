@@ -12,7 +12,7 @@ public class SelectionMenu : MonoBehaviour {
     private WorldDataHandler worldDataHandler;
     private List<WorldData> allWorlds;
 
-    private void Awake() {
+    private void OnEnable() {
         worldDataHandler = FindObjectOfType<WorldDataHandler>();
         Setup();
     }

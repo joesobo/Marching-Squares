@@ -13,7 +13,7 @@ public class CreationMenu : MonoBehaviour {
     private int seed;
     private WorldDataHandler worldDataHandler;
 
-    private void Awake() {
+    private void OnEnable() {
         worldDataHandler = FindObjectOfType<WorldDataHandler>();
         errorText.text = "";
     }

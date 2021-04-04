@@ -13,9 +13,15 @@ public class ContinueButton : MonoBehaviour {
         button = GetComponent<Button>();
         worldDataHandler = FindObjectOfType<WorldDataHandler>();
 
+        UpdateState();
+    }
+
+    public void UpdateState() {
         currentWorldName = PlayerPrefs.GetString("CurrentWorld");
         if (currentWorldName != "") {
             button.interactable = true;
+        } else {
+            button.interactable = false;
         }
     }
 
