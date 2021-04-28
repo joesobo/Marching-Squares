@@ -14,6 +14,7 @@ public class ChunkSaveLoadManager : MonoBehaviour {
     private Transform parent;
     private int halfRes;
 
+    private WorldManager worldManager;
     private WorldScriptableObject worldScriptableObject;
     private string worldPath;
 
@@ -22,15 +23,19 @@ public class ChunkSaveLoadManager : MonoBehaviour {
         worldScriptableObject = worldObject;
         worldPath = worldScriptableObject.pathName;
         halfRes = regionResolution / 2;
+
+        worldManager = FindObjectOfType<WorldManager>();
     }
 
     private void OpenRegion(Vector2 regionPos) {
-        Directory.CreateDirectory(worldPath);
-        string path = worldPath + "/region(" + regionPos.x + "," + regionPos.y + ").sav";
+        if (worldManager.worldName != "") {
+            Directory.CreateDirectory(worldPath);
+            string path = worldPath + "/region(" + regionPos.x + "," + regionPos.y + ").sav";
 
-        if (!streamPositions.Contains(regionPos)) {
-            streams.Add(new FileStream(path, FileMode.OpenOrCreate));
-            streamPositions.Add(regionPos);
+            if (!streamPositions.Contains(regionPos)) {
+                streams.Add(new FileStream(path, FileMode.OpenOrCreate));
+                streamPositions.Add(regionPos);
+            }
         }
     }
 
@@ -96,26 +101,28 @@ public class ChunkSaveLoadManager : MonoBehaviour {
     }
 
     public void SaveChunk(Vector2 chunkPos, VoxelChunk saveChunk) {
-        var regionPos = RegionPosFromChunkPos(chunkPos);
-        var data = LoadRegionData(regionPos);
-        bool hasBeenAdded = false;
+        if (worldManager.worldName != "") {
+            var regionPos = RegionPosFromChunkPos(chunkPos);
+            var data = LoadRegionData(regionPos);
+            bool hasBeenAdded = false;
 
-        foreach (var chunkData in data.chunkDatas.Where(chunkData =>
-            chunkData.xPos == chunkPos.x && chunkData.yPos == chunkPos.y)) {
-            hasBeenAdded = true;
-            for (int j = 0, count = 0; j < saveChunk.voxels.Length; j++, count += 2) {
-                chunkData.voxelPositions[count] = saveChunk.voxels[j].position.x;
-                chunkData.voxelPositions[count] = saveChunk.voxels[j].position.y;
-                chunkData.voxelStates[j] = saveChunk.voxels[j].state;
+            foreach (var chunkData in data.chunkDatas.Where(chunkData =>
+                chunkData.xPos == chunkPos.x && chunkData.yPos == chunkPos.y)) {
+                hasBeenAdded = true;
+                for (int j = 0, count = 0; j < saveChunk.voxels.Length; j++, count += 2) {
+                    chunkData.voxelPositions[count] = saveChunk.voxels[j].position.x;
+                    chunkData.voxelPositions[count] = saveChunk.voxels[j].position.y;
+                    chunkData.voxelStates[j] = saveChunk.voxels[j].state;
+                }
             }
-        }
 
-        if (!hasBeenAdded) {
-            var newData = new ChunkData(chunkPos, saveChunk);
-            data.chunkDatas.Add(newData);
-        }
+            if (!hasBeenAdded) {
+                var newData = new ChunkData(chunkPos, saveChunk);
+                data.chunkDatas.Add(newData);
+            }
 
-        UpdateRegionData(regionPos, data);
+            UpdateRegionData(regionPos, data);
+        }
     }
 
     public VoxelChunk LoadChunk(Vector2 chunkPos, VoxelChunk fillChunk) {
@@ -150,19 +157,21 @@ public class ChunkSaveLoadManager : MonoBehaviour {
     }
 
     public void SaveAllChunks() {
-        Debug.Log("Saving all regions");
+        if (worldManager.worldName != "") {
+            Debug.Log("Saving all regions");
 
-        foreach (var chunk in from region in regionList
-                              from Transform child in region
-                              select child.GetComponent<VoxelChunk>()
-            into chunk
-                              where chunk
-                              select chunk) {
-            SaveChunk(chunk.transform.position / 8, chunk);
-        }
+            foreach (var chunk in from region in regionList
+                                  from Transform child in region
+                                  select child.GetComponent<VoxelChunk>()
+                into chunk
+                                  where chunk
+                                  select chunk) {
+                SaveChunk(chunk.transform.position / 8, chunk);
+            }
 
-        foreach (var region in regionList) {
-            CloseRegion(GetRegionPosition(region));
+            foreach (var region in regionList) {
+                CloseRegion(GetRegionPosition(region));
+            }
         }
     }
 

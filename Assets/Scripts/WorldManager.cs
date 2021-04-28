@@ -14,9 +14,13 @@ public class WorldManager : MonoBehaviour {
         worldPath = Application.persistentDataPath + "/worlds/";
         worldDataHandler = FindObjectOfType<WorldDataHandler>();
 
-        var worldData = worldDataHandler.LoadCurrentWorld();
-        worldName = worldData.name;
-        seed = worldData.seed;
-        last_played = worldData.last_played;
+        if (worldDataHandler) {
+            var worldData = worldDataHandler.LoadCurrentWorld();
+            worldName = worldData.name;
+            seed = worldData.seed;
+            last_played = worldData.last_played;
+        } else {
+            Debug.Log("WARNING: No world saving");
+        }
     }
 }

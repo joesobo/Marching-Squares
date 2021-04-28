@@ -33,10 +33,6 @@ public partial class VoxelMap : MonoBehaviour {
 
         recycleableChunks = new Queue<VoxelChunk>();
 
-        if (worldManager.worldName == null || worldManager.worldName == "") {
-            Debug.Log("no name");
-        }
-
         worldScriptableObject.pathName = worldManager.worldPath + "/" + worldManager.worldName;
         worldScriptableObject.seed = worldManager.seed;
 
