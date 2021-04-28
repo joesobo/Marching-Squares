@@ -25,7 +25,7 @@ public class TerrainNoise : MonoBehaviour {
     private Transform player;
 
     // [DrawIf(nameof(terrainType), TerrainType.Perlin, ComparisonType.Equals)]
-    public float height1, height2, height3, height4 = 0;
+    public float height1, height2, height3, height4, xHeightOffset = 0;
 
     public enum TerrainType {
         Off,
@@ -83,7 +83,7 @@ public class TerrainNoise : MonoBehaviour {
         float scaledX = x / scaleTerrainNoise / voxelResolution;
         float scaledY = y / scaleTerrainNoise / voxelResolution;
 
-        float scaledXHeight = x / scaleHeightNoise / voxelResolution;
+        float scaledXHeight = x / scaleHeightNoise / voxelResolution / xHeightOffset;
 
         float noiseVal = Mathf.PerlinNoise(scaledX + seed, scaledY + seed);
         float maxHeight = Mathf.PerlinNoise(scaledXHeight + seed, 0) * (chunkResolution * voxelResolution);

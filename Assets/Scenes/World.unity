@@ -880,12 +880,13 @@ MonoBehaviour:
   terrainType: 4
   scaleHeightNoise: 2
   scaleTerrainNoise: 1
-  seed: 5
+  seed: 15
   useRandomSeed: 0
   height1: 0.05
   height2: 0.2
   height3: 0.3
   height4: 0.5
+  xHeightOffset: 10
 --- !u!4 &666039678
 Transform:
   m_ObjectHideFlags: 0
