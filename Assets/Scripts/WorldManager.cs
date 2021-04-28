@@ -21,6 +21,7 @@ public class WorldManager : MonoBehaviour {
             last_played = worldData.last_played;
         } else {
             Debug.Log("WARNING: No world saving");
+            seed = FindObjectOfType<TerrainNoise>().seed;
         }
     }
 }

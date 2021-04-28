@@ -14,7 +14,7 @@ public class TerrainNoise : MonoBehaviour {
     public float scaleTerrainNoise;
 
     // [DrawIf(nameof(terrainType), TerrainType.Perlin, ComparisonType.Equals)]
-    public float seed = 0;
+    public int seed = 0;
 
     // [DrawIf(nameof(terrainType), TerrainType.Perlin, ComparisonType.Equals)]
     public bool useRandomSeed;
@@ -44,7 +44,7 @@ public class TerrainNoise : MonoBehaviour {
         noiseMap = new float[voxelResolution * chunkResolution, voxelResolution * chunkResolution];
 
         if (useRandomSeed) {
-            seed = Random.Range(0f, 10000f);
+            seed = (int)Random.Range(0f, 10000f);
         }
     }
 
