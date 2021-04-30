@@ -24,9 +24,11 @@ public class TerrainNoise : MonoBehaviour {
 
     public GameObject map;
     private Texture2D texture;
-    private int mapIndex = 0;
+    private Color[] colors;
+    private Material mapMaterial;
+    public int mapRenderResolution = 512;
 
-    private int voxelResolution, chunkResolution, mapRenderResolution;
+    private int voxelResolution, chunkResolution;
     private float halfSize;
     private Transform player;
 
@@ -44,10 +46,9 @@ public class TerrainNoise : MonoBehaviour {
         this.player = player;
         halfSize = 0.5f * chunkResolution;
 
-        mapRenderResolution = 256;
-        texture = new Texture2D(mapRenderResolution, mapRenderResolution);
-        texture.filterMode = FilterMode.Point;
-        mapIndex = 0;
+        mapMaterial = map.GetComponent<Renderer>().material;
+        texture = new Texture2D(mapRenderResolution, mapRenderResolution) { filterMode = FilterMode.Point };
+        colors = new Color[mapRenderResolution * mapRenderResolution];
         RecalculateMap();
 
         if (useRandomSeed) {
@@ -56,24 +57,35 @@ public class TerrainNoise : MonoBehaviour {
     }
 
     public void RecalculateMap() {
-        Vector3Int pos = new Vector3Int((int)player.position.x, (int)player.position.y, 0);
-        Vector2Int offset = new Vector2Int(mapRenderResolution / 2, mapRenderResolution / 2);
+        var position = player.position;
+        var pos = new Vector3Int((int)position.x, (int)position.y, 0);
+        var offset = new Vector2Int(mapRenderResolution / 2, mapRenderResolution / 2);
 
-        for (int x = 0; x < mapRenderResolution; x++) {
-            for (int y = 0; y < mapRenderResolution; y++) {
-                texture.SetPixel(x, y, Color.black);
+        for (int x = mapRenderResolution, index = 0; x > 0; x--) {
+            for (var y = 0; y < mapRenderResolution; y++, index++) {
+                colors[index] = Color.black;
                 if (Perlin(x + pos.x - offset.x, y + pos.y - offset.y) > 0) {
-                    texture.SetPixel(x, y, Color.white);
+                    colors[index] = Color.white;
                 }
             }
         }
+
+        int radius = mapRenderResolution / 128;
+        for (int x = offset.x - radius; x < offset.x + radius; x++) {
+            for (int y = offset.y - radius; y < offset.y + radius; y++) {
+                var playerIndex = y * mapRenderResolution + x;
+                colors[playerIndex] = Color.red;
+            }
+        }
+
+        texture.SetPixels(colors);
         texture.Apply();
     }
 
     public void GenerateNoiseValues(VoxelChunk chunk) {
         var position = chunk.transform.position;
-        float chunkX = position.x;
-        float chunkY = position.y;
+        var chunkX = position.x;
+        var chunkY = position.y;
 
         foreach (var voxel in chunk.voxels) {
             switch (terrainType) {
@@ -98,26 +110,26 @@ public class TerrainNoise : MonoBehaviour {
         }
 
         texture.Apply();
-        map.GetComponent<Renderer>().material.SetTexture("MapTexture", texture);
+        mapMaterial.SetTexture("MapTexture", texture);
     }
 
     private void PerlinNoise(float chunkX, float chunkY, Voxel voxel) {
-        int x = Mathf.RoundToInt(voxel.position.x * (voxelResolution - 1) + chunkX * voxelResolution);
-        int y = Mathf.RoundToInt(voxel.position.y * (voxelResolution - 1) + chunkY * voxelResolution);
+        var x = Mathf.RoundToInt(voxel.position.x * (voxelResolution - 1) + chunkX * voxelResolution);
+        var y = Mathf.RoundToInt(voxel.position.y * (voxelResolution - 1) + chunkY * voxelResolution);
 
         voxel.state = Perlin(x, y);
     }
 
     private int Perlin(int x, int y) {
-        float scaledX = x / scaleTerrainNoise / voxelResolution;
-        float scaledY = y / scaleTerrainNoise / voxelResolution;
+        var scaledX = x / scaleTerrainNoise / voxelResolution;
+        var scaledY = y / scaleTerrainNoise / voxelResolution;
 
-        float scaledXHeight = x / scaleHeightNoise / voxelResolution;
+        var scaledXHeight = x / scaleHeightNoise / voxelResolution;
 
-        float noiseVal = Mathf.PerlinNoise(scaledX + seed, scaledY + seed);
-        float maxHeight = Mathf.PerlinNoise(scaledXHeight + seed, 0) * (chunkResolution * voxelResolution);
+        var noiseVal = Mathf.PerlinNoise(scaledX + seed, scaledY + seed);
+        var maxHeight = Mathf.PerlinNoise(scaledXHeight + seed, 0) * (chunkResolution * voxelResolution);
 
-        int voxelState = 0;
+        var voxelState = 0;
 
         if (y > maxHeight) {
             voxelState = 0;
@@ -145,11 +157,7 @@ public class TerrainNoise : MonoBehaviour {
         return voxelState;
     }
 
-    private bool InRange(float input, float value, float range) {
-        if (input + range > value && input - range < value) {
-            return true;
-        }
-
-        return false;
+    private static bool InRange(float input, float value, float range) {
+        return input + range > value && input - range < value;
     }
 }
