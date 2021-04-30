@@ -124,6 +124,7 @@ public class InfiniteGeneration : MonoBehaviour {
                 }
             }
         }
+        terrainNoise.RecalculateMap();
     }
 
     private VoxelChunk CreateChunk() {
