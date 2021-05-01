@@ -6,6 +6,8 @@ using UnityEngine.UI;
 public class TerrainMap : MonoBehaviour {
     public GameObject map;
     public int mapRenderResolution = 512;
+    [Range(0,1)]
+    public float updateInterval = 0.1f;
 
     private Texture2D texture;
     private Color[] colors;

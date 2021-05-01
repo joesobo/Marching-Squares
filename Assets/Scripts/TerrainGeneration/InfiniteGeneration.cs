@@ -23,6 +23,7 @@ public class InfiniteGeneration : MonoBehaviour {
     private bool useColliders;
     private ChunkCollider chunkCollider;
     private WorldScriptableObject worldScriptableObject;
+    private Rigidbody2D playerRb;
 
     public void StartUp(VoxelMap map, WorldScriptableObject worldObject) {
         voxelMesh = FindObjectOfType<VoxelMesh>();
@@ -44,24 +45,36 @@ public class InfiniteGeneration : MonoBehaviour {
         chunkSaveLoadManager = map.chunkSaveLoadManager;
         worldScriptableObject = worldObject;
 
+        playerRb = player.GetComponent<Rigidbody2D>();
+
         terrainNoise.seed = worldScriptableObject.seed;
         terrainNoise.Startup(voxelResolution, chunkResolution, player);
         voxelMesh.Startup(voxelResolution, chunkResolution, viewDistance, useColliders, colliderRadius);
+
+        InvokeRepeating("UpdateMap", 0.0f, terrainMap.updateInterval);
+    }
+
+    private void UpdateMap() {
+        if (playerRb.velocity.magnitude > 0) {
+            terrainMap.RecalculateMap();
+        }
     }
 
     public void UpdateAroundPlayer() {
-        p = player.position / voxelResolution;
-        playerCoord = new Vector2Int(Mathf.RoundToInt(p.x), Mathf.RoundToInt(p.y));
+        if (playerRb.velocity.magnitude > 0) {
+            p = player.position / voxelResolution;
+            playerCoord = new Vector2Int(Mathf.RoundToInt(p.x), Mathf.RoundToInt(p.y));
 
-        voxelMesh.CreateBuffers();
+            voxelMesh.CreateBuffers();
 
-        RemoveOutOfBoundsChunks();
+            RemoveOutOfBoundsChunks();
 
-        CreateNewChunksInRange();
+            CreateNewChunksInRange();
 
-        UpdateNewChunks();
+            UpdateNewChunks();
 
-        RecreateUpdatedChunkMeshes();
+            RecreateUpdatedChunkMeshes();
+        }
     }
 
     private void RemoveOutOfBoundsChunks() {
@@ -126,7 +139,6 @@ public class InfiniteGeneration : MonoBehaviour {
                 }
             }
         }
-        terrainMap.RecalculateMap();
     }
 
     private VoxelChunk CreateChunk() {

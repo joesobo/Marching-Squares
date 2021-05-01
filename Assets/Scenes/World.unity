@@ -920,6 +920,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   map: {fileID: 828033624}
   mapRenderResolution: 512
+  updateInterval: 0.2
 --- !u!1 &705507993
 GameObject:
   m_ObjectHideFlags: 0
