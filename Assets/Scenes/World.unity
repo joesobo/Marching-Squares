@@ -512,7 +512,7 @@ Rigidbody2D:
   m_LinearDrag: 0
   m_AngularDrag: 0
   m_GravityScale: 98
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 6200000, guid: 213b04e3059d8c741ac650feb500eb4f, type: 2}
   m_Interpolate: 1
   m_SleepingMode: 1
   m_CollisionDetection: 1
@@ -526,7 +526,7 @@ CircleCollider2D:
   m_GameObject: {fileID: 547865863}
   m_Enabled: 1
   m_Density: 1
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 6200000, guid: 213b04e3059d8c741ac650feb500eb4f, type: 2}
   m_IsTrigger: 0
   m_UsedByEffector: 0
   m_UsedByComposite: 0
@@ -613,8 +613,8 @@ MonoBehaviour:
   velocity: {x: 0, y: 0, z: 0}
   speed: 3000
   walkAcceleration: 1500
-  jumpforce: 75
-  jumpDecelleration: 60
+  jumpforce: 50
+  jumpDecelleration: 70
   isGroundedRayLength: 0.15
   layerMaskForGrounded:
     serializedVersion: 2
@@ -884,14 +884,21 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   terrainType: 4
-  scaleHeightNoise: 2
-  scaleTerrainNoise: 1
   seed: 15
   useRandomSeed: 1
   height1: 0.05
   height2: 0.2
   height3: 0.3
   height4: 0.5
+  frequencies:
+  - 0.1
+  - 0.2
+  - 0.5
+  amplitudes:
+  - 1
+  - 0.5
+  - 0.25
+  exponent: 2
 --- !u!4 &666039678
 Transform:
   m_ObjectHideFlags: 0

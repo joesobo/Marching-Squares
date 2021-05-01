@@ -1,26 +1,19 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
 public class TerrainNoise : MonoBehaviour {
     public TerrainType terrainType = TerrainType.Perlin;
 
-    // [DrawIf(nameof(terrainType), TerrainType.Perlin, ComparisonType.Equals)]
-    [Range(0.3f, 100)]
-    public float scaleHeightNoise;
-
-    // [DrawIf(nameof(terrainType), TerrainType.Perlin, ComparisonType.Equals)]
-    [Range(0.3f, 100)]
-    public float scaleTerrainNoise;
-
-    // [DrawIf(nameof(terrainType), TerrainType.Perlin, ComparisonType.Equals)]
     public int seed = 0;
-
-    // [DrawIf(nameof(terrainType), TerrainType.Perlin, ComparisonType.Equals)]
     public bool useRandomSeed;
-
-    // [DrawIf(nameof(terrainType), TerrainType.Perlin, ComparisonType.Equals)]
     public float height1, height2, height3, height4 = 0;
+
+    public List<float> frequencies = new List<float>();
+    public List<float> amplitudes = new List<float>();
+    [Range(0, 2)]
+    public float exponent = 0.5f;
 
     private int voxelResolution, chunkResolution;
     private float halfSize;
@@ -85,36 +78,45 @@ public class TerrainNoise : MonoBehaviour {
     }
 
     public int Perlin(int x, int y) {
-        var scaledX = x / scaleTerrainNoise / voxelResolution;
-        var scaledY = y / scaleTerrainNoise / voxelResolution;
+        var scaledX = x / 1f / voxelResolution;
+        var scaledY = y / 1f / voxelResolution;
 
-        var scaledXHeight = x / scaleHeightNoise / voxelResolution;
+        var scaledXHeight = x / 1f / voxelResolution;
 
         var noiseVal = Mathf.PerlinNoise(scaledX + seed, scaledY + seed);
-        var maxHeight = Mathf.PerlinNoise(scaledXHeight + seed, 0) * (chunkResolution * voxelResolution);
-
+        var noiseHeight = 0f;
+        var amplitudeSum = 0f;
         var voxelState = 0;
 
-        if (y > maxHeight) {
+        for (int i = 0; i < frequencies.Count; i++) {
+            noiseHeight += amplitudes[i] * Mathf.PerlinNoise((scaledXHeight + seed) * frequencies[i], 0);
+            amplitudeSum += amplitudes[i];
+        }
+
+        noiseHeight /= amplitudeSum;
+        noiseHeight = (float)Math.Pow(noiseHeight, exponent);
+        noiseHeight *= chunkResolution * voxelResolution;
+
+        if (y > noiseHeight) {
             voxelState = 0;
         } else {
-            if (y < height1 * chunkResolution * voxelResolution) {
+            if (y < height1) {
                 //random 3/0
                 voxelState = noiseVal > 0.33f ? 3 : 0;
-            } else if (y < height2 * chunkResolution * voxelResolution) {
+            } else if (y < height2) {
                 //random 3/1/0
                 voxelState = noiseVal > 0.65f ? 3 : noiseVal > 0.33f ? 1 : 0;
-            } else if (y < height3 * chunkResolution * voxelResolution) {
+            } else if (y < height3) {
                 //random 2/1/0
                 voxelState = noiseVal > 0.66f ? 2 : noiseVal > 0.33f ? 1 : 0;
             } else {
                 voxelState = noiseVal > 0.5f ? 2 : noiseVal > 0.33f ? 1 : 0;
             }
 
-            if (InRange(y, Mathf.RoundToInt(maxHeight), 3)) {
-                voxelState = 4;
-            } else if (InRange(y, Mathf.RoundToInt(maxHeight), 8)) {
-                voxelState = noiseVal > 0.2f ? 2 : 1;
+            if (InRange(y, Mathf.RoundToInt(noiseHeight), 3)) {
+                voxelState = noiseVal > 0.33f ? 4 : 0;
+            } else if (InRange(y, Mathf.RoundToInt(noiseHeight), 8)) {
+                voxelState = noiseVal > 0.8f ? 1 : noiseVal > 0.33f ? 2 : 0;
             }
         }
 
