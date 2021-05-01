@@ -15,6 +15,7 @@ public partial class VoxelMap : MonoBehaviour {
     private WorldManager worldManager;
     [HideInInspector] public ChunkSaveLoadManager chunkSaveLoadManager;
     [HideInInspector] public Transform player;
+    private Rigidbody2D playerRb;
 
     [HideInInspector] public List<VoxelChunk> chunks;
     public Dictionary<Vector2Int, VoxelChunk> existingChunks;
@@ -28,6 +29,7 @@ public partial class VoxelMap : MonoBehaviour {
         worldManager = FindObjectOfType<WorldManager>();
         chunkSaveLoadManager = FindObjectOfType<ChunkSaveLoadManager>();
         player = FindObjectOfType<PlayerController>().transform;
+        playerRb = player.GetComponent<Rigidbody2D>();
 
         chunkResolution = 16;
 
@@ -46,7 +48,10 @@ public partial class VoxelMap : MonoBehaviour {
     private void GenerateTerrain() {
         transform.parent.localScale = Vector3.one;
 
-        infiniteGeneration.UpdateAroundPlayer();
+        //only update world when player is moving
+        if (playerRb.velocity.magnitude > 0) {
+            infiniteGeneration.UpdateAroundPlayer();
+        }
 
         transform.parent.localScale = Vector3.one * voxelResolution;
     }

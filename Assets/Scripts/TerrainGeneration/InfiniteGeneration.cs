@@ -8,6 +8,7 @@ public class InfiniteGeneration : MonoBehaviour {
     private VoxelMesh voxelMesh;
     private Transform player;
     private TerrainNoise terrainNoise;
+    private TerrainMap terrainMap;
     private ChunkSaveLoadManager chunkSaveLoadManager;
 
     private Vector2 p, playerOffset, offset;
@@ -26,6 +27,7 @@ public class InfiniteGeneration : MonoBehaviour {
     public void StartUp(VoxelMap map, WorldScriptableObject worldObject) {
         voxelMesh = FindObjectOfType<VoxelMesh>();
         terrainNoise = FindObjectOfType<TerrainNoise>();
+        terrainMap = FindObjectOfType<TerrainMap>();
         chunkCollider = FindObjectOfType<ChunkCollider>();
 
         recycleableChunks = map.recycleableChunks;
@@ -42,8 +44,8 @@ public class InfiniteGeneration : MonoBehaviour {
         chunkSaveLoadManager = map.chunkSaveLoadManager;
         worldScriptableObject = worldObject;
 
-        terrainNoise.Startup(voxelResolution, chunkResolution, player);
         terrainNoise.seed = worldScriptableObject.seed;
+        terrainNoise.Startup(voxelResolution, chunkResolution, player);
         voxelMesh.Startup(voxelResolution, chunkResolution, viewDistance, useColliders, colliderRadius);
     }
 
@@ -124,7 +126,7 @@ public class InfiniteGeneration : MonoBehaviour {
                 }
             }
         }
-        terrainNoise.RecalculateMap();
+        terrainMap.RecalculateMap();
     }
 
     private VoxelChunk CreateChunk() {

@@ -22,15 +22,10 @@ public class TerrainNoise : MonoBehaviour {
     // [DrawIf(nameof(terrainType), TerrainType.Perlin, ComparisonType.Equals)]
     public float height1, height2, height3, height4 = 0;
 
-    public GameObject map;
-    private Texture2D texture;
-    private Color[] colors;
-    private Material mapMaterial;
-    public int mapRenderResolution = 512;
-
     private int voxelResolution, chunkResolution;
     private float halfSize;
     private Transform player;
+    private TerrainMap terrainMap;
 
     public enum TerrainType {
         Off,
@@ -46,40 +41,13 @@ public class TerrainNoise : MonoBehaviour {
         this.player = player;
         halfSize = 0.5f * chunkResolution;
 
-        mapMaterial = map.GetComponent<Renderer>().material;
-        texture = new Texture2D(mapRenderResolution, mapRenderResolution) { filterMode = FilterMode.Point };
-        colors = new Color[mapRenderResolution * mapRenderResolution];
-        RecalculateMap();
-
         if (useRandomSeed) {
             seed = (int)Random.Range(0f, 10000f);
         }
-    }
+        Random.InitState(seed);
 
-    public void RecalculateMap() {
-        var position = player.position;
-        var pos = new Vector3Int((int)position.x, (int)position.y, 0);
-        var offset = new Vector2Int(mapRenderResolution / 2, mapRenderResolution / 2);
-
-        for (int x = mapRenderResolution, index = 0; x > 0; x--) {
-            for (var y = 0; y < mapRenderResolution; y++, index++) {
-                colors[index] = Color.black;
-                if (Perlin(x + pos.x - offset.x, y + pos.y - offset.y) > 0) {
-                    colors[index] = Color.white;
-                }
-            }
-        }
-
-        int radius = mapRenderResolution / 128;
-        for (int x = offset.x - radius; x < offset.x + radius; x++) {
-            for (int y = offset.y - radius; y < offset.y + radius; y++) {
-                var playerIndex = y * mapRenderResolution + x;
-                colors[playerIndex] = Color.red;
-            }
-        }
-
-        texture.SetPixels(colors);
-        texture.Apply();
+        terrainMap = FindObjectOfType<TerrainMap>();
+        terrainMap.RecalculateMap();
     }
 
     public void GenerateNoiseValues(VoxelChunk chunk) {
@@ -108,9 +76,6 @@ public class TerrainNoise : MonoBehaviour {
                     throw new ArgumentOutOfRangeException();
             }
         }
-
-        texture.Apply();
-        mapMaterial.SetTexture("MapTexture", texture);
     }
 
     private void PerlinNoise(float chunkX, float chunkY, Voxel voxel) {
@@ -120,7 +85,7 @@ public class TerrainNoise : MonoBehaviour {
         voxel.state = Perlin(x, y);
     }
 
-    private int Perlin(int x, int y) {
+    public int Perlin(int x, int y) {
         var scaledX = x / scaleTerrainNoise / voxelResolution;
         var scaledY = y / scaleTerrainNoise / voxelResolution;
 
@@ -144,7 +109,7 @@ public class TerrainNoise : MonoBehaviour {
                 //random 2/1/0
                 voxelState = noiseVal > 0.66f ? 2 : noiseVal > 0.33f ? 1 : 0;
             } else {
-                voxelState = noiseVal > 0.5f ? 2 : 1;
+                voxelState = noiseVal > 0.5f ? 2 : noiseVal > 0.33f ? 1 : 0;
             }
 
             if (InRange(y, Mathf.RoundToInt(maxHeight), 3)) {
