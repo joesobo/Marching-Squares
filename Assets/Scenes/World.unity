@@ -613,8 +613,8 @@ MonoBehaviour:
   velocity: {x: 0, y: 0, z: 0}
   speed: 3000
   walkAcceleration: 1500
-  jumpforce: 50
-  jumpDecelleration: 70
+  jumpforce: 70
+  jumpDecelleration: 80
   isGroundedRayLength: 0.15
   layerMaskForGrounded:
     serializedVersion: 2
@@ -927,10 +927,10 @@ MonoBehaviour:
   zoomInterval: 64
   colorList:
   - {r: 0, g: 0, b: 0, a: 0}
-  - {r: 0.5410733, g: 0.5795395, b: 0.5943396, a: 0}
-  - {r: 0.6603774, g: 0.5207604, b: 0.3582236, a: 0}
-  - {r: 0.3372549, g: 0.35902232, b: 0.3764706, a: 0}
-  - {r: 0.5511217, g: 0.735849, b: 0.48246706, a: 0}
+  - {r: 0.5522873, g: 0.5871492, b: 0.5943396, a: 0}
+  - {r: 0.3773585, g: 0.31596872, b: 0.22961909, a: 0}
+  - {r: 0.34118018, g: 0.3446888, b: 0.38679248, a: 0}
+  - {r: 0.39013758, g: 0.5754717, b: 0.30673727, a: 0}
 --- !u!1 &705507993
 GameObject:
   m_ObjectHideFlags: 0
