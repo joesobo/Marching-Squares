@@ -10,8 +10,18 @@ public class TerrainNoise : MonoBehaviour {
     public bool useRandomSeed;
     public float height1, height2, height3, height4 = 0;
 
-    public List<float> frequencies = new List<float>();
-    public List<float> amplitudes = new List<float>();
+    [Range(0.1f, 1)]
+    public float frequency = 1f;
+
+    [Range(1, 8)]
+	public int octaves = 1;
+
+	[Range(1f, 4f)]
+	public float lacunarity = 2f;
+
+	[Range(0f, 1f)]
+	public float persistence = 0.5f;
+
     [Range(0, 2)]
     public float exponent = 0.5f;
 
@@ -85,16 +95,20 @@ public class TerrainNoise : MonoBehaviour {
 
         var noiseVal = Mathf.PerlinNoise(scaledX + seed, scaledY + seed);
         var noiseHeight = 0f;
-        var amplitudeSum = 0f;
         var voxelState = 0;
 
-        for (int i = 0; i < frequencies.Count; i++) {
-            noiseHeight += amplitudes[i] * Mathf.PerlinNoise((scaledXHeight + seed) * frequencies[i], 0);
-            amplitudeSum += amplitudes[i];
-        }
-
-        noiseHeight /= amplitudeSum;
-        noiseHeight = (float)Math.Pow(noiseHeight, exponent);
+        float freq = frequency;
+		float amplitude = 1f;
+		float range = 1f;
+        float sum = Mathf.PerlinNoise((scaledXHeight + seed) * freq, 0);
+        
+		for (int o = 1; o < octaves; o++) {
+			freq *= lacunarity;
+			amplitude *= persistence;
+			range += amplitude;
+			sum += Mathf.PerlinNoise((scaledXHeight + seed) * freq, 0) * amplitude;
+		}
+		noiseHeight = sum / range;
         noiseHeight *= chunkResolution * voxelResolution;
 
         if (y > noiseHeight) {
