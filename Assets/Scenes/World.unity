@@ -887,7 +887,7 @@ MonoBehaviour:
   scaleHeightNoise: 2
   scaleTerrainNoise: 1
   seed: 15
-  useRandomSeed: 0
+  useRandomSeed: 1
   height1: 0.05
   height2: 0.2
   height3: 0.3
@@ -919,8 +919,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   map: {fileID: 828033624}
-  mapRenderResolution: 512
+  mapRenderResolution: 256
   updateInterval: 0.2
+  zoomInterval: 64
+  colorList:
+  - {r: 0, g: 0, b: 0, a: 0}
+  - {r: 0.5410733, g: 0.5795395, b: 0.5943396, a: 0}
+  - {r: 0.6603774, g: 0.5207604, b: 0.3582236, a: 0}
+  - {r: 0.3372549, g: 0.35902232, b: 0.3764706, a: 0}
+  - {r: 0.5511217, g: 0.735849, b: 0.48246706, a: 0}
 --- !u!1 &705507993
 GameObject:
   m_ObjectHideFlags: 0

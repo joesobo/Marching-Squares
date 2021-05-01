@@ -47,7 +47,6 @@ public class TerrainNoise : MonoBehaviour {
         Random.InitState(seed);
 
         terrainMap = FindObjectOfType<TerrainMap>();
-        terrainMap.RecalculateMap();
     }
 
     public void GenerateNoiseValues(VoxelChunk chunk) {
