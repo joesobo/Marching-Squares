@@ -6,7 +6,7 @@ using UnityEngine.UI;
 public class TerrainMap : MonoBehaviour {
     public GameObject map;
     public int mapRenderResolution = 512;
-    [Range(0,1)]
+    [Range(0, 1)]
     public float updateInterval = 0.1f;
 
     private Texture2D texture;
@@ -15,6 +15,7 @@ public class TerrainMap : MonoBehaviour {
     private float stepSize;
     private Transform player;
     private TerrainNoise terrainNoise;
+    private bool isActive = true;
 
     void Awake() {
         mapMaterial = map.GetComponent<Image>().material;
@@ -24,6 +25,12 @@ public class TerrainMap : MonoBehaviour {
         stepSize = 1f / mapRenderResolution;
         player = FindObjectOfType<PlayerController>().transform;
         terrainNoise = FindObjectOfType<TerrainNoise>();
+    }
+
+    void Update() {
+        if(Input.GetKeyDown(KeyCode.M)) {
+            ToggleMap();
+        }
     }
 
     public void RecalculateMap() {
@@ -51,5 +58,10 @@ public class TerrainMap : MonoBehaviour {
         texture.SetPixels(colors);
         texture.Apply();
         mapMaterial.SetTexture("MapTexture", texture);
+    }
+
+    private void ToggleMap() {
+        isActive = !isActive;
+        map.SetActive(isActive);
     }
 }
