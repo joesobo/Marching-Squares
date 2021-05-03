@@ -4,16 +4,16 @@ using UnityEngine;
 
 [Serializable]
 public class Block {
-    public Texture2D texture;
+    public string texturePath;
     public int index;
     public string name;
     public Color color;
 
-    public Block(int index, string name, Color color, Texture2D texture) {
+    public Block(int index, string name, Color color, string texturePath) {
         this.index = index;
         this.name = name;
         this.color = color;
-        this.texture = texture;
+        this.texturePath = texturePath;
     }
 }
 
