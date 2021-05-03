@@ -1403,7 +1403,7 @@
     },
     "m_Name": "Textures",
     "m_DefaultReferenceName": "Texture2DArray_93f76cf1d5584a0ab3f90e322c4c0979",
-    "m_OverrideReferenceName": "",
+    "m_OverrideReferenceName": "Textures",
     "m_GeneratePropertyBlock": true,
     "m_Precision": 0,
     "overrideHLSLDeclaration": false,

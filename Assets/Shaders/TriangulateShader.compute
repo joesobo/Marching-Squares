@@ -55,31 +55,9 @@ bool isMultiMaterial(float a, float b, float c, float d) {
 
 Color colorByState(float state) {
   Color col;
- 
-  //Stone
-  if (state == 1) {
-    col.red = 0;
-    col.green = 0;
-    col.blue = 0;
-  } 
-  //Dirt
-  else if (state == 2) {
-    col.red = 1.0 / 255.0;
-    col.green = 0;
-    col.blue = 0;
-  }
-  //Rock
-  else if (state == 3) {
-    col.red = 2.0 / 255.0;
-    col.green = 0;
-    col.blue = 0;
-  }
-  //Grass
-  else if (state == 4) {
-    col.red = 3.0 / 255.0;
-    col.green = 0;
-    col.blue = 0;
-  }
+  col.red = state / 255.0;
+  col.blue = 0;
+  col.green = 0;
    
   return col;
 }

@@ -7,7 +7,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Test
+  m_Name: BlocksMaterial
   m_Shader: {fileID: -6465566751694194690, guid: 96d1b24f4c73b26439c85166adcca2fd,
     type: 3}
   m_ShaderKeywords: 
@@ -29,7 +29,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - Texture2DArray_93f76cf1d5584a0ab3f90e322c4c0979:
-        m_Texture: {fileID: 18700000, guid: 2c41de4693ec022428b37821b4ae2b51, type: 2}
+        m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - Texture2DArray_c57030634ba446aa9b8033a35a856a68:
@@ -46,6 +46,10 @@ Material:
         m_Offset: {x: 0, y: 0}
     - Texture4:
         m_Texture: {fileID: 2800000, guid: 9a51adcc3f19fd0429e5d02fc03f7e61, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - Textures:
+        m_Texture: {fileID: 18700000, guid: d9b044b5af0a42940a4beffec62c0758, type: 2}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _SampleTexture2D_77152559b25e4546963aa99d1ef57109_Texture_1:

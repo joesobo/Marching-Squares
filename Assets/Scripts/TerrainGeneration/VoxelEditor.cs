@@ -6,7 +6,8 @@ using UnityEngine;
 public class VoxelEditor : MonoBehaviour {
     private const int UPDATE_INTERVAL = 2;
 
-    private static readonly string[] FillTypeNames = { "Empty", "Stone", "Dirt", "Rock", "Grass" };
+    // private static readonly string[] FillTypeNames = { "Empty", "Stone", "Dirt", "Rock", "Grass" };
+    private List<string> FillTypeNames = new List<string>();
     private static readonly string[] RadiusNames = { "0", "1", "2", "3", "4", "5" };
     private static readonly string[] StencilNames = { "Square", "Circle" };
 
@@ -35,6 +36,12 @@ public class VoxelEditor : MonoBehaviour {
     };
 
     public void Startup(VoxelMap map) {
+        BlockCollection blockList = BlockManager.ReadBlocks();
+        FillTypeNames.Add("Empty");
+        foreach (Block block in blockList.blocks) {
+            FillTypeNames.Add(block.name);
+        }
+
         voxelResolution = map.voxelResolution;
         chunkResolution = map.chunkResolution;
         viewDistance = map.viewDistance;
@@ -178,7 +185,7 @@ public class VoxelEditor : MonoBehaviour {
     private void OnGUI() {
         GUILayout.BeginArea(new Rect(4f, 4f, 150f, 1000f));
         GUILayout.Label("Fill Type");
-        fillTypeIndex = GUILayout.SelectionGrid(fillTypeIndex, FillTypeNames, 2);
+        fillTypeIndex = GUILayout.SelectionGrid(fillTypeIndex, FillTypeNames.ToArray(), 2);
         GUILayout.Label("Radius");
         radiusIndex = GUILayout.SelectionGrid(radiusIndex, RadiusNames, 6);
         GUILayout.Label("Stencil");

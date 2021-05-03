@@ -9,8 +9,8 @@ public class BlockMap : EditorWindow {
     private Color mapColor;
     private Texture2D blockTexture;
     private List<Texture2D> textures;
-
-    //TODO: connect to voxel placer / voxel shader
+    private Material blocksMaterial;
+    private Texture2DArray textureArray;
 
     [MenuItem("Window/Block Map")]
     public static void ShowWindow() {
@@ -19,9 +19,14 @@ public class BlockMap : EditorWindow {
 
     void OnEnable() {
         blockList = BlockManager.ReadBlocks();
+        blocksMaterial.SetTexture("Textures", textureArray);
     }
 
     void OnGUI() {
+        GUILayout.Space(20f);
+        blocksMaterial = (Material)EditorGUILayout.ObjectField(blocksMaterial, typeof(Material), false);
+        GUILayout.Space(20f);
+        
         textures = new List<Texture2D>();
         GUILayout.Label("Blocks", EditorStyles.boldLabel);
         for (int i = 0; i < blockList.blocks.Count; i++) {
@@ -54,11 +59,20 @@ public class BlockMap : EditorWindow {
             blockList = BlockManager.ReadBlocks();
         }
         if (GUILayout.Button("+")) {
-            BlockManager.WriteBlocks(blockList, new Block(blockList.blocks.Count, blockName, mapColor, GetPathFromTexture(blockTexture)));
+            if (!blockTexture) {
+                blockTexture = null;
+            }
+
+            BlockManager.WriteBlocks(blockList, new Block(blockList.blocks.Count + 1, blockName, mapColor, GetPathFromTexture(blockTexture)));
             blockList.blocks.Clear();
             blockList = BlockManager.ReadBlocks();
         }
         GUILayout.EndHorizontal();
+
+        GUILayout.Space(20f);
+        if (GUILayout.Button("Update Texture2D Array")) {
+            SaveTexture2DArray();
+        }
     }
 
     private static Texture2D TextureField(Texture2D texture) {
@@ -78,5 +92,28 @@ public class BlockMap : EditorWindow {
     private string GetPathFromTexture(Texture2D texture) {
         string path = "Assets/Resources/Blocks/";
         return path + texture.name + ".png";
+    }
+
+    private void SaveTexture2DArray() {
+        string path = "Assets/Resources/Blocks/TextureArray.Asset";
+
+        Texture2D t = textures[0];
+        textureArray = new Texture2DArray(t.width, t.height, textures.Count, t.format, t.mipmapCount > 1);
+        textureArray.anisoLevel = t.anisoLevel;
+        textureArray.filterMode = t.filterMode;
+        textureArray.wrapMode = t.wrapMode;
+
+        for (int i = 0; i < textures.Count; i++) {
+            for (int m = 0; m < t.mipmapCount; m++) {
+                Graphics.CopyTexture(textures[i], 0, m, textureArray, i, m);
+            }
+        }
+
+        if (AssetDatabase.LoadAssetAtPath<Texture2DArray>(path) != null) { AssetDatabase.DeleteAsset(path); }
+        AssetDatabase.CreateAsset(textureArray, path);
+
+        AssetDatabase.Refresh();
+
+        blocksMaterial.SetTexture("Textures", textureArray);
     }
 }
