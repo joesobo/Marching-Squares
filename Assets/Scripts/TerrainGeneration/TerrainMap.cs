@@ -19,12 +19,18 @@ public class TerrainMap : MonoBehaviour {
     private TerrainNoise terrainNoise;
     private bool isActive = true;
 
-    public List<Color> colorList = new List<Color>();
+    private List<Color> colorList = new List<Color>();
 
     private void Awake() {
         mapMaterial = map.GetComponent<Image>().material;
         player = FindObjectOfType<PlayerController>().transform;
         terrainNoise = FindObjectOfType<TerrainNoise>();
+
+        BlockCollection blockList = BlockManager.ReadBlocks();
+        colorList.Add(Color.black);
+        foreach (Block block in blockList.blocks) {
+            colorList.Add(block.color);
+        }
 
         NewTexture();
     }
@@ -87,18 +93,7 @@ public class TerrainMap : MonoBehaviour {
     }
 
     private Color FindColor(int pointState) {
-        switch (pointState) {
-            case 1:
-                return colorList[1];
-            case 2:
-                return colorList[2];
-            case 3:
-                return colorList[3];
-            case 4:
-                return colorList[4];
-            default:
-                return colorList[0];
-        }
+        return colorList[pointState];
     }
 
     private void ToggleMap() {
