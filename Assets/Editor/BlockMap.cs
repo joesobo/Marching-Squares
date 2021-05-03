@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEditor;
@@ -26,7 +27,7 @@ public class BlockMap : EditorWindow {
         GUILayout.Space(20f);
         blocksMaterial = (Material)EditorGUILayout.ObjectField(blocksMaterial, typeof(Material), false);
         GUILayout.Space(20f);
-        
+
         textures = new List<Texture2D>();
         GUILayout.Label("Blocks", EditorStyles.boldLabel);
         for (int i = 0; i < blockList.blocks.Count; i++) {
@@ -73,6 +74,11 @@ public class BlockMap : EditorWindow {
         if (GUILayout.Button("Update Texture2D Array")) {
             SaveTexture2DArray();
         }
+
+        GUILayout.Space(20f);
+        if (GUILayout.Button("Refresh")) {
+            blockList = BlockManager.ReadBlocks();
+        }
     }
 
     private static Texture2D TextureField(Texture2D texture) {
@@ -81,12 +87,16 @@ public class BlockMap : EditorWindow {
     }
 
     private Texture2D GetTextureFromPath(string path) {
-        var rawData = System.IO.File.ReadAllBytes(path);
-        Texture2D texture = new Texture2D(16, 16); // Create an empty Texture; size doesn't matter
-        texture.LoadImage(rawData);
-        texture.Apply();
-
-        return texture;
+        try {
+            var rawData = System.IO.File.ReadAllBytes(path);
+            Texture2D texture = new Texture2D(16, 16); // Create an empty Texture; size doesn't matter
+            texture.LoadImage(rawData);
+            texture.Apply();
+            return texture;
+        } catch (Exception e) {
+            Debug.Log("Error reading texture from path " + e);
+            return null;
+        }
     }
 
     private string GetPathFromTexture(Texture2D texture) {
