@@ -2,10 +2,12 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEditor;
+using UnityEditorInternal;
 using UnityEngine;
 
 public class BlockMap : EditorWindow {
     private BlockCollection blockList;
+    private ReorderableList reorderableBlocks;
     private string blockName;
     private Color mapColor;
     private Texture2D blockTexture;
@@ -20,30 +22,15 @@ public class BlockMap : EditorWindow {
 
     void OnEnable() {
         blockList = BlockManager.ReadBlocks();
+        textures = new List<Texture2D>();
+
         blocksMaterial.SetTexture("Textures", textureArray);
     }
 
     void OnGUI() {
+        PrepareList();
+        reorderableBlocks.DoLayoutList();
         GUILayout.Space(20f);
-        blocksMaterial = (Material)EditorGUILayout.ObjectField(blocksMaterial, typeof(Material), false);
-        GUILayout.Space(20f);
-
-        textures = new List<Texture2D>();
-        GUILayout.Label("Blocks", EditorStyles.boldLabel);
-        for (int i = 0; i < blockList.blocks.Count; i++) {
-            Block block = blockList.blocks[i];
-            textures.Add(GetTextureFromPath(block.texturePath));
-
-            GUILayout.BeginHorizontal(EditorStyles.helpBox);
-            TextureField(textures[i]);
-            GUILayout.BeginVertical();
-            GUILayout.Label("Index: " + block.index);
-            GUILayout.Label("Name: " + block.name);
-            EditorGUILayout.ColorField("Map Color: ", block.color);
-            GUILayout.EndVertical();
-            GUILayout.EndHorizontal();
-        }
-        GUILayout.Space(30f);
 
         blockName = EditorGUILayout.TextField("Block Name: ", blockName);
         mapColor = EditorGUILayout.ColorField("Map Color: ", mapColor);
@@ -53,22 +40,8 @@ public class BlockMap : EditorWindow {
         EditorGUILayout.EndHorizontal();
 
         GUILayout.Space(20f);
-        GUILayout.BeginHorizontal();
-        if (GUILayout.Button("-")) {
-            BlockManager.RemoveBlock(blockList);
-            blockList.blocks.Clear();
-            blockList = BlockManager.ReadBlocks();
-        }
-        if (GUILayout.Button("+")) {
-            if (!blockTexture) {
-                blockTexture = null;
-            }
-
-            BlockManager.WriteBlocks(blockList, new Block(blockList.blocks.Count + 1, blockName, mapColor, GetPathFromTexture(blockTexture)));
-            blockList.blocks.Clear();
-            blockList = BlockManager.ReadBlocks();
-        }
-        GUILayout.EndHorizontal();
+        blocksMaterial = (Material)EditorGUILayout.ObjectField(blocksMaterial, typeof(Material), false);
+        GUILayout.Space(20f);
 
         GUILayout.Space(20f);
         if (GUILayout.Button("Update Texture2D Array")) {
@@ -78,13 +51,40 @@ public class BlockMap : EditorWindow {
         GUILayout.Space(20f);
         if (GUILayout.Button("Refresh")) {
             blockList = BlockManager.ReadBlocks();
+            reorderableBlocks = new ReorderableList(blockList.blocks,
+                typeof(Block),
+                true, true, true, true);
         }
     }
 
-    private static Texture2D TextureField(Texture2D texture) {
-        var result = (Texture2D)EditorGUILayout.ObjectField(texture, typeof(Texture2D), false, GUILayout.Width(70), GUILayout.Height(70));
-        return result;
+    private void PrepareList() {
+        if (reorderableBlocks == null || reorderableBlocks.list != blockList.blocks) {
+            reorderableBlocks = new ReorderableList(blockList.blocks, typeof(Block), true, true, true, true);
+        }
+
+        reorderableBlocks.elementHeight = EditorGUIUtility.singleLineHeight * 2f + 20f;
+
+        reorderableBlocks.drawHeaderCallback = (Rect rect) => {
+            EditorGUI.LabelField(rect, "Blocks", EditorStyles.boldLabel);
+        };
+
+        reorderableBlocks.drawElementCallback = (Rect rect, int index, bool isActive, bool isFocused) => {
+            Block block = (Block)reorderableBlocks.list[index];
+            textures.Add(GetTextureFromPath(block.texturePath));
+            
+            EditorGUI.ObjectField(new Rect(rect.x, rect.y, rect.width, EditorGUIUtility.singleLineHeight), "Texture", (UnityEngine.Object)textures[block.index], typeof(Texture2D), false);
+            rect.y += 30;
+            rect.height = 60;
+            EditorGUI.ColorField(new Rect(rect.x, rect.y, 60, EditorGUIUtility.singleLineHeight), block.color);
+            EditorGUI.TextField(new Rect(rect.x + 70, rect.y, rect.width - 110, EditorGUIUtility.singleLineHeight), block.name);
+            EditorGUI.TextField(new Rect(rect.x + rect.width - 30, rect.y, 30, EditorGUIUtility.singleLineHeight), block.index.ToString());
+        };
     }
+
+    // private static Texture2D TextureField(Texture2D texture) {
+    //     var result = (Texture2D)EditorGUILayout.ObjectField(texture, typeof(Texture2D), false, GUILayout.Width(70), GUILayout.Height(70));
+    //     return result;
+    // }
 
     private Texture2D GetTextureFromPath(string path) {
         try {
