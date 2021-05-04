@@ -15,7 +15,6 @@ public class BlockMap : EditorWindow {
     private List<Texture2D> textures;
     private Material blocksMaterial;
     private Texture2DArray textureArray;
-
     private int selectedIndex;
 
     [MenuItem("Window/Block Map")]
@@ -27,26 +26,26 @@ public class BlockMap : EditorWindow {
         Refresh();
     }
 
+    void Reset() {
+        Refresh();
+    }
+
     void OnGUI() {
         PrepareList();
         reorderableList.DoLayoutList();
-        GUILayout.Space(20f);
 
-        blockName = EditorGUILayout.TextField("Block Name: ", blockName);
-        mapColor = EditorGUILayout.ColorField("Map Color: ", mapColor);
-        EditorGUILayout.BeginHorizontal();
-        EditorGUILayout.PrefixLabel("Texture: ");
-        blockTexture = (Texture2D)EditorGUILayout.ObjectField(blockTexture, typeof(Texture2D), false);
-        EditorGUILayout.EndHorizontal();
-
-        GUILayout.Space(20f);
+        GUILayout.Space(10f);
         blocksMaterial = (Material)EditorGUILayout.ObjectField(blocksMaterial, typeof(Material), false);
-        GUILayout.Space(20f);
 
         GUILayout.Space(20f);
-        if (GUILayout.Button("Update Texture2D Array")) {
+        EditorGUILayout.BeginHorizontal();
+        if (GUILayout.Button("Save Texture2D Array")) {
             SaveTexture2DArray();
         }
+        if (GUILayout.Button("Save JSON structure")) {
+            BlockManager.WriteBlocks(blockList, null);
+        }
+        EditorGUILayout.EndHorizontal();
 
         GUILayout.Space(20f);
         if (GUILayout.Button("Refresh")) {
@@ -67,9 +66,13 @@ public class BlockMap : EditorWindow {
 
         reorderableList.drawElementCallback = (Rect rect, int index, bool isActive, bool isFocused) => {
             Block block = (Block)reorderableList.list[index];
+
             textures.Add(GetTextureFromPath(block.texturePath));
 
-            EditorGUI.ObjectField(new Rect(rect.x, rect.y, rect.width, EditorGUIUtility.singleLineHeight), "Texture", (UnityEngine.Object)textures[index], typeof(Texture2D), false);
+            textures[index] = (Texture2D)EditorGUI.ObjectField(new Rect(rect.x, rect.y, rect.width, EditorGUIUtility.singleLineHeight), "Texture", textures[index], typeof(Texture2D), false);
+            if (block.texturePath == "" && GetPathFromTexture(textures[index]) != "") {
+                block.texturePath = GetPathFromTexture(textures[index]);
+            }
             rect.y += 20;
             rect.height = 30;
             block.color = EditorGUI.ColorField(new Rect(rect.x, rect.y, 60, EditorGUIUtility.singleLineHeight), block.color);
@@ -87,7 +90,7 @@ public class BlockMap : EditorWindow {
         };
 
         reorderableList.onAddCallback = (ReorderableList list) => {
-            Block block = new Block("", Color.black, null);
+            Block block = new Block("", Color.black, "");
             BlockManager.WriteBlocks(blockList, block);
             Refresh();
         };
@@ -99,8 +102,9 @@ public class BlockMap : EditorWindow {
             }
         };
 
-
-        //TODO: handle update element
+        if (textures.Count > blockList.blocks.Count) {
+            textures = new List<Texture2D>();
+        }
     }
 
     private void Refresh() {
@@ -127,6 +131,9 @@ public class BlockMap : EditorWindow {
     }
 
     private string GetPathFromTexture(Texture2D texture) {
+        if (texture == null || texture.name == "") {
+            return "";
+        }
         string path = "Assets/Resources/Blocks/";
         return path + texture.name + ".png";
     }

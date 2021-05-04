@@ -6,7 +6,6 @@ using UnityEngine;
 public class VoxelEditor : MonoBehaviour {
     private const int UPDATE_INTERVAL = 2;
 
-    // private static readonly string[] FillTypeNames = { "Empty", "Stone", "Dirt", "Rock", "Grass" };
     private List<string> FillTypeNames = new List<string>();
     private static readonly string[] RadiusNames = { "0", "1", "2", "3", "4", "5" };
     private static readonly string[] StencilNames = { "Square", "Circle" };
