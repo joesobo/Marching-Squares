@@ -19,9 +19,14 @@ public static class BlockManager {
         }
     }
 
-    public static void RemoveBlock(BlockCollection collection) {
+    public static void RemoveBlock(BlockCollection collection, int index) {
         BlockCollection tempCollection = new BlockCollection();
-        tempCollection.blocks = collection.blocks.GetRange(0, collection.blocks.Count - 1);
+        if (index == collection.blocks.Count-1) {
+            tempCollection.blocks = collection.blocks.GetRange(0, index);
+            tempCollection.blocks.AddRange(collection.blocks.GetRange(index + 1, collection.blocks.Count));
+        } else {
+            tempCollection.blocks = collection.blocks.GetRange(0, index);
+        }
         WriteBlocks(tempCollection, null);
     }
 

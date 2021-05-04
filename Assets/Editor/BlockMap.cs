@@ -1,13 +1,14 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using UnityEditor;
 using UnityEditorInternal;
 using UnityEngine;
 
 public class BlockMap : EditorWindow {
     private BlockCollection blockList;
-    private ReorderableList reorderableBlocks;
+    private ReorderableList reorderableList;
     private string blockName;
     private Color mapColor;
     private Texture2D blockTexture;
@@ -15,21 +16,20 @@ public class BlockMap : EditorWindow {
     private Material blocksMaterial;
     private Texture2DArray textureArray;
 
+    private int selectedIndex;
+
     [MenuItem("Window/Block Map")]
     public static void ShowWindow() {
         EditorWindow.GetWindow(typeof(BlockMap));
     }
 
     void OnEnable() {
-        blockList = BlockManager.ReadBlocks();
-        textures = new List<Texture2D>();
-
-        blocksMaterial.SetTexture("Textures", textureArray);
+        Refresh();
     }
 
     void OnGUI() {
         PrepareList();
-        reorderableBlocks.DoLayoutList();
+        reorderableList.DoLayoutList();
         GUILayout.Space(20f);
 
         blockName = EditorGUILayout.TextField("Block Name: ", blockName);
@@ -50,41 +50,69 @@ public class BlockMap : EditorWindow {
 
         GUILayout.Space(20f);
         if (GUILayout.Button("Refresh")) {
-            blockList = BlockManager.ReadBlocks();
-            reorderableBlocks = new ReorderableList(blockList.blocks,
-                typeof(Block),
-                true, true, true, true);
+            Refresh();
         }
     }
 
     private void PrepareList() {
-        if (reorderableBlocks == null || reorderableBlocks.list != blockList.blocks) {
-            reorderableBlocks = new ReorderableList(blockList.blocks, typeof(Block), true, true, true, true);
+        if (reorderableList == null || reorderableList.list != blockList.blocks) {
+            reorderableList = new ReorderableList(blockList.blocks, typeof(Block), true, true, true, true);
         }
 
-        reorderableBlocks.elementHeight = EditorGUIUtility.singleLineHeight * 2f + 20f;
+        reorderableList.elementHeight = EditorGUIUtility.singleLineHeight * 2f + 10f;
 
-        reorderableBlocks.drawHeaderCallback = (Rect rect) => {
+        reorderableList.drawHeaderCallback = (Rect rect) => {
             EditorGUI.LabelField(rect, "Blocks", EditorStyles.boldLabel);
         };
 
-        reorderableBlocks.drawElementCallback = (Rect rect, int index, bool isActive, bool isFocused) => {
-            Block block = (Block)reorderableBlocks.list[index];
+        reorderableList.drawElementCallback = (Rect rect, int index, bool isActive, bool isFocused) => {
+            Block block = (Block)reorderableList.list[index];
             textures.Add(GetTextureFromPath(block.texturePath));
-            
-            EditorGUI.ObjectField(new Rect(rect.x, rect.y, rect.width, EditorGUIUtility.singleLineHeight), "Texture", (UnityEngine.Object)textures[block.index], typeof(Texture2D), false);
-            rect.y += 30;
-            rect.height = 60;
-            EditorGUI.ColorField(new Rect(rect.x, rect.y, 60, EditorGUIUtility.singleLineHeight), block.color);
-            EditorGUI.TextField(new Rect(rect.x + 70, rect.y, rect.width - 110, EditorGUIUtility.singleLineHeight), block.name);
-            EditorGUI.TextField(new Rect(rect.x + rect.width - 30, rect.y, 30, EditorGUIUtility.singleLineHeight), block.index.ToString());
+
+            EditorGUI.ObjectField(new Rect(rect.x, rect.y, rect.width, EditorGUIUtility.singleLineHeight), "Texture", (UnityEngine.Object)textures[index], typeof(Texture2D), false);
+            rect.y += 20;
+            rect.height = 30;
+            block.color = EditorGUI.ColorField(new Rect(rect.x, rect.y, 60, EditorGUIUtility.singleLineHeight), block.color);
+            block.name = EditorGUI.TextField(new Rect(rect.x + 70, rect.y, rect.width - 110, EditorGUIUtility.singleLineHeight), block.name);
+            EditorGUI.TextField(new Rect(rect.x + rect.width - 30, rect.y, 30, EditorGUIUtility.singleLineHeight), index.ToString());
         };
+
+        reorderableList.onSelectCallback = (ReorderableList list) => {
+            selectedIndex = list.index;
+        };
+
+        reorderableList.onReorderCallback = (ReorderableList list) => {
+            BlockManager.WriteBlocks(blockList, null);
+            Refresh();
+        };
+
+        reorderableList.onAddCallback = (ReorderableList list) => {
+            Block block = new Block("", Color.black, null);
+            BlockManager.WriteBlocks(blockList, block);
+            Refresh();
+        };
+
+        reorderableList.onRemoveCallback = (ReorderableList list) => {
+            if (EditorUtility.DisplayDialog("Warning!", "Are you sure you want to delete this block?", "Yes", "No")) {
+                ReorderableList.defaultBehaviours.DoRemoveButton(list);
+                BlockManager.RemoveBlock(blockList, selectedIndex);
+            }
+        };
+
+
+        //TODO: handle update element
     }
 
-    // private static Texture2D TextureField(Texture2D texture) {
-    //     var result = (Texture2D)EditorGUILayout.ObjectField(texture, typeof(Texture2D), false, GUILayout.Width(70), GUILayout.Height(70));
-    //     return result;
-    // }
+    private void Refresh() {
+        blockList = BlockManager.ReadBlocks();
+        textures = new List<Texture2D>();
+        reorderableList = new ReorderableList(blockList.blocks,
+            typeof(Block),
+            true, true, true, true);
+        foreach (Block block in blockList.blocks) {
+            textures.Add(GetTextureFromPath(block.texturePath));
+        }
+    }
 
     private Texture2D GetTextureFromPath(string path) {
         try {
@@ -94,7 +122,6 @@ public class BlockMap : EditorWindow {
             texture.Apply();
             return texture;
         } catch (Exception e) {
-            Debug.Log("Error reading texture from path " + e);
             return null;
         }
     }
@@ -125,5 +152,23 @@ public class BlockMap : EditorWindow {
         AssetDatabase.Refresh();
 
         blocksMaterial.SetTexture("Textures", textureArray);
+    }
+}
+
+static class IListExtensions {
+    public static void Swap<T>(
+        this IList<T> list,
+        int firstIndex,
+        int secondIndex
+    ) {
+        Contract.Requires(list != null);
+        Contract.Requires(firstIndex >= 0 && firstIndex < list.Count);
+        Contract.Requires(secondIndex >= 0 && secondIndex < list.Count);
+        if (firstIndex == secondIndex) {
+            return;
+        }
+        T temp = list[firstIndex];
+        list[firstIndex] = list[secondIndex];
+        list[secondIndex] = temp;
     }
 }
