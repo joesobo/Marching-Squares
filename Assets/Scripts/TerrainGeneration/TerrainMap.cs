@@ -31,6 +31,7 @@ public class TerrainMap : MonoBehaviour {
         RawPerlin,
         HeightPerlin,
         CavePerlin,
+        GrassPerlin,
         LiveMap
     };
 
@@ -120,6 +121,8 @@ public class TerrainMap : MonoBehaviour {
                 return terrainNoise.Perlin1D(x, y);
             case RenderType.CavePerlin:
                 return terrainNoise.Perlin2D(x, y);
+            case RenderType.GrassPerlin:
+                return terrainNoise.PerlinGrass(x, y);
             case RenderType.LiveMap:
                 return 1;
             default:
