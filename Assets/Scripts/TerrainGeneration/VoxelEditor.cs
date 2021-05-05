@@ -36,9 +36,9 @@ public class VoxelEditor : MonoBehaviour {
 
     public void Startup(VoxelMap map) {
         BlockCollection blockList = BlockManager.ReadBlocks();
-        FillTypeNames.Add("Empty");
-        foreach (Block block in blockList.blocks) {
-            FillTypeNames.Add(block.name);
+        string[] BlockTypeNames = System.Enum.GetNames(typeof(BlockType));
+        for (int i = 0; i < BlockTypeNames.Length; i++) {
+            FillTypeNames.Add(BlockTypeNames[i]);
         }
 
         voxelResolution = map.voxelResolution;

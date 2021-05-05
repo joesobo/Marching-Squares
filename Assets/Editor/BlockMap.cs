@@ -31,6 +31,8 @@ public class BlockMap : EditorWindow {
     }
 
     void OnGUI() {
+        EditorGUILayout.LabelField("Warning: Remember to add to BlockManager Enum", EditorStyles.boldLabel);
+
         PrepareList();
         reorderableList.DoLayoutList();
 
@@ -76,7 +78,7 @@ public class BlockMap : EditorWindow {
             rect.y += 20;
             rect.height = 30;
             block.color = EditorGUI.ColorField(new Rect(rect.x, rect.y, 60, EditorGUIUtility.singleLineHeight), block.color);
-            block.name = EditorGUI.TextField(new Rect(rect.x + 70, rect.y, rect.width - 110, EditorGUIUtility.singleLineHeight), block.name);
+            block.blockType = (BlockType)EditorGUI.EnumPopup(new Rect(rect.x + 70, rect.y, rect.width - 110, EditorGUIUtility.singleLineHeight), block.blockType);
             EditorGUI.TextField(new Rect(rect.x + rect.width - 30, rect.y, 30, EditorGUIUtility.singleLineHeight), index.ToString());
         };
 
@@ -90,7 +92,7 @@ public class BlockMap : EditorWindow {
         };
 
         reorderableList.onAddCallback = (ReorderableList list) => {
-            Block block = new Block("", Color.black, "");
+            Block block = new Block(BlockType.Empty, Color.black, "");
             BlockManager.WriteBlocks(blockList, block);
             Refresh();
         };
@@ -141,13 +143,13 @@ public class BlockMap : EditorWindow {
     private void SaveTexture2DArray() {
         string path = "Assets/Resources/Blocks/TextureArray.Asset";
 
-        Texture2D t = textures[0];
+        Texture2D t = textures[1];
         textureArray = new Texture2DArray(t.width, t.height, textures.Count, t.format, t.mipmapCount > 1);
         textureArray.anisoLevel = t.anisoLevel;
         textureArray.filterMode = t.filterMode;
         textureArray.wrapMode = t.wrapMode;
 
-        for (int i = 0; i < textures.Count; i++) {
+        for (int i = 1; i < textures.Count; i++) {
             for (int m = 0; m < t.mipmapCount; m++) {
                 Graphics.CopyTexture(textures[i], 0, m, textureArray, i, m);
             }

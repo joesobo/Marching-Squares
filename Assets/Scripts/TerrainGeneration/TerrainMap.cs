@@ -3,7 +3,11 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+//TODO: have map update off of current state noise, not new noise generation
+
 public class TerrainMap : MonoBehaviour {
+    public RenderType renderType = RenderType.RawPerlin;
+
     public GameObject map;
     [Range(64, 1028)]
     public int mapRenderResolution = 512;
@@ -20,6 +24,14 @@ public class TerrainMap : MonoBehaviour {
     private bool isActive = true;
 
     private List<Color> colorList = new List<Color>();
+
+    public enum RenderType {
+        Off,
+        RawPerlin,
+        HeightPerlin,
+        CavePerlin,
+        LiveMap
+    };
 
     private void Awake() {
         mapMaterial = map.GetComponent<Image>().material;
@@ -43,15 +55,15 @@ public class TerrainMap : MonoBehaviour {
         if (Input.GetKeyDown(KeyCode.RightBracket)) {
             if (mapRenderResolution <= 1028 - zoomInterval) {
                 mapRenderResolution += zoomInterval;
+                NewTexture();
             }
-            NewTexture();
         }
 
         if (Input.GetKeyDown(KeyCode.LeftBracket)) {
             if (mapRenderResolution >= 64 + zoomInterval) {
                 mapRenderResolution -= zoomInterval;
+                NewTexture();
             }
-            NewTexture();
         }
     }
 
@@ -72,7 +84,7 @@ public class TerrainMap : MonoBehaviour {
         for (int x = mapRenderResolution, index = 0; x > 0; x--) {
             for (var y = 0; y < mapRenderResolution; y++, index++) {
                 colors[index] = Color.black;
-                int pointState = terrainNoise.Perlin(x + pos.x - offset.x, y + pos.y - offset.y);
+                int pointState = FindNoise(x + pos.x - offset.x, y + pos.y - offset.y);
                 if (pointState > 0) {
                     colors[index] = FindColor(pointState);
                 }
@@ -92,8 +104,25 @@ public class TerrainMap : MonoBehaviour {
         mapMaterial.SetTexture("MapTexture", texture);
     }
 
+    private int FindNoise(int x, int y) {
+        switch (renderType) {
+            case RenderType.Off:
+                return 0;
+            case RenderType.RawPerlin:
+                return terrainNoise.Perlin(x, y);
+            case RenderType.HeightPerlin:
+                return 1;
+            case RenderType.CavePerlin:
+                return 1;
+            case RenderType.LiveMap:
+                return 1;
+            default:
+                return 1;
+        }
+    }
+
     private Color FindColor(int pointState) {
-        return colorList[pointState];
+        return colorList[pointState + 1];
     }
 
     private void ToggleMap() {

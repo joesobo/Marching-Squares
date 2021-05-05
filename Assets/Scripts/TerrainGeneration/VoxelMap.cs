@@ -29,6 +29,7 @@ public partial class VoxelMap : MonoBehaviour {
         worldManager = FindObjectOfType<WorldManager>();
         chunkSaveLoadManager = FindObjectOfType<ChunkSaveLoadManager>();
         player = FindObjectOfType<PlayerController>().transform;
+        BlockCollection blockList = BlockManager.ReadBlocks();
 
         chunkResolution = 16;
 

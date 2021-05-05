@@ -921,16 +921,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e5d8b3a3cd4b73b4a9184daf1498b876, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  renderType: 1
   map: {fileID: 828033624}
   mapRenderResolution: 256
   updateInterval: 0.2
   zoomInterval: 64
-  colorList:
-  - {r: 0, g: 0, b: 0, a: 0}
-  - {r: 0.5522873, g: 0.5871492, b: 0.5943396, a: 0}
-  - {r: 0.3773585, g: 0.31596872, b: 0.22961909, a: 0}
-  - {r: 0.34118018, g: 0.3446888, b: 0.38679248, a: 0}
-  - {r: 0.39013758, g: 0.5754717, b: 0.30673727, a: 0}
 --- !u!1 &705507993
 GameObject:
   m_ObjectHideFlags: 0

@@ -5,11 +5,11 @@ using UnityEngine;
 [Serializable]
 public class Block {
     public string texturePath;
-    public string name;
+    public BlockType blockType;
     public Color color;
 
-    public Block(string name, Color color, string texturePath) {
-        this.name = name;
+    public Block(BlockType blockType, Color color, string texturePath) {
+        this.blockType = blockType;
         this.color = color;
         this.texturePath = texturePath;
     }

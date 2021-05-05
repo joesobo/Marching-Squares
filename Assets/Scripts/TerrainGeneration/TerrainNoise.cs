@@ -14,13 +14,13 @@ public class TerrainNoise : MonoBehaviour {
     public float frequency = 1f;
 
     [Range(1, 8)]
-	public int octaves = 1;
+    public int octaves = 1;
 
-	[Range(1f, 4f)]
-	public float lacunarity = 2f;
+    [Range(1f, 4f)]
+    public float lacunarity = 2f;
 
-	[Range(0f, 1f)]
-	public float persistence = 0.5f;
+    [Range(0f, 1f)]
+    public float persistence = 0.5f;
 
     [Range(0, 2)]
     public float exponent = 0.5f;
@@ -98,43 +98,48 @@ public class TerrainNoise : MonoBehaviour {
         var voxelState = 0;
 
         float freq = frequency;
-		float amplitude = 1f;
-		float range = 1f;
+        float amplitude = 1f;
+        float range = 1f;
         float sum = Mathf.PerlinNoise((scaledXHeight + seed) * freq, 0);
-        
-		for (int o = 1; o < octaves; o++) {
-			freq *= lacunarity;
-			amplitude *= persistence;
-			range += amplitude;
-			sum += Mathf.PerlinNoise((scaledXHeight + seed) * freq, 0) * amplitude;
-		}
-		noiseHeight = sum / range;
+
+        for (int o = 1; o < octaves; o++) {
+            freq *= lacunarity;
+            amplitude *= persistence;
+            range += amplitude;
+            sum += Mathf.PerlinNoise((scaledXHeight + seed) * freq, 0) * amplitude;
+        }
+        noiseHeight = sum / range;
         noiseHeight *= chunkResolution * voxelResolution;
 
         if (y > noiseHeight) {
             voxelState = 0;
         } else {
             if (y < height1) {
-                //random 3/0
-                voxelState = noiseVal > 0.33f ? 3 : 0;
+                voxelState = GetBlockTypeIndex(PercentChangeBlocks(noiseVal, 33, BlockType.Rock, BlockType.Empty));
             } else if (y < height2) {
-                //random 3/1/0
-                voxelState = noiseVal > 0.65f ? 3 : noiseVal > 0.33f ? 1 : 0;
+                voxelState = GetBlockTypeIndex(PercentChangeBlocks(noiseVal, 66, BlockType.Rock, PercentChangeBlocks(noiseVal, 33, BlockType.Stone, BlockType.Empty)));
             } else if (y < height3) {
-                //random 2/1/0
-                voxelState = noiseVal > 0.66f ? 2 : noiseVal > 0.33f ? 1 : 0;
+                voxelState = GetBlockTypeIndex(PercentChangeBlocks(noiseVal, 66, BlockType.Dirt, PercentChangeBlocks(noiseVal, 33, BlockType.Stone, BlockType.Empty)));
             } else {
-                voxelState = noiseVal > 0.5f ? 2 : noiseVal > 0.33f ? 1 : 0;
+                voxelState = GetBlockTypeIndex(PercentChangeBlocks(noiseVal, 50, BlockType.Dirt, PercentChangeBlocks(noiseVal, 33, BlockType.Stone, BlockType.Empty)));
             }
 
             if (InRange(y, Mathf.RoundToInt(noiseHeight), 3)) {
-                voxelState = noiseVal > 0.33f ? 4 : 0;
+                voxelState = GetBlockTypeIndex(PercentChangeBlocks(noiseVal, 33, BlockType.Grass, BlockType.Empty));
             } else if (InRange(y, Mathf.RoundToInt(noiseHeight), 8)) {
-                voxelState = noiseVal > 0.8f ? 1 : noiseVal > 0.33f ? 2 : 0;
+                voxelState = GetBlockTypeIndex(PercentChangeBlocks(noiseVal, 80, BlockType.Stone, PercentChangeBlocks(noiseVal, 33, BlockType.Dirt, BlockType.Empty)));
             }
         }
 
         return voxelState;
+    }
+
+    private BlockType PercentChangeBlocks(float noiseVal, int percent, BlockType block1, BlockType block2) {
+        return noiseVal > (percent / 100f) ? block1 : block2;
+    }
+
+    private int GetBlockTypeIndex(BlockType type) {
+        return BlockManager.blockIndexDictionary[type];
     }
 
     private static bool InRange(float input, float value, float range) {
