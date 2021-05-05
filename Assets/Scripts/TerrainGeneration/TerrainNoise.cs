@@ -117,13 +117,13 @@ public class TerrainNoise : MonoBehaviour {
         float freq = frequency;
         float amplitude = 1f;
         float range = 1f;
-        float sum = Mathf.PerlinNoise((x + seed) * freq, 0);
+        float sum = Mathf.PerlinNoise((scaledXHeight + seed) * freq, 0);
 
         for (int o = 1; o < octaves; o++) {
             freq *= lacunarity;
             amplitude *= persistence;
             range += amplitude;
-            sum += Mathf.PerlinNoise((x + seed) * freq, 0) * amplitude;
+            sum += Mathf.PerlinNoise((scaledXHeight + seed) * freq, 0) * amplitude;
         }
         noiseHeight = sum / range;
         noiseHeight *= chunkResolution * voxelResolution;
