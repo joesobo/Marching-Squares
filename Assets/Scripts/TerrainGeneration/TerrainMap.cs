@@ -6,6 +6,7 @@ using UnityEngine.UI;
 //TODO: have map update off of current state noise, not new noise generation
 
 public class TerrainMap : MonoBehaviour {
+    private RenderType oldRenderType = RenderType.RawPerlin;
     public RenderType renderType = RenderType.RawPerlin;
 
     public GameObject map;
@@ -65,6 +66,11 @@ public class TerrainMap : MonoBehaviour {
                 NewTexture();
             }
         }
+
+        if (renderType != oldRenderType) {
+            oldRenderType = renderType;
+            RecalculateMap();
+        }
     }
 
     private void NewTexture() {
@@ -109,11 +115,11 @@ public class TerrainMap : MonoBehaviour {
             case RenderType.Off:
                 return 0;
             case RenderType.RawPerlin:
-                return terrainNoise.Perlin(x, y);
+                return terrainNoise.PerlinCalculate(x, y);
             case RenderType.HeightPerlin:
-                return 1;
+                return terrainNoise.Perlin1D(x, y);
             case RenderType.CavePerlin:
-                return 1;
+                return terrainNoise.Perlin2D(x, y);
             case RenderType.LiveMap:
                 return 1;
             default:
