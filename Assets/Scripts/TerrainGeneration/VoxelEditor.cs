@@ -21,6 +21,7 @@ public class VoxelEditor : MonoBehaviour {
     private VoxelMap voxelMap;
     private BoxCollider box;
     private Camera mainCamera;
+    private TerrainMap terrainMap;
 
     private Vector3 oldPoint, chunkPos, absChunkPos;
     private Vector2Int diff, absCheckPos, currentPos;
@@ -47,6 +48,7 @@ public class VoxelEditor : MonoBehaviour {
         existingChunks = map.existingChunks;
         voxelMap = map;
         mainCamera = Camera.main;
+        terrainMap = FindObjectOfType<TerrainMap>();
 
         voxelMesh = FindObjectOfType<VoxelMesh>();
         chunkCollider = FindObjectOfType<ChunkCollider>();
@@ -71,6 +73,7 @@ public class VoxelEditor : MonoBehaviour {
                     EditVoxels(hitInfo.point);
                     oldPoint = hitInfo.point;
                     oldTypeIndex = fillTypeIndex;
+                    terrainMap.RecalculateMap();
                 }
             }
         }

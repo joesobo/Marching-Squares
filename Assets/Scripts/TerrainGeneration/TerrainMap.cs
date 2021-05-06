@@ -10,8 +10,8 @@ public class TerrainMap : MonoBehaviour {
     public GameObject map;
     [Range(64, 1028)]
     public int mapRenderResolution = 256;
-    // [Range(0, 1)]
-    // public float updateInterval = 0.1f;
+    [Range(0, 1)]
+    public float updateInterval = 0.1f;
     public int zoomInterval = 64;
 
     private Texture2D texture;
@@ -149,10 +149,6 @@ public class TerrainMap : MonoBehaviour {
 
         int voxelX = (Mathf.Abs(x - (chunkX * halfChunksLength))) % 8;
         int voxelY = (Mathf.Abs(y - (chunkY * halfChunksLength))) % 8;
-
-        if (chunkY < 0) {
-            voxelY = 8 - voxelY - 1;
-        }
 
         Vector2Int chunkPos = new Vector2Int(chunkX, chunkY);
         if (voxelMap.existingChunks.ContainsKey(chunkPos)) {

@@ -51,14 +51,14 @@ public class InfiniteGeneration : MonoBehaviour {
         terrainNoise.Startup(voxelResolution, chunkResolution, player);
         voxelMesh.Startup(voxelResolution, chunkResolution, viewDistance, useColliders, colliderRadius);
 
-        // InvokeRepeating("UpdateMap", 0.0f, terrainMap.updateInterval);
+        InvokeRepeating("UpdateMap", 0.0f, terrainMap.updateInterval);
     }
 
-    // private void UpdateMap() {
-    //     if (playerRb.velocity.magnitude > 0) {
-    //         terrainMap.RecalculateMap();
-    //     }
-    // }
+    private void UpdateMap() {
+        if (playerRb.velocity.magnitude > 0) {
+            terrainMap.RecalculateMap();
+        }
+    }
 
     public void UpdateAroundPlayer() {
         if (playerRb.velocity.magnitude > 0) {
@@ -74,8 +74,6 @@ public class InfiniteGeneration : MonoBehaviour {
             UpdateNewChunks();
 
             RecreateUpdatedChunkMeshes();
-
-            terrainMap.RecalculateMap();
         }
     }
 
