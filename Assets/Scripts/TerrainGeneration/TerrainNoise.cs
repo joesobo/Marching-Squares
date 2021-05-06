@@ -60,10 +60,10 @@ public class TerrainNoise : MonoBehaviour {
         foreach (var voxel in chunk.voxels) {
             switch (terrainType) {
                 case TerrainType.Off:
-                    voxel.state = 0;
+                    voxel.state = GetBlockTypeIndex(BlockType.Empty);
                     break;
                 case TerrainType.On:
-                    voxel.state = 1;
+                    voxel.state = GetBlockTypeIndex(BlockType.Stone);
                     break;
                 case TerrainType.Random:
                     voxel.state = UnityEngine.Random.Range(0, 5);

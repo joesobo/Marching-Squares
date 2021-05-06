@@ -3,18 +3,16 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-//TODO: have map update off of current state noise, not new noise generation
-
 public class TerrainMap : MonoBehaviour {
-    private RenderType oldRenderType = RenderType.RawPerlin;
-    public RenderType renderType = RenderType.RawPerlin;
+    private RenderType oldRenderType = RenderType.FullPerlin;
+    public RenderType renderType = RenderType.FullPerlin;
 
     public GameObject map;
     [Range(64, 1028)]
-    public int mapRenderResolution = 512;
-    [Range(0, 1)]
-    public float updateInterval = 0.1f;
-    public int zoomInterval = 128;
+    public int mapRenderResolution = 256;
+    // [Range(0, 1)]
+    // public float updateInterval = 0.1f;
+    public int zoomInterval = 64;
 
     private Texture2D texture;
     private Color[] colors;
@@ -22,23 +20,26 @@ public class TerrainMap : MonoBehaviour {
     private float stepSize;
     private Transform player;
     private TerrainNoise terrainNoise;
+    private VoxelMap voxelMap;
     private bool isActive = true;
 
     private List<Color> colorList = new List<Color>();
+    // private Dictionary<Vector2Int, int> voxelIndexPositionDictionary = new Dictionary<Vector2Int, int>();
 
     public enum RenderType {
         Off,
-        RawPerlin,
+        FullPerlin,
         HeightPerlin,
         CavePerlin,
         GrassPerlin,
         LiveMap
     };
 
-    private void Awake() {
+    private void Start() {
         mapMaterial = map.GetComponent<Image>().material;
         player = FindObjectOfType<PlayerController>().transform;
         terrainNoise = FindObjectOfType<TerrainNoise>();
+        voxelMap = FindObjectOfType<VoxelMap>();
 
         BlockCollection blockList = BlockManager.ReadBlocks();
         colorList.Add(Color.black);
@@ -52,6 +53,10 @@ public class TerrainMap : MonoBehaviour {
     private void Update() {
         if (Input.GetKeyDown(KeyCode.M)) {
             ToggleMap();
+        }
+
+        if (Input.GetKeyDown(KeyCode.R)) {
+            RecalculateMap();
         }
 
         if (Input.GetKeyDown(KeyCode.RightBracket)) {
@@ -84,6 +89,7 @@ public class TerrainMap : MonoBehaviour {
     }
 
     public void RecalculateMap() {
+        // voxelIndexPositionDictionary.Clear();
         var position = player.position;
         var pos = new Vector3Int((int)position.x, (int)position.y, 0);
         var offset = new Vector2Int(mapRenderResolution / 2, mapRenderResolution / 2);
@@ -115,7 +121,7 @@ public class TerrainMap : MonoBehaviour {
         switch (renderType) {
             case RenderType.Off:
                 return 0;
-            case RenderType.RawPerlin:
+            case RenderType.FullPerlin:
                 return terrainNoise.PerlinCalculate(x, y);
             case RenderType.HeightPerlin:
                 return terrainNoise.Perlin1D(x, y);
@@ -124,7 +130,29 @@ public class TerrainMap : MonoBehaviour {
             case RenderType.GrassPerlin:
                 return terrainNoise.PerlinGrass(x, y);
             case RenderType.LiveMap:
-                return 1;
+                int halResolution = mapRenderResolution / 2;
+                int halfChunksLength = halResolution / 8;
+
+                int chunkX = (int)Mathf.Floor((x * 1.0f) / halfChunksLength);
+                int chunkY = (int)Mathf.Floor((y * 1.0f) / halfChunksLength);
+
+                int voxelX = (Mathf.Abs(x - (chunkX * halfChunksLength))) % 8;
+                int voxelY = (Mathf.Abs(y - (chunkY * halfChunksLength))) % 8;
+
+                if (chunkY < 0) {
+                    voxelY = 8 - voxelY - 1;
+                }
+
+                //TODO: fix zooming
+                Vector2Int chunkPos = new Vector2Int(chunkX, chunkY);
+                if (voxelMap.existingChunks.ContainsKey(chunkPos)) {
+                    VoxelChunk chunk = voxelMap.existingChunks[chunkPos];
+                    Voxel voxel = chunk.voxels[(voxelY * 8) + voxelX];
+
+                    return voxel.state;
+                } else {
+                    return 0;
+                }
             default:
                 return 1;
         }
