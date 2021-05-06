@@ -24,7 +24,6 @@ public class TerrainMap : MonoBehaviour {
     private bool isActive = true;
 
     private List<Color> colorList = new List<Color>();
-    // private Dictionary<Vector2Int, int> voxelIndexPositionDictionary = new Dictionary<Vector2Int, int>();
 
     public enum RenderType {
         Off,
@@ -32,7 +31,8 @@ public class TerrainMap : MonoBehaviour {
         HeightPerlin,
         CavePerlin,
         GrassPerlin,
-        LiveMap
+        LiveMap,
+        FullMap
     };
 
     private void Start() {
@@ -89,7 +89,6 @@ public class TerrainMap : MonoBehaviour {
     }
 
     public void RecalculateMap() {
-        // voxelIndexPositionDictionary.Clear();
         var position = player.position;
         var pos = new Vector3Int((int)position.x, (int)position.y, 0);
         var offset = new Vector2Int(mapRenderResolution / 2, mapRenderResolution / 2);
@@ -130,31 +129,39 @@ public class TerrainMap : MonoBehaviour {
             case RenderType.GrassPerlin:
                 return terrainNoise.PerlinGrass(x, y);
             case RenderType.LiveMap:
-                int halResolution = mapRenderResolution / 2;
-                int halfChunksLength = halResolution / 8;
-
-                int chunkX = (int)Mathf.Floor((x * 1.0f) / halfChunksLength);
-                int chunkY = (int)Mathf.Floor((y * 1.0f) / halfChunksLength);
-
-                int voxelX = (Mathf.Abs(x - (chunkX * halfChunksLength))) % 8;
-                int voxelY = (Mathf.Abs(y - (chunkY * halfChunksLength))) % 8;
-
-                if (chunkY < 0) {
-                    voxelY = 8 - voxelY - 1;
+                return LiveNoise(x, y);
+            case RenderType.FullMap:
+                int state = LiveNoise(x, y);
+                if (state == -1) {
+                    state = terrainNoise.PerlinCalculate(x, y);
                 }
-
-                //TODO: fix zooming
-                Vector2Int chunkPos = new Vector2Int(chunkX, chunkY);
-                if (voxelMap.existingChunks.ContainsKey(chunkPos)) {
-                    VoxelChunk chunk = voxelMap.existingChunks[chunkPos];
-                    Voxel voxel = chunk.voxels[(voxelY * 8) + voxelX];
-
-                    return voxel.state;
-                } else {
-                    return 0;
-                }
+                return state;
             default:
                 return 1;
+        }
+    }
+
+    private int LiveNoise(int x, int y) {
+        int halfChunksLength = 8;
+
+        int chunkX = (int)Mathf.Floor((x * 1.0f) / halfChunksLength);
+        int chunkY = (int)Mathf.Floor((y * 1.0f) / halfChunksLength);
+
+        int voxelX = (Mathf.Abs(x - (chunkX * halfChunksLength))) % 8;
+        int voxelY = (Mathf.Abs(y - (chunkY * halfChunksLength))) % 8;
+
+        if (chunkY < 0) {
+            voxelY = 8 - voxelY - 1;
+        }
+
+        Vector2Int chunkPos = new Vector2Int(chunkX, chunkY);
+        if (voxelMap.existingChunks.ContainsKey(chunkPos)) {
+            VoxelChunk chunk = voxelMap.existingChunks[chunkPos];
+            Voxel voxel = chunk.voxels[(voxelY * 8) + voxelX];
+
+            return voxel.state;
+        } else {
+            return -1;
         }
     }
 
