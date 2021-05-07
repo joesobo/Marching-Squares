@@ -4,8 +4,8 @@ using UnityEngine;
 using UnityEngine.UI;
 
 public class TerrainMap : MonoBehaviour {
-    private RenderType oldRenderType = RenderType.FullPerlin;
-    public RenderType renderType = RenderType.FullPerlin;
+    private RenderType oldRenderType = RenderType.Perlin;
+    public RenderType renderType = RenderType.Perlin;
 
     public GameObject map;
     [Range(64, 1028)]
@@ -28,12 +28,12 @@ public class TerrainMap : MonoBehaviour {
 
     public enum RenderType {
         Off,
-        FullPerlin,
+        Perlin,
         HeightPerlin,
         CavePerlin,
         GrassPerlin,
         LiveMap,
-        FullMap
+        FullMap,
     };
 
     private void Start() {
@@ -123,7 +123,7 @@ public class TerrainMap : MonoBehaviour {
         switch (renderType) {
             case RenderType.Off:
                 return 0;
-            case RenderType.FullPerlin:
+            case RenderType.Perlin:
                 return terrainNoise.PerlinCalculate(x, y);
             case RenderType.HeightPerlin:
                 return terrainNoise.Perlin1D(x, y);

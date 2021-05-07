@@ -977,7 +977,15 @@ MonoBehaviour:
   octaves: 3
   lacunarity: 2
   persistence: 0.5
-  exponent: 2
+  amplitude: 1
+  range: 1
+  caveFrequency: 0.7
+  caveOctaves: 3
+  caveLacunarity: 1.1
+  cavePersistence: 1.25
+  caveAmplitude: 0.4
+  scale: 2
+  offset: {x: 0, y: 0}
 --- !u!4 &666039678
 Transform:
   m_ObjectHideFlags: 0
@@ -1004,9 +1012,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e5d8b3a3cd4b73b4a9184daf1498b876, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  renderType: 6
+  renderType: 1
   map: {fileID: 828033624}
-  mapRenderResolution: 128
+  mapRenderResolution: 256
   updateInterval: 0.1
   zoomInterval: 64
 --- !u!1 &705507993
