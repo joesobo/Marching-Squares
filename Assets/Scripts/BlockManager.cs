@@ -14,7 +14,7 @@ public enum BlockType {
 };
 
 public static class BlockManager {
-    private static string path = Application.persistentDataPath + "/blocks.json";
+    private static readonly string Path = Application.persistentDataPath + "/blocks.json";
 
     public static Dictionary<BlockType, int> blockIndexDictionary = new Dictionary<BlockType, int>();
 
@@ -23,16 +23,15 @@ public static class BlockManager {
             collection.blocks.Add(newBlock);
         }
 
-        using (StreamWriter w = new StreamWriter(path, false)) {
-            string json = JsonUtility.ToJson(collection);
-            w.Write(json);
-            w.Flush();
-            w.Close();
-        }
+        using var w = new StreamWriter(Path, false);
+        var json = JsonUtility.ToJson(collection);
+        w.Write(json);
+        w.Flush();
+        w.Close();
     }
 
     public static void RemoveBlock(BlockCollection collection, int index) {
-        BlockCollection tempCollection = new BlockCollection();
+        var tempCollection = new BlockCollection();
         if (index == collection.blocks.Count - 1) {
             tempCollection.blocks = collection.blocks.GetRange(0, index);
             tempCollection.blocks.AddRange(collection.blocks.GetRange(index + 1, collection.blocks.Count));
@@ -43,22 +42,21 @@ public static class BlockManager {
     }
 
     public static BlockCollection ReadBlocks() {
-        BlockCollection blocks = new BlockCollection();
+        var blocks = new BlockCollection();
 
         try {
-            using (StreamReader r = new StreamReader(path)) {
-                string json = r.ReadToEnd();
-                blocks = JsonUtility.FromJson<BlockCollection>(json);
-                r.Close();
-            }
+            using var r = new StreamReader(Path);
+            var json = r.ReadToEnd();
+            blocks = JsonUtility.FromJson<BlockCollection>(json);
+            r.Close();
         } catch (Exception e) {
             Debug.Log("ERROR: No block file found.");
             Debug.Log(e.Message);
         }
 
         blockIndexDictionary.Clear();
-        for (int i = 0; i < blocks.blocks.Count; i++) {
-            Block block = blocks.blocks[i];
+        for (var i = 0; i < blocks.blocks.Count; i++) {
+            var block = blocks.blocks[i];
             if (!blockIndexDictionary.ContainsKey(block.blockType)) {
                 blockIndexDictionary.Add(block.blockType, i);
             }

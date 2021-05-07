@@ -1004,9 +1004,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e5d8b3a3cd4b73b4a9184daf1498b876, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  renderType: 5
+  renderType: 6
   map: {fileID: 828033624}
   mapRenderResolution: 128
+  updateInterval: 0.1
   zoomInterval: 64
 --- !u!1 &705507993
 GameObject:

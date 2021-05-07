@@ -51,7 +51,7 @@ public class InfiniteGeneration : MonoBehaviour {
         terrainNoise.Startup(voxelResolution, chunkResolution, player);
         voxelMesh.Startup(voxelResolution, chunkResolution, viewDistance, useColliders, colliderRadius);
 
-        InvokeRepeating("UpdateMap", 0.0f, terrainMap.updateInterval);
+        InvokeRepeating(nameof(UpdateMap), 0.0f, terrainMap.updateInterval);
     }
 
     private void UpdateMap() {
@@ -80,7 +80,7 @@ public class InfiniteGeneration : MonoBehaviour {
     private void RemoveOutOfBoundsChunks() {
         sqrViewDist = viewDistance * viewDistance;
 
-        for (int i = chunks.Count - 1; i >= 0; i--) {
+        for (var i = chunks.Count - 1; i >= 0; i--) {
             var testChunk = chunks[i];
             if (!ReferenceEquals(testChunk, null)) {
                 var position = testChunk.transform.position;
@@ -103,8 +103,8 @@ public class InfiniteGeneration : MonoBehaviour {
     }
 
     private void CreateNewChunksInRange() {
-        for (int y = -chunkResolution / 2; y < chunkResolution / 2; y++) {
-            for (int x = -chunkResolution / 2; x < chunkResolution / 2; x++) {
+        for (var y = -chunkResolution / 2; y < chunkResolution / 2; y++) {
+            for (var x = -chunkResolution / 2; x < chunkResolution / 2; x++) {
                 coord = new Vector2Int(x, y) + playerCoord;
 
                 if (existingChunks.ContainsKey(coord)) continue;

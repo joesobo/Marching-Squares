@@ -26,9 +26,6 @@ public class TerrainNoise : MonoBehaviour {
     public float exponent = 0.5f;
 
     private int voxelResolution, chunkResolution;
-    private float halfSize;
-    private Transform player;
-    private TerrainMap terrainMap;
 
     public enum TerrainType {
         Off,
@@ -41,15 +38,11 @@ public class TerrainNoise : MonoBehaviour {
     public void Startup(int voxelResolution, int chunkResolution, Transform player) {
         this.voxelResolution = voxelResolution;
         this.chunkResolution = chunkResolution;
-        this.player = player;
-        halfSize = 0.5f * chunkResolution;
 
         if (useRandomSeed) {
             seed = (int)Random.Range(0f, 10000f);
         }
         Random.InitState(seed);
-
-        terrainMap = FindObjectOfType<TerrainMap>();
     }
 
     public void GenerateNoiseValues(VoxelChunk chunk) {
@@ -91,35 +84,30 @@ public class TerrainNoise : MonoBehaviour {
         var voxelState = 0;
 
         voxelState = Perlin1D(x, y);
-        if (voxelState != 0) {
-            if (PerlinGrass(x, y) != -1) {
-                return PerlinGrass(x, y);
-            }
-            voxelState = Perlin2D(x, y);
+        if (voxelState == 0) return voxelState;
+        if (PerlinGrass(x, y) != -1) {
+            return PerlinGrass(x, y);
         }
+        voxelState = Perlin2D(x, y);
 
         return voxelState;
     }
 
     public int Perlin1D(float x, int y) {
-        float noiseHeight = Noise1D(x);
+        var noiseHeight = Noise1D(x);
 
-        if (y > noiseHeight) {
-            return 0;
-        } else {
-            return 1;
-        }
+        return y > noiseHeight ? 0 : 1;
     }
 
     private float Noise1D(float x) {
         var scaledXHeight = x / 1f / voxelResolution;
         var noiseHeight = 0f;
-        float freq = frequency;
-        float amplitude = 1f;
-        float range = 1f;
-        float sum = Mathf.PerlinNoise((scaledXHeight + seed) * freq, 0);
+        var freq = frequency;
+        var amplitude = 1f;
+        var range = 1f;
+        var sum = Mathf.PerlinNoise((scaledXHeight + seed) * freq, 0);
 
-        for (int o = 1; o < octaves; o++) {
+        for (var o = 1; o < octaves; o++) {
             freq *= lacunarity;
             amplitude *= persistence;
             range += amplitude;
@@ -131,7 +119,7 @@ public class TerrainNoise : MonoBehaviour {
     }
 
     public int Perlin2D(float x, int y) {
-        float noiseVal = Noise2D(x, y);
+        var noiseVal = Noise2D(x, y);
 
         if (y < height1) {
             return GetBlockTypeIndex(PercentChangeBlocks(noiseVal, 33, BlockType.Rock, BlockType.Empty));
@@ -168,7 +156,7 @@ public class TerrainNoise : MonoBehaviour {
         return noiseVal > (percent / 100f) ? block1 : block2;
     }
 
-    private int GetBlockTypeIndex(BlockType type) {
+    private static int GetBlockTypeIndex(BlockType type) {
         return BlockManager.blockIndexDictionary[type];
     }
 

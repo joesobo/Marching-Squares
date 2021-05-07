@@ -36,10 +36,10 @@ public class VoxelEditor : MonoBehaviour {
     };
 
     public void Startup(VoxelMap map) {
-        BlockCollection blockList = BlockManager.ReadBlocks();
-        string[] BlockTypeNames = System.Enum.GetNames(typeof(BlockType));
-        for (int i = 0; i < BlockTypeNames.Length; i++) {
-            FillTypeNames.Add(BlockTypeNames[i]);
+        var blockList = BlockManager.ReadBlocks();
+        var blockTypeNames = System.Enum.GetNames(typeof(BlockType));
+        foreach (var blockType in blockTypeNames) {
+            FillTypeNames.Add(blockType);
         }
 
         voxelResolution = map.voxelResolution;
@@ -107,22 +107,22 @@ public class VoxelEditor : MonoBehaviour {
         activeStencil = stencils[stencilIndex];
         activeStencil.Initialize(fillTypeIndex, radiusIndex);
 
-        int voxelYOffset = yEnd * voxelResolution;
+        var voxelYOffset = yEnd * voxelResolution;
         Vector2Int checkChunk;
         updateChunkPositions.Clear();
 
-        bool result = false;
+        var result = false;
 
-        for (int y = yStart - 1; y < yEnd + 1; y++) {
-            int voxelXOffset = xEnd * voxelResolution;
-            for (int x = xStart - 1; x < xEnd + 1; x++) {
+        for (var y = yStart - 1; y < yEnd + 1; y++) {
+            var voxelXOffset = xEnd * voxelResolution;
+            for (var x = xStart - 1; x < xEnd + 1; x++) {
                 activeStencil.SetCenter(diff.x - voxelXOffset, diff.y - voxelYOffset);
 
                 checkChunk = new Vector2Int((int)Mathf.Floor((point.x + voxelXOffset) / voxelResolution), (int)Mathf.Floor((point.y + voxelYOffset) / voxelResolution));
 
                 if (existingChunks.ContainsKey(checkChunk)) {
                     var currentChunk = existingChunks[checkChunk];
-                    bool tempRes = currentChunk.Apply(activeStencil);
+                    var tempRes = currentChunk.Apply(activeStencil);
                     if (!result && tempRes) {
                         result = true;
                     }
@@ -150,13 +150,13 @@ public class VoxelEditor : MonoBehaviour {
     }
 
     private void EditChunkAndNeighbors(Vector2Int checkChunk, Vector2 pos) {
-        for (int x = -1; x <= 1; x++) {
-            for (int y = -1; y <= 1; y++) {
-                bool result = false;
+        for (var x = -1; x <= 1; x++) {
+            for (var y = -1; y <= 1; y++) {
+                var result = false;
                 var currentChunkPos = new Vector2Int(checkChunk.x + x, checkChunk.y + y);
 
-                for (int index = 0; index <= radiusIndex; index++) {
-                    for (int index2 = 0; index2 <= radiusIndex; index2++) {
+                for (var index = 0; index <= radiusIndex; index++) {
+                    for (var index2 = 0; index2 <= radiusIndex; index2++) {
                         switch (x) {
                             case -1 when y == -1 && (Mathf.Abs(pos.x - index) % 8 == 0) && (Mathf.Abs(pos.y - index2) % 8 == 0): //1
                             case 0 when y == -1 && (Mathf.Abs(pos.y - index) % 8 == 0): //2

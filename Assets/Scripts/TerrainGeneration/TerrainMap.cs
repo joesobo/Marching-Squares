@@ -24,6 +24,7 @@ public class TerrainMap : MonoBehaviour {
     private bool isActive = true;
 
     private List<Color> colorList = new List<Color>();
+    private static readonly int MapTexture = Shader.PropertyToID("MapTexture");
 
     public enum RenderType {
         Off,
@@ -41,9 +42,9 @@ public class TerrainMap : MonoBehaviour {
         terrainNoise = FindObjectOfType<TerrainNoise>();
         voxelMap = FindObjectOfType<VoxelMap>();
 
-        BlockCollection blockList = BlockManager.ReadBlocks();
+        var blockList = BlockManager.ReadBlocks();
         colorList.Add(Color.black);
-        foreach (Block block in blockList.blocks) {
+        foreach (var block in blockList.blocks) {
             colorList.Add(block.color);
         }
 
@@ -80,8 +81,10 @@ public class TerrainMap : MonoBehaviour {
     }
 
     private void NewTexture() {
-        texture = new Texture2D(mapRenderResolution, mapRenderResolution, TextureFormat.RGB24, false) { filterMode = FilterMode.Point };
-        texture.wrapMode = TextureWrapMode.Clamp;
+        texture = new Texture2D(mapRenderResolution, mapRenderResolution, TextureFormat.RGB24, false) {
+            filterMode = FilterMode.Point,
+            wrapMode = TextureWrapMode.Clamp
+        };
         colors = new Color[mapRenderResolution * mapRenderResolution];
         stepSize = 1f / mapRenderResolution;
 
@@ -96,16 +99,16 @@ public class TerrainMap : MonoBehaviour {
         for (int x = mapRenderResolution, index = 0; x > 0; x--) {
             for (var y = 0; y < mapRenderResolution; y++, index++) {
                 colors[index] = Color.black;
-                int pointState = FindNoise(x + pos.x - offset.x, y + pos.y - offset.y);
+                var pointState = FindNoise(x + pos.x - offset.x, y + pos.y - offset.y);
                 if (pointState > 0) {
                     colors[index] = FindColor(pointState);
                 }
             }
         }
 
-        int radius = mapRenderResolution / zoomInterval;
-        for (int x = offset.x - radius; x < offset.x + radius; x++) {
-            for (int y = offset.y - radius; y < offset.y + radius; y++) {
+        var radius = mapRenderResolution / zoomInterval;
+        for (var x = offset.x - radius; x < offset.x + radius; x++) {
+            for (var y = offset.y - radius; y < offset.y + radius; y++) {
                 var playerIndex = y * mapRenderResolution + x;
                 colors[playerIndex] = Color.white;
             }
@@ -113,7 +116,7 @@ public class TerrainMap : MonoBehaviour {
 
         texture.SetPixels(colors);
         texture.Apply();
-        mapMaterial.SetTexture("MapTexture", texture);
+        mapMaterial.SetTexture(MapTexture, texture);
     }
 
     private int FindNoise(int x, int y) {
@@ -131,7 +134,7 @@ public class TerrainMap : MonoBehaviour {
             case RenderType.LiveMap:
                 return LiveNoise(x, y);
             case RenderType.FullMap:
-                int state = LiveNoise(x, y);
+                var state = LiveNoise(x, y);
                 if (state == -1) {
                     state = terrainNoise.PerlinCalculate(x, y);
                 }
@@ -142,18 +145,18 @@ public class TerrainMap : MonoBehaviour {
     }
 
     private int LiveNoise(int x, int y) {
-        int halfChunksLength = 8;
+        const int halfChunksLength = 8;
 
-        int chunkX = (int)Mathf.Floor((x * 1.0f) / halfChunksLength);
-        int chunkY = (int)Mathf.Floor((y * 1.0f) / halfChunksLength);
+        var chunkX = (int)Mathf.Floor((x * 1.0f) / halfChunksLength);
+        var chunkY = (int)Mathf.Floor((y * 1.0f) / halfChunksLength);
 
-        int voxelX = (Mathf.Abs(x - (chunkX * halfChunksLength))) % 8;
-        int voxelY = (Mathf.Abs(y - (chunkY * halfChunksLength))) % 8;
+        var voxelX = (Mathf.Abs(x - (chunkX * halfChunksLength))) % 8;
+        var voxelY = (Mathf.Abs(y - (chunkY * halfChunksLength))) % 8;
 
-        Vector2Int chunkPos = new Vector2Int(chunkX, chunkY);
+        var chunkPos = new Vector2Int(chunkX, chunkY);
         if (voxelMap.existingChunks.ContainsKey(chunkPos)) {
-            VoxelChunk chunk = voxelMap.existingChunks[chunkPos];
-            Voxel voxel = chunk.voxels[(voxelY * 8) + voxelX];
+            var chunk = voxelMap.existingChunks[chunkPos];
+            var voxel = chunk.voxels[(voxelY * 8) + voxelX];
 
             return voxel.state;
         } else {

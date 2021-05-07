@@ -5,6 +5,7 @@ using System.Diagnostics.Contracts;
 using UnityEditor;
 using UnityEditorInternal;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 public class BlockMap : EditorWindow {
     private BlockCollection blockList;
@@ -16,21 +17,22 @@ public class BlockMap : EditorWindow {
     private Material blocksMaterial;
     private Texture2DArray textureArray;
     private int selectedIndex;
+    private static readonly int Textures = Shader.PropertyToID("Textures");
 
     [MenuItem("Window/Block Map")]
     public static void ShowWindow() {
         EditorWindow.GetWindow(typeof(BlockMap));
     }
 
-    void OnEnable() {
+    private void OnEnable() {
         Refresh();
     }
 
-    void Reset() {
+    private void Reset() {
         Refresh();
     }
 
-    void OnGUI() {
+    private void OnGUI() {
         EditorGUILayout.LabelField("Warning: Remember to add to BlockManager Enum", EditorStyles.boldLabel);
 
         PrepareList();
@@ -67,7 +69,7 @@ public class BlockMap : EditorWindow {
         };
 
         reorderableList.drawElementCallback = (Rect rect, int index, bool isActive, bool isFocused) => {
-            Block block = (Block)reorderableList.list[index];
+            var block = (Block)reorderableList.list[index];
 
             textures.Add(GetTextureFromPath(block.texturePath));
 
@@ -92,7 +94,7 @@ public class BlockMap : EditorWindow {
         };
 
         reorderableList.onAddCallback = (ReorderableList list) => {
-            Block block = new Block(BlockType.Empty, Color.black, "");
+            var block = new Block(BlockType.Empty, Color.black, "");
             BlockManager.WriteBlocks(blockList, block);
             Refresh();
         };
@@ -115,15 +117,15 @@ public class BlockMap : EditorWindow {
         reorderableList = new ReorderableList(blockList.blocks,
             typeof(Block),
             true, true, true, true);
-        foreach (Block block in blockList.blocks) {
+        foreach (var block in blockList.blocks) {
             textures.Add(GetTextureFromPath(block.texturePath));
         }
     }
 
-    private Texture2D GetTextureFromPath(string path) {
+    private static Texture2D GetTextureFromPath(string path) {
         try {
             var rawData = System.IO.File.ReadAllBytes(path);
-            Texture2D texture = new Texture2D(16, 16); // Create an empty Texture; size doesn't matter
+            var texture = new Texture2D(16, 16); // Create an empty Texture; size doesn't matter
             texture.LoadImage(rawData);
             texture.Apply();
             return texture;
@@ -132,52 +134,37 @@ public class BlockMap : EditorWindow {
         }
     }
 
-    private string GetPathFromTexture(Texture2D texture) {
+    private static string GetPathFromTexture(Object texture) {
+        const string path = "Assets/Resources/Blocks/";
+
         if (texture == null || texture.name == "") {
             return "";
         }
-        string path = "Assets/Resources/Blocks/";
+
         return path + texture.name + ".png";
     }
 
     private void SaveTexture2DArray() {
-        string path = "Assets/Resources/Blocks/TextureArray.Asset";
+        const string path = "Assets/Resources/Blocks/TextureArray.Asset";
 
-        Texture2D t = textures[1];
-        textureArray = new Texture2DArray(t.width, t.height, textures.Count, t.format, t.mipmapCount > 1);
-        textureArray.anisoLevel = t.anisoLevel;
-        textureArray.filterMode = t.filterMode;
-        textureArray.wrapMode = t.wrapMode;
+        var t = textures[1];
+        textureArray = new Texture2DArray(t.width, t.height, textures.Count, t.format, t.mipmapCount > 1) {
+            anisoLevel = t.anisoLevel,
+            filterMode = t.filterMode,
+            wrapMode = t.wrapMode
+        };
 
-        for (int i = 1; i < textures.Count; i++) {
-            for (int m = 0; m < t.mipmapCount; m++) {
+        for (var i = 1; i < textures.Count; i++) {
+            for (var m = 0; m < t.mipmapCount; m++) {
                 Graphics.CopyTexture(textures[i], 0, m, textureArray, i, m);
             }
         }
 
-        if (AssetDatabase.LoadAssetAtPath<Texture2DArray>(path) != null) { AssetDatabase.DeleteAsset(path); }
+        AssetDatabase.DeleteAsset(path);
         AssetDatabase.CreateAsset(textureArray, path);
 
         AssetDatabase.Refresh();
 
-        blocksMaterial.SetTexture("Textures", textureArray);
-    }
-}
-
-static class IListExtensions {
-    public static void Swap<T>(
-        this IList<T> list,
-        int firstIndex,
-        int secondIndex
-    ) {
-        Contract.Requires(list != null);
-        Contract.Requires(firstIndex >= 0 && firstIndex < list.Count);
-        Contract.Requires(secondIndex >= 0 && secondIndex < list.Count);
-        if (firstIndex == secondIndex) {
-            return;
-        }
-        T temp = list[firstIndex];
-        list[firstIndex] = list[secondIndex];
-        list[secondIndex] = temp;
+        blocksMaterial.SetTexture(Textures, textureArray);
     }
 }
