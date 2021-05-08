@@ -66,7 +66,6 @@ public class TerrainNoise : MonoBehaviour {
         }
         Random.InitState(seed);
 
-        //TESTING SHIT
         octaveOffsets = new Vector2[caveOctaves];
         for (int i = 0; i < caveOctaves; i++) {
             float offsetX = Random.Range(-100000, 100000) + offset.x;
@@ -174,8 +173,6 @@ public class TerrainNoise : MonoBehaviour {
         var noiseVal = 0f;
         var freq = caveFrequency;
         var amp = caveAmplitude;
-        // var noiseRange = caveRange;
-        // var sum = 0f;
 
         for (var o = 0; o < caveOctaves; o++) {
             float sampleX = (scaledX) / scale * freq + octaveOffsets[o].x;
@@ -184,18 +181,14 @@ public class TerrainNoise : MonoBehaviour {
             float perlinValue = Mathf.PerlinNoise(sampleX, sampleY) * 2 - 1;
             noiseVal += perlinValue * amp;
 
-            // sum += Mathf.PerlinNoise((scaledX + seed) * freq, (scaledY + seed) * freq) * amp;
             freq *= caveLacunarity;
             amp *= cavePersistence;
-            // noiseRange += amp;
         }
         if (noiseVal > maxNoiseVal) {
             maxNoiseVal = noiseVal;
         } else if (noiseVal < minNoiseVal) {
             minNoiseVal = noiseVal;
         }
-
-        // noiseVal = sum / noiseRange;
 
         return noiseVal;
     }
