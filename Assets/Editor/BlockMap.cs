@@ -73,9 +73,11 @@ public class BlockMap : EditorWindow {
 
             textures.Add(GetTextureFromPath(block.texturePath));
 
-            textures[index] = (Texture2D)EditorGUI.ObjectField(new Rect(rect.x, rect.y, rect.width, EditorGUIUtility.singleLineHeight), "Texture", textures[index], typeof(Texture2D), false);
-            if (block.texturePath == "" && GetPathFromTexture(textures[index]) != "") {
-                block.texturePath = GetPathFromTexture(textures[index]);
+            if (index < textures.Count) {
+                textures[index] = (Texture2D)EditorGUI.ObjectField(new Rect(rect.x, rect.y, rect.width, EditorGUIUtility.singleLineHeight), "Texture", textures[index], typeof(Texture2D), false);
+                if (block.texturePath == "" && GetPathFromTexture(textures[index]) != "") {
+                    block.texturePath = GetPathFromTexture(textures[index]);
+                }
             }
             rect.y += 20;
             rect.height = 30;

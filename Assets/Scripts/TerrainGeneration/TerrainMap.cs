@@ -43,11 +43,7 @@ public class TerrainMap : MonoBehaviour {
         terrainNoise = FindObjectOfType<TerrainNoise>();
         voxelMap = FindObjectOfType<VoxelMap>();
 
-        var blockList = BlockManager.ReadBlocks();
-        colorList.Add(Color.black);
-        foreach (var block in blockList.blocks) {
-            colorList.Add(block.color);
-        }
+        RefreshColors();
 
         NewTexture();
     }
@@ -97,6 +93,8 @@ public class TerrainMap : MonoBehaviour {
         var pos = new Vector3Int((int)position.x, (int)position.y, 0);
         var offset = new Vector2Int(mapRenderResolution / 2, mapRenderResolution / 2);
 
+        RefreshColors();
+
         for (int x = mapRenderResolution, index = 0; x > 0; x--) {
             for (var y = 0; y < mapRenderResolution; y++, index++) {
                 colors[index] = Color.black;
@@ -121,6 +119,14 @@ public class TerrainMap : MonoBehaviour {
         texture.SetPixels(colors);
         texture.Apply();
         mapMaterial.SetTexture(MapTexture, texture);
+    }
+
+    private void RefreshColors() {
+        var blockList = BlockManager.ReadBlocks();
+        colorList.Clear();
+        foreach (var block in blockList.blocks) {
+            colorList.Add(BlockManager.blockColorDictionary[block.blockType]);
+        }
     }
 
     private int FindNoise(int x, int y) {
@@ -173,7 +179,7 @@ public class TerrainMap : MonoBehaviour {
             return Color.Lerp(Color.white, Color.black, pointState);
         }
 
-        return colorList[(int)pointState + 1];
+        return colorList[(int)pointState];
     }
 
     private void ToggleMap() {
