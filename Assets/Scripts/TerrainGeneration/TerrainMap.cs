@@ -13,8 +13,6 @@ public class TerrainMap : MonoBehaviour {
     [Range(0, 1)]
     public float updateInterval = 0.1f;
     public int zoomInterval = 64;
-    public bool isBlackAndWhite = false;
-    private bool prevIsBlackAndWhite;
 
     private Texture2D texture;
     private Color[] colors;
@@ -35,6 +33,7 @@ public class TerrainMap : MonoBehaviour {
         GrassPerlin,
         LiveMap,
         FullMap,
+        BWCave
     };
 
     private void Start() {
@@ -71,12 +70,11 @@ public class TerrainMap : MonoBehaviour {
             }
         }
 
-        if (prevIsBlackAndWhite != isBlackAndWhite || renderType != oldRenderType) {
+        if (renderType != oldRenderType) {
             RecalculateMap();
-            prevIsBlackAndWhite = isBlackAndWhite;
             oldRenderType = renderType;
         }
-        
+
     }
 
     private void NewTexture() {
@@ -100,7 +98,7 @@ public class TerrainMap : MonoBehaviour {
             for (var y = 0; y < mapRenderResolution; y++, index++) {
                 colors[index] = Color.black;
                 float pointState = FindNoise(x + pos.x - offset.x, y + pos.y - offset.y);
-                if (isBlackAndWhite) {
+                if (renderType == RenderType.BWCave) {
                     pointState = terrainNoise.Perlin2D(x + pos.x - offset.x, y + pos.y - offset.y);
                 }
                 if (pointState > 0) {
@@ -176,7 +174,7 @@ public class TerrainMap : MonoBehaviour {
     }
 
     private Color FindColor(float pointState) {
-        return isBlackAndWhite ? Color.Lerp(Color.black, Color.white, pointState) : colorList[(int)pointState];
+        return renderType == RenderType.BWCave ? Color.Lerp(Color.black, Color.white, pointState) : colorList[(int)pointState];
     }
 
     private void ToggleMap() {
