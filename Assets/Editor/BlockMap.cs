@@ -21,7 +21,7 @@ public class BlockMap : EditorWindow {
 
     [MenuItem("Window/Block Map")]
     public static void ShowWindow() {
-        EditorWindow.GetWindow(typeof(BlockMap));
+        GetWindow(typeof(BlockMap));
     }
 
     private void OnEnable() {
@@ -64,11 +64,11 @@ public class BlockMap : EditorWindow {
 
         reorderableList.elementHeight = EditorGUIUtility.singleLineHeight * 2f + 10f;
 
-        reorderableList.drawHeaderCallback = (Rect rect) => {
+        reorderableList.drawHeaderCallback = (rect) => {
             EditorGUI.LabelField(rect, "Blocks", EditorStyles.boldLabel);
         };
 
-        reorderableList.drawElementCallback = (Rect rect, int index, bool isActive, bool isFocused) => {
+        reorderableList.drawElementCallback = (rect, index, isActive, isFocused) => {
             var block = (Block)reorderableList.list[index];
 
             textures.Add(GetTextureFromPath(block.texturePath));
@@ -86,22 +86,22 @@ public class BlockMap : EditorWindow {
             EditorGUI.TextField(new Rect(rect.x + rect.width - 30, rect.y, 30, EditorGUIUtility.singleLineHeight), index.ToString());
         };
 
-        reorderableList.onSelectCallback = (ReorderableList list) => {
+        reorderableList.onSelectCallback = (list) => {
             selectedIndex = list.index;
         };
 
-        reorderableList.onReorderCallback = (ReorderableList list) => {
+        reorderableList.onReorderCallback = (list) => {
             BlockManager.WriteBlocks(blockList, null);
             Refresh();
         };
 
-        reorderableList.onAddCallback = (ReorderableList list) => {
+        reorderableList.onAddCallback = (list) => {
             var block = new Block(BlockType.Empty, Color.black, "");
             BlockManager.WriteBlocks(blockList, block);
             Refresh();
         };
 
-        reorderableList.onRemoveCallback = (ReorderableList list) => {
+        reorderableList.onRemoveCallback = (list) => {
             if (EditorUtility.DisplayDialog("Warning!", "Are you sure you want to delete this block?", "Yes", "No")) {
                 ReorderableList.defaultBehaviours.DoRemoveButton(list);
                 BlockManager.RemoveBlock(blockList, selectedIndex);

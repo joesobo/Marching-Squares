@@ -48,7 +48,7 @@ public class InfiniteGeneration : MonoBehaviour {
         playerRb = player.GetComponent<Rigidbody2D>();
 
         terrainNoise.seed = worldScriptableObject.seed;
-        terrainNoise.Startup(voxelResolution, chunkResolution, player);
+        terrainNoise.Startup(voxelResolution, chunkResolution);
         voxelMesh.Startup(voxelResolution, chunkResolution, viewDistance, useColliders, colliderRadius);
 
         InvokeRepeating(nameof(UpdateMap), 0.0f, terrainMap.updateInterval);

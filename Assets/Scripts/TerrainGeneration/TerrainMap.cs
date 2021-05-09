@@ -13,12 +13,11 @@ public class TerrainMap : MonoBehaviour {
     [Range(0, 1)]
     public float updateInterval = 0.1f;
     public int zoomInterval = 64;
-    public bool isBlackAndWhite = false;
+    public bool isBlackAndWhite;
 
     private Texture2D texture;
     private Color[] colors;
     private Material mapMaterial;
-    private float stepSize;
     private Transform player;
     private TerrainNoise terrainNoise;
     private VoxelMap voxelMap;
@@ -83,7 +82,6 @@ public class TerrainMap : MonoBehaviour {
             wrapMode = TextureWrapMode.Clamp
         };
         colors = new Color[mapRenderResolution * mapRenderResolution];
-        stepSize = 1f / mapRenderResolution;
 
         RecalculateMap();
     }
@@ -125,7 +123,7 @@ public class TerrainMap : MonoBehaviour {
         var blockList = BlockManager.ReadBlocks();
         colorList.Clear();
         foreach (var block in blockList.blocks) {
-            colorList.Add(BlockManager.blockColorDictionary[block.blockType]);
+            colorList.Add(BlockManager.BlockColorDictionary[block.blockType]);
         }
     }
 
@@ -175,11 +173,7 @@ public class TerrainMap : MonoBehaviour {
     }
 
     private Color FindColor(float pointState) {
-        if (isBlackAndWhite) {
-            return Color.Lerp(Color.white, Color.black, pointState);
-        }
-
-        return colorList[(int)pointState];
+        return isBlackAndWhite ? Color.Lerp(Color.white, Color.black, pointState) : colorList[(int)pointState];
     }
 
     private void ToggleMap() {

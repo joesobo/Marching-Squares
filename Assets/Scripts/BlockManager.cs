@@ -16,8 +16,8 @@ public enum BlockType {
 public static class BlockManager {
     private static readonly string Path = Application.persistentDataPath + "/blocks.json";
 
-    public static Dictionary<BlockType, int> blockIndexDictionary = new Dictionary<BlockType, int>();
-    public static Dictionary<BlockType, Color> blockColorDictionary = new Dictionary<BlockType, Color>();
+    public static Dictionary<BlockType, int> BlockIndexDictionary = new Dictionary<BlockType, int>();
+    public static Dictionary<BlockType, Color> BlockColorDictionary = new Dictionary<BlockType, Color>();
 
     public static void WriteBlocks(BlockCollection collection, Block newBlock) {
         if (newBlock != null) {
@@ -55,13 +55,13 @@ public static class BlockManager {
             Debug.Log(e.Message);
         }
 
-        blockIndexDictionary.Clear();
-        blockColorDictionary.Clear();
+        BlockIndexDictionary.Clear();
+        BlockColorDictionary.Clear();
         for (var i = 0; i < blocks.blocks.Count; i++) {
             var block = blocks.blocks[i];
-            if (!blockIndexDictionary.ContainsKey(block.blockType)) {
-                blockIndexDictionary.Add(block.blockType, i);
-                blockColorDictionary.Add(block.blockType, block.color);
+            if (!BlockIndexDictionary.ContainsKey(block.blockType)) {
+                BlockIndexDictionary.Add(block.blockType, i);
+                BlockColorDictionary.Add(block.blockType, block.color);
             }
         }
 

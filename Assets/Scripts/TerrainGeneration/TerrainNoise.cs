@@ -55,7 +55,7 @@ public class TerrainNoise : MonoBehaviour {
         Perlin,
     }
 
-    public void Startup(int voxelResolution, int chunkResolution, Transform player) {
+    public void Startup(int voxelResolution, int chunkResolution) {
         this.voxelResolution = voxelResolution;
         this.chunkResolution = chunkResolution;
 
@@ -65,16 +65,14 @@ public class TerrainNoise : MonoBehaviour {
         Random.InitState(seed);
 
         octaveOffsets = new Vector2[caveOctaves];
-        for (int i = 0; i < caveOctaves; i++) {
-            float offsetX = Random.Range(-100000, 100000) + offset.x;
-            float offsetY = Random.Range(-100000, 100000) + offset.y;
+        for (var i = 0; i < caveOctaves; i++) {
+            var offsetX = Random.Range(-100000, 100000) + offset.x;
+            var offsetY = Random.Range(-100000, 100000) + offset.y;
             octaveOffsets[i] = new Vector2(offsetX, offsetY);
         }
 
         maxNoiseVal = float.MinValue;
         minNoiseVal = float.MaxValue;
-
-        float halfResolution = (voxelResolution * chunkResolution) / 2f;
     }
 
     public void GenerateNoiseValues(VoxelChunk chunk) {
@@ -83,25 +81,14 @@ public class TerrainNoise : MonoBehaviour {
         var chunkY = position.y;
 
         foreach (var voxel in chunk.voxels) {
-            switch (terrainType) {
-                case TerrainType.Off:
-                    voxel.state = GetBlockTypeIndex(BlockType.Empty);
-                    break;
-                case TerrainType.On:
-                    voxel.state = GetBlockTypeIndex(BlockType.Stone);
-                    break;
-                case TerrainType.Random:
-                    voxel.state = UnityEngine.Random.Range(0, 5);
-                    break;
-                case TerrainType.RandomFull:
-                    voxel.state = UnityEngine.Random.Range(1, 5);
-                    break;
-                case TerrainType.Perlin:
-                    voxel.state = PerlinNoise(chunkX, chunkY, voxel);
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
+            voxel.state = terrainType switch {
+                TerrainType.Off => GetBlockTypeIndex(BlockType.Empty),
+                TerrainType.On => GetBlockTypeIndex(BlockType.Stone),
+                TerrainType.Random => Random.Range(0, 5),
+                TerrainType.RandomFull => Random.Range(1, 5),
+                TerrainType.Perlin => PerlinNoise(chunkX, chunkY, voxel),
+                _ => throw new ArgumentOutOfRangeException()
+            };
         }
     }
 
@@ -113,9 +100,7 @@ public class TerrainNoise : MonoBehaviour {
     }
 
     public int PerlinCalculate(int x, int y) {
-        var voxelState = 0f;
-
-        voxelState = Perlin1D(x, y);
+        float voxelState = Perlin1D(x, y);
         if (voxelState == 0) return (int)voxelState;
         if (PerlinGrass(x, y) != -1) {
             return PerlinGrass(x, y);
@@ -144,7 +129,7 @@ public class TerrainNoise : MonoBehaviour {
 
     private float Noise1D(float x) {
         var scaledXHeight = x / 1f / voxelResolution;
-        var noiseHeight = 0f;
+        float noiseHeight;
         var freq = frequency;
         var amp = amplitude;
         var noiseRange = range;
@@ -165,7 +150,7 @@ public class TerrainNoise : MonoBehaviour {
         return Mathf.InverseLerp(minNoiseVal, maxNoiseVal, Noise2D(x, y));
     }
 
-    public float Noise2D(float x, int y) {
+    private float Noise2D(float x, int y) {
         var scaledX = x / 1f / voxelResolution;
         var scaledY = y / 1f / voxelResolution;
         var noiseVal = 0f;
@@ -173,10 +158,10 @@ public class TerrainNoise : MonoBehaviour {
         var amp = caveAmplitude;
 
         for (var o = 0; o < caveOctaves; o++) {
-            float sampleX = (scaledX) / scale * freq + octaveOffsets[o].x;
-            float sampleY = (scaledY) / scale * freq + octaveOffsets[o].y;
+            var sampleX = (scaledX) / scale * freq + octaveOffsets[o].x;
+            var sampleY = (scaledY) / scale * freq + octaveOffsets[o].y;
 
-            float perlinValue = Mathf.PerlinNoise(sampleX, sampleY) * 2 - 1;
+            var perlinValue = Mathf.PerlinNoise(sampleX, sampleY) * 2 - 1;
             noiseVal += perlinValue * amp;
 
             freq *= caveLacunarity;
@@ -197,7 +182,6 @@ public class TerrainNoise : MonoBehaviour {
 
         if (InRange(y, Mathf.RoundToInt(noiseHeight), 3)) {
             return GetBlockTypeIndex(BlockType.Grass);
-            // return GetBlockTypeIndex(PercentChangeBlocks(noiseVal, 33, BlockType.Grass, BlockType.Empty));
         } else if (InRange(y, Mathf.RoundToInt(noiseHeight), 8)) {
             return GetBlockTypeIndex(PercentChangeBlocks(noiseVal, 80, BlockType.Stone, PercentChangeBlocks(noiseVal, 25, BlockType.Dirt, BlockType.Empty)));
         } else {
@@ -205,12 +189,12 @@ public class TerrainNoise : MonoBehaviour {
         }
     }
 
-    private BlockType PercentChangeBlocks(float noiseVal, int percent, BlockType block1, BlockType block2) {
+    private static BlockType PercentChangeBlocks(float noiseVal, int percent, BlockType block1, BlockType block2) {
         return noiseVal > (percent / 100f) ? block1 : block2;
     }
 
     private static int GetBlockTypeIndex(BlockType type) {
-        return BlockManager.blockIndexDictionary[type];
+        return BlockManager.BlockIndexDictionary[type];
     }
 
     private static bool InRange(float input, float value, float range) {

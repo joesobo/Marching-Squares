@@ -36,7 +36,6 @@ public class VoxelEditor : MonoBehaviour {
     };
 
     public void Startup(VoxelMap map) {
-        var blockList = BlockManager.ReadBlocks();
         var blockTypeNames = System.Enum.GetNames(typeof(BlockType));
         foreach (var blockType in blockTypeNames) {
             FillTypeNames.Add(blockType);
