@@ -13,6 +13,7 @@ public class TerrainMap : MonoBehaviour {
     [Range(0, 1)]
     public float updateInterval = 0.1f;
     public int zoomInterval = 64;
+    public bool isBlackAndWhite = false;
 
     private Texture2D texture;
     private Color[] colors;
@@ -99,7 +100,10 @@ public class TerrainMap : MonoBehaviour {
         for (int x = mapRenderResolution, index = 0; x > 0; x--) {
             for (var y = 0; y < mapRenderResolution; y++, index++) {
                 colors[index] = Color.black;
-                var pointState = FindNoise(x + pos.x - offset.x, y + pos.y - offset.y);
+                float pointState = FindNoise(x + pos.x - offset.x, y + pos.y - offset.y);
+                if (isBlackAndWhite) {
+                    pointState = terrainNoise.Perlin2D(x + pos.x - offset.x, y + pos.y - offset.y);
+                }
                 if (pointState > 0) {
                     colors[index] = FindColor(pointState);
                 }
@@ -128,7 +132,7 @@ public class TerrainMap : MonoBehaviour {
             case RenderType.HeightPerlin:
                 return terrainNoise.Perlin1D(x, y);
             case RenderType.CavePerlin:
-                return terrainNoise.Perlin2D(x, y);
+                return terrainNoise.PerlinCaves(y, terrainNoise.Perlin2D(x, y));
             case RenderType.GrassPerlin:
                 return terrainNoise.PerlinGrass(x, y);
             case RenderType.LiveMap:
@@ -164,8 +168,12 @@ public class TerrainMap : MonoBehaviour {
         }
     }
 
-    private Color FindColor(int pointState) {
-        return colorList[pointState + 1];
+    private Color FindColor(float pointState) {
+        if (isBlackAndWhite) {
+            return Color.Lerp(Color.white, Color.black, pointState);
+        }
+
+        return colorList[(int)pointState + 1];
     }
 
     private void ToggleMap() {

@@ -35,8 +35,6 @@ public class TerrainNoise : MonoBehaviour {
     public float cavePersistence = 0.5f;
     [Range(0, 2)]
     public float caveAmplitude = 1f;
-    // [Range(0, 2)]
-    // public float caveRange = 1f;
 
     private int voxelResolution, chunkResolution;
 
@@ -115,16 +113,27 @@ public class TerrainNoise : MonoBehaviour {
     }
 
     public int PerlinCalculate(int x, int y) {
-        var voxelState = 0;
+        var voxelState = 0f;
 
         voxelState = Perlin1D(x, y);
-        if (voxelState == 0) return voxelState;
+        if (voxelState == 0) return (int)voxelState;
         if (PerlinGrass(x, y) != -1) {
             return PerlinGrass(x, y);
         }
         voxelState = Perlin2D(x, y);
+        return PerlinCaves(y, voxelState);
+    }
 
-        return voxelState;
+    public int PerlinCaves(int y, float voxelState) {
+        if (y < height1) {
+            return GetBlockTypeIndex(PercentChangeBlocks(voxelState, 33, BlockType.Rock, BlockType.Empty));
+        } else if (y < height2) {
+            return GetBlockTypeIndex(PercentChangeBlocks(voxelState, 66, BlockType.Rock, PercentChangeBlocks(voxelState, 33, BlockType.Stone, BlockType.Empty)));
+        } else if (y < height3) {
+            return GetBlockTypeIndex(PercentChangeBlocks(voxelState, 66, BlockType.Dirt, PercentChangeBlocks(voxelState, 33, BlockType.Stone, BlockType.Empty)));
+        } else {
+            return GetBlockTypeIndex(PercentChangeBlocks(voxelState, 50, BlockType.Dirt, PercentChangeBlocks(voxelState, 33, BlockType.Stone, BlockType.Empty)));
+        }
     }
 
     public int Perlin1D(float x, int y) {
@@ -152,22 +161,11 @@ public class TerrainNoise : MonoBehaviour {
         return noiseHeight;
     }
 
-    public int Perlin2D(float x, int y) {
-        var noiseVal = Mathf.InverseLerp(minNoiseVal, maxNoiseVal, Noise2D(x, y));
-
-        // return GetBlockTypeIndex(PercentChangeBlocks(noiseVal, 100 - caveRange, BlockType.Empty, PercentChangeBlocks(noiseVal, caveRange, BlockType.Stone, BlockType.Empty)));
-        if (y < height1) {
-            return GetBlockTypeIndex(PercentChangeBlocks(noiseVal, 33, BlockType.Rock, BlockType.Empty));
-        } else if (y < height2) {
-            return GetBlockTypeIndex(PercentChangeBlocks(noiseVal, 66, BlockType.Rock, PercentChangeBlocks(noiseVal, 33, BlockType.Stone, BlockType.Empty)));
-        } else if (y < height3) {
-            return GetBlockTypeIndex(PercentChangeBlocks(noiseVal, 66, BlockType.Dirt, PercentChangeBlocks(noiseVal, 33, BlockType.Stone, BlockType.Empty)));
-        } else {
-            return GetBlockTypeIndex(PercentChangeBlocks(noiseVal, 50, BlockType.Dirt, PercentChangeBlocks(noiseVal, 33, BlockType.Stone, BlockType.Empty)));
-        }
+    public float Perlin2D(float x, int y) {
+        return Mathf.InverseLerp(minNoiseVal, maxNoiseVal, Noise2D(x, y));
     }
 
-    private float Noise2D(float x, int y) {
+    public float Noise2D(float x, int y) {
         var scaledX = x / 1f / voxelResolution;
         var scaledY = y / 1f / voxelResolution;
         var noiseVal = 0f;
