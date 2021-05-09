@@ -13,7 +13,8 @@ public class TerrainMap : MonoBehaviour {
     [Range(0, 1)]
     public float updateInterval = 0.1f;
     public int zoomInterval = 64;
-    public bool isBlackAndWhite;
+    public bool isBlackAndWhite = false;
+    private bool prevIsBlackAndWhite;
 
     private Texture2D texture;
     private Color[] colors;
@@ -70,10 +71,12 @@ public class TerrainMap : MonoBehaviour {
             }
         }
 
-        if (renderType != oldRenderType) {
-            oldRenderType = renderType;
+        if (prevIsBlackAndWhite != isBlackAndWhite || renderType != oldRenderType) {
             RecalculateMap();
+            prevIsBlackAndWhite = isBlackAndWhite;
+            oldRenderType = renderType;
         }
+        
     }
 
     private void NewTexture() {
@@ -173,7 +176,7 @@ public class TerrainMap : MonoBehaviour {
     }
 
     private Color FindColor(float pointState) {
-        return isBlackAndWhite ? Color.Lerp(Color.white, Color.black, pointState) : colorList[(int)pointState];
+        return isBlackAndWhite ? Color.Lerp(Color.black, Color.white, pointState) : colorList[(int)pointState];
     }
 
     private void ToggleMap() {
